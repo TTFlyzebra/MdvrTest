@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 3.22.1)
 
 # Declares and names the project.
 
-project("dvrtest")
+project("mdvr_zebra")
 
 # Creates and names a library, sets it as either STATIC
 # or SHARED, and provides the relative paths to its source code.
@@ -15,13 +15,13 @@ project("dvrtest")
 # Gradle automatically packages shared libraries with your APK.
 
 add_library( # Sets the name of the library.
-        dvrtest
+        mdvr_zebra
 
         # Sets the library as a shared library.
         SHARED
 
         # Provides a relative path to your source file(s).
-        native-lib.cpp)
+        mdvrmain.cpp)
 
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because CMake includes system libraries in the search path by
@@ -41,7 +41,7 @@ find_library( # Sets the name of the path variable.
 # build script, prebuilt third-party libraries, or system libraries.
 
 target_link_libraries( # Specifies the target library.
-        dvrtest
+        mdvr_zebra
 
         # Links the target library to the log library
         # included in the NDK.
