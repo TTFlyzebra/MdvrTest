@@ -4,6 +4,9 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.Window;
@@ -14,19 +17,62 @@ import com.flyzebra.utils.FlyLog;
 import com.quectel.qcarapi.stream.QCarCamera;
 
 public class MainActivity extends AppCompatActivity {
-    private SurfaceView sv01 = null;
-    private SurfaceView sv02 = null;
-    private SurfaceView sv03 = null;
-    private SurfaceView sv04 = null;
-    private QCarCamera qCarCamera = null;
 
     // Used to load the 'dvrtest' library on application startup.
     static {
-        System.loadLibrary("mdvr_zebra");
         System.loadLibrary("mmqcar_qcar_jni");
     }
 
     private ActivityMainBinding binding;
+    private final int MAX_CAM = 4;
+    private final SurfaceView[] mSurfaceViews = new SurfaceView[MAX_CAM];
+    private final int[] mSurfaceViewIds = new int[]{R.id.sv01, R.id.sv02, R.id.sv03, R.id.sv04};
+    private final Surface[] mSurface = new Surface[MAX_CAM];
+    private final boolean[] isPreview = new boolean[MAX_CAM];
+    private QCarCamera qCarCamera = null;
+    private static final Handler mHander = new Handler(Looper.getMainLooper());
+
+    private final Runnable camerTask = new Runnable() {
+        @Override
+        public void run() {
+            qCarCamera = GUtilMain.getQCamera(1);
+            int ret = qCarCamera.cameraOpen(4, 1);
+            if (ret == 0) {
+                FlyLog.d("camera open success!");
+                for (int i = 0; i < MAX_CAM; i++) {
+                    starPreviewCamera(i);
+                }
+            } else {
+                FlyLog.e("camera open failed, ret=%d", ret);
+                mHander.postDelayed(camerTask, 1000);
+            }
+        }
+    };
+
+    private class MySurfaceCallback implements SurfaceHolder.Callback {
+        private int num;
+
+        public MySurfaceCallback(int num) {
+            this.num = num;
+        }
+
+        @Override
+        public void surfaceCreated(@NonNull SurfaceHolder holder) {
+            mSurface[num] = holder.getSurface();
+            starPreviewCamera(num);
+        }
+
+        @Override
+        public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int width, int height) {
+
+        }
+
+        @Override
+        public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
+            mSurface[num] = null;
+            stopPreviewCamera(num);
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,131 +82,33 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        sv01 = findViewById(R.id.sv01);
-        sv02 = findViewById(R.id.sv02);
-        sv03 = findViewById(R.id.sv03);
-        sv04 = findViewById(R.id.sv04);
-        //cameraPowerUp();
-        qCarCamera = new QCarCamera(1);
-        int ret = qCarCamera.cameraOpen(4, 3);
-        if (ret == 0) {
-            FlyLog.e("camera open success!");
-        } else if (ret > 0) {
-            FlyLog.e("camera don't close, ret=%d", ret);
-        } else {
-            FlyLog.e("camera open failed, ret=%d", ret);
+        for (int i = 0; i < MAX_CAM; i++) {
+            mSurface[i] = null;
+            isPreview[i] = false;
+            mSurfaceViews[i] = findViewById(mSurfaceViewIds[i]);
+            mSurfaceViews[i].getHolder().addCallback(new MySurfaceCallback(i));
         }
-
-        sv01.getHolder().addCallback(new SurfaceHolder.Callback() {
-            @Override
-            public void surfaceCreated(@NonNull SurfaceHolder holder) {
-                if (qCarCamera != null) {
-                    qCarCamera.startPreview(0, holder.getSurface(), 1280, 720, QCarCamera.YUV420_NV21);
-                }
-            }
-
-            @Override
-            public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int width, int height) {
-
-            }
-
-            @Override
-            public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
-                if (qCarCamera != null) {
-                    qCarCamera.stopPreview(0);
-                }
-            }
-        });
-
-
-        sv02.getHolder().addCallback(new SurfaceHolder.Callback() {
-            @Override
-            public void surfaceCreated(@NonNull SurfaceHolder holder) {
-                if (qCarCamera != null) {
-                    qCarCamera.startPreview(1, holder.getSurface(), 1280, 720, QCarCamera.YUV420_NV21);
-                }
-            }
-
-            @Override
-            public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int width, int height) {
-
-            }
-
-            @Override
-            public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
-                if (qCarCamera != null) {
-                    qCarCamera.stopPreview(1);
-                }
-            }
-        });
-
-        sv03.getHolder().addCallback(new SurfaceHolder.Callback() {
-            @Override
-            public void surfaceCreated(@NonNull SurfaceHolder holder) {
-                if (qCarCamera != null) {
-                    qCarCamera.startPreview(2, holder.getSurface(), 1280, 720, QCarCamera.YUV420_NV21);
-                }
-            }
-
-            @Override
-            public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int width, int height) {
-
-            }
-
-            @Override
-            public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
-                if (qCarCamera != null) {
-                    qCarCamera.stopPreview(2);
-                }
-            }
-        });
-
-        sv04.getHolder().addCallback(new SurfaceHolder.Callback() {
-            @Override
-            public void surfaceCreated(@NonNull SurfaceHolder holder) {
-                if (qCarCamera != null) {
-                    qCarCamera.startPreview(3, holder.getSurface(), 1280, 720, QCarCamera.YUV420_NV21);
-                }
-            }
-
-            @Override
-            public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int width, int height) {
-
-            }
-
-            @Override
-            public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
-                if (qCarCamera != null) {
-                    qCarCamera.stopPreview(3);
-                }
-            }
-        });
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
+        mHander.post(camerTask);
     }
 
     @Override
     protected void onDestroy() {
-        //cameraPowerDown();
+        mHander.removeCallbacksAndMessages(null);
         qCarCamera.cameraClose();
-        qCarCamera.release();
         super.onDestroy();
     }
 
-    /**
-     * A native method that is implemented by the 'dvrtest' native library,
-     * which is packaged with this application.
-     */
-    public native void cameraPowerUp();
+    private void starPreviewCamera(int num) {
+        if (qCarCamera != null && mSurface[num] != null && !isPreview[num]) {
+            isPreview[num] = true;
+            qCarCamera.startPreview(num, mSurface[num], 1280, 720, QCarCamera.YUV420_NV21);
+        }
+    }
 
-    public native void cameraPowerDown();
-
+    private void stopPreviewCamera(int num) {
+        if (qCarCamera != null) {
+            isPreview[num] = false;
+            qCarCamera.stopPreview(num);
+        }
+    }
 }
