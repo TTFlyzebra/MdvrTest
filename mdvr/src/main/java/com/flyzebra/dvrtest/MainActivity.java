@@ -30,27 +30,35 @@ public class MainActivity extends AppCompatActivity {
     private final Surface[] mSurface = new Surface[MAX_CAM];
     private final boolean[] isPreview = new boolean[MAX_CAM];
     private QCarCamera qCarCamera = null;
+    private int camer_open_ret = 0;
     private static final Handler mHander = new Handler(Looper.getMainLooper());
 
     private final Runnable camerTask = new Runnable() {
         @Override
         public void run() {
-            qCarCamera = GUtilMain.getQCamera(1);
-            int ret = qCarCamera.cameraOpen(4, 1);
-            if (ret == 0) {
-                FlyLog.d("camera open success!");
-                for (int i = 0; i < MAX_CAM; i++) {
-                    starPreviewCamera(i);
+            try {
+                if (qCarCamera == null) {
+                    qCarCamera = new QCarCamera(1);
                 }
-            } else {
-                FlyLog.e("camera open failed, ret=%d", ret);
-                mHander.postDelayed(camerTask, 1000);
+                camer_open_ret = qCarCamera.cameraOpen(4, 1);
+                if (camer_open_ret == 0) {
+                    FlyLog.d("camera open success!");
+                    for (int i = 0; i < MAX_CAM; i++) {
+                        starPreviewCamera(i);
+                    }
+                } else {
+                    FlyLog.e("camera open failed, ret=%d", camer_open_ret);
+                    mHander.postDelayed(camerTask, 500);
+                }
+            } catch (Exception e) {
+                FlyLog.e(e.toString());
+                mHander.postDelayed(camerTask, 500);
             }
         }
     };
 
     private class MySurfaceCallback implements SurfaceHolder.Callback {
-        private int num;
+        private int num = 4;
 
         public MySurfaceCallback(int num) {
             this.num = num;
@@ -94,8 +102,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         mHander.removeCallbacksAndMessages(null);
-        qCarCamera.cameraClose();
+        if (camer_open_ret == 0) {
+            qCarCamera.cameraClose();
+        }
+        qCarCamera.release();
         super.onDestroy();
+        FlyLog.d("MdvrTest exit!");
     }
 
     private void starPreviewCamera(int num) {

@@ -3,9 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#000"
     android:orientation="vertical"
     android:weightSum="2"
-    android:background="#000"
     tools:context=".MainActivity">
 
     <LinearLayout
@@ -16,18 +16,20 @@
         android:weightSum="2">
 
         <SurfaceView
-            android:layout_margin="1dp"
             android:id="@+id/sv01"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1" />
+            android:layout_margin="1dp"
+            android:layout_weight="1"
+            android:background="#7F00FF00" />
 
         <SurfaceView
-            android:layout_margin="1dp"
             android:id="@+id/sv02"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1" />
+            android:layout_margin="1dp"
+            android:layout_weight="1"
+            android:background="#7F00FF00" />
     </LinearLayout>
 
     <LinearLayout
@@ -38,17 +40,19 @@
         android:weightSum="2">
 
         <SurfaceView
-            android:layout_margin="1dp"
             android:id="@+id/sv03"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1" />
+            android:layout_margin="1dp"
+            android:layout_weight="1"
+            android:background="#7F00FF00" />
 
         <SurfaceView
-            android:layout_margin="1dp"
             android:id="@+id/sv04"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1" />
+            android:layout_margin="1dp"
+            android:layout_weight="1"
+            android:background="#7F00FF00" />
     </LinearLayout>
 </LinearLayout>
