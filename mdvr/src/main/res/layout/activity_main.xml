@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000"
+    android:background="#7FFFFFFF"
     android:orientation="vertical"
     android:weightSum="2"
     tools:context=".MainActivity">
@@ -20,16 +20,14 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_margin="1dp"
-            android:layout_weight="1"
-            android:background="#7F00FF00" />
+            android:layout_weight="1"/>
 
         <SurfaceView
             android:id="@+id/sv02"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_margin="1dp"
-            android:layout_weight="1"
-            android:background="#7F00FF00" />
+            android:layout_weight="1" />
     </LinearLayout>
 
     <LinearLayout
@@ -44,15 +42,13 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_margin="1dp"
-            android:layout_weight="1"
-            android:background="#7F00FF00" />
+            android:layout_weight="1"/>
 
         <SurfaceView
             android:id="@+id/sv04"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_margin="1dp"
-            android:layout_weight="1"
-            android:background="#7F00FF00" />
+            android:layout_weight="1"/>
     </LinearLayout>
 </LinearLayout>
