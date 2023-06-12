@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -15,6 +16,7 @@ import android.view.WindowManager;
 import com.flyzebra.dvrtest.databinding.ActivityMainBinding;
 import com.flyzebra.utils.FlyLog;
 import com.quectel.qcarapi.stream.QCarCamera;
+import com.quectel.qcarapi.util.QCarLog;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -97,6 +99,7 @@ public class MainActivity extends AppCompatActivity {
             mSurfaceViews[i].getHolder().addCallback(new MySurfaceCallback(i));
         }
         mHander.post(camerTask);
+        QCarLog.setTagLogLevel(Log.INFO);
     }
 
     @Override
