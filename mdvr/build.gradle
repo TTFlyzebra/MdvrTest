@@ -12,11 +12,7 @@ android {
         targetSdk 33
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-
-        ndk {
-            abiFilters "armeabi-v7a"
-        }
+        flavorDimensions "versionCode"
     }
 
     signingConfigs {
@@ -48,8 +44,26 @@ android {
     }
 
     sourceSets {
-        main {
-            jniLibs.srcDirs = ['libs']
+        AndroidP {
+            jniLibs.srcDirs = ['libs/androidp']
+        }
+        AndroidQ {
+            jniLibs.srcDirs = ['libs/androidq']
+        }
+    }
+
+    productFlavors {
+        AndroidP {
+            versionName "1.0"
+            ndk {
+                abiFilters "armeabi-v7a"
+            }
+        }
+        AndroidQ {
+            versionName "1.0"
+            ndk {
+                abiFilters "armeabi-v7a"
+            }
         }
     }
 
