@@ -6,6 +6,7 @@
     android:background="#7FFFFFFF"
     android:orientation="vertical"
     android:weightSum="2"
+    android:keepScreenOn="true"
     tools:context=".MainActivity">
 
     <LinearLayout

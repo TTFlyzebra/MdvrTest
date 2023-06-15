@@ -124,8 +124,6 @@ public class MainActivity extends AppCompatActivity implements IQCarAudioDataCB 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        QCarLog.setTagLogLevel(Log.VERBOSE);
-
         for (int i = 0; i < MAX_CAM; i++) {
             mSurface[i] = null;
             isPreview[i] = false;
