@@ -15,10 +15,12 @@ import android.view.WindowManager;
 
 import com.flyzebra.dvrtest.databinding.ActivityMainBinding;
 import com.flyzebra.utils.FlyLog;
+import com.quectel.qcarapi.cb.IQCarAudioDataCB;
+import com.quectel.qcarapi.stream.QCarAudio;
 import com.quectel.qcarapi.stream.QCarCamera;
 import com.quectel.qcarapi.util.QCarLog;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements IQCarAudioDataCB {
 
     // Used to load the 'dvrtest' library on application startup.
     static {
@@ -48,16 +50,46 @@ public class MainActivity extends AppCompatActivity {
                     for (int i = 0; i < MAX_CAM; i++) {
                         starPreviewCamera(i);
                     }
+
+                    try {
+                        if (qCarAudio == null) {
+                            qCarAudio = QCarAudio.getInstance();
+                        }
+                        if (qCarAudio != null) {
+                            qCarAudio.configureAudioParam(
+                                    QCarAudio.QUEC_SAMPLINGRATE_48,
+                                    1,
+                                    QCarAudio.QUEC_PCMSAMPLEFORMAT_FIXED_16,
+                                    QCarAudio.QUEC_SPEAKER_FRONT_LEFT,
+                                    QCarAudio.QUEC_BYTEORDER_LITTLEENDIAN
+                            );
+                            qCarAudio.registerQCarAudioDataCB(MainActivity.this);
+                            qCarAudio.startRecorder();
+                        } else {
+                            FlyLog.e("Get QCarAudio failed!");
+                        }
+                    } catch (Exception e) {
+                        FlyLog.e(e.toString());
+                    }
+
                 } else {
                     FlyLog.e("camera open failed, ret=%d", camer_open_ret);
-                    mHander.postDelayed(camerTask, 500);
+                    mHander.postDelayed(camerTask, 1000);
                 }
             } catch (Exception e) {
                 FlyLog.e(e.toString());
-                mHander.postDelayed(camerTask, 500);
+                mHander.postDelayed(camerTask, 1000);
             }
         }
     };
+
+
+    private QCarAudio qCarAudio = null;
+
+    @Override
+    public void onAudioChannelStream(int i, byte[] bytes, int i1) {
+        FlyLog.e("onAudioChannelStream recv pcm channel=%d, size=%d", i, i1);
+    }
 
     private class MySurfaceCallback implements SurfaceHolder.Callback {
         private int num = 4;
@@ -92,6 +124,8 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        QCarLog.setTagLogLevel(Log.VERBOSE);
+
         for (int i = 0; i < MAX_CAM; i++) {
             mSurface[i] = null;
             isPreview[i] = false;
@@ -99,11 +133,18 @@ public class MainActivity extends AppCompatActivity {
             mSurfaceViews[i].getHolder().addCallback(new MySurfaceCallback(i));
         }
         mHander.post(camerTask);
-        QCarLog.setTagLogLevel(Log.INFO);
     }
 
     @Override
     protected void onDestroy() {
+        try {
+            if (qCarAudio != null) {
+                qCarAudio.registerQCarAudioDataCB(null);
+                qCarAudio.stopRecorder();
+            }
+        } catch (Exception e) {
+            FlyLog.e(e.toString());
+        }
         mHander.removeCallbacksAndMessages(null);
         if (camer_open_ret == 0) {
             qCarCamera.cameraClose();
