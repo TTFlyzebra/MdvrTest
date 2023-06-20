@@ -16,7 +16,7 @@
         android:theme="@style/Theme.Dvrtest"
         tools:targetApi="31">
         <activity
-            android:name=".MainActivity"
+            android:name=".MdvrActivity"
             android:screenOrientation="reverseLandscape"
             android:exported="true">
             <intent-filter>
