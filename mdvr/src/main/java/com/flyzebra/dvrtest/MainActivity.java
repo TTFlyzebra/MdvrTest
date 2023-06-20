@@ -33,6 +33,9 @@ public class MainActivity extends AppCompatActivity implements IQCarAudioDataCB 
     private final boolean[] isPreview = new boolean[MAX_CAM];
     private QCarCamera qCarCamera = null;
     private int camer_open_ret = 0;
+
+    private QCarAudio qCarAudio = null;
+
     private static final Handler mHander = new Handler(Looper.getMainLooper());
 
     private final Runnable camerTask = new Runnable() {
@@ -61,12 +64,7 @@ public class MainActivity extends AppCompatActivity implements IQCarAudioDataCB 
                         QCarAudio.QUEC_SPEAKER_FRONT_LEFT | QCarAudio.QUEC_SPEAKER_FRONT_RIGHT,
                         QCarAudio.QUEC_BYTEORDER_LITTLEENDIAN);
                 qCarAudio.setSplitChannelAndByteNums(4, 1);
-                qCarAudio.registerQCarAudioDataCB(new IQCarAudioDataCB() {
-                    @Override
-                    public void onAudioChannelStream(int i, byte[] bytes, int i1) {
-                        FlyLog.e("onAudioChannelStream recv pcm channel=%d, size=%d", i, i1);
-                    }
-                });
+                qCarAudio.registerQCarAudioDataCB(MainActivity.this);
                 qCarAudio.startAudioStream(12);
                 qCarAudio.startAudioStream(13);
                 qCarAudio.startAudioStream(14);
@@ -76,16 +74,12 @@ public class MainActivity extends AppCompatActivity implements IQCarAudioDataCB 
                 for (int i = 0; i < MAX_CAM; i++) {
                     starPreviewCamera(i);
                 }
-
             } catch (Exception e) {
                 FlyLog.e(e.toString());
                 mHander.postDelayed(camerTask, 1000);
             }
         }
     };
-
-
-    private QCarAudio qCarAudio = null;
 
     @Override
     public void onAudioChannelStream(int i, byte[] bytes, int i1) {

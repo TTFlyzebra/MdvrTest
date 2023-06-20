@@ -14,4 +14,3 @@ dependencyResolutionManagement {
 }
 rootProject.name = "MdvrTest"
 include ':mdvr'
-include ':camera'
