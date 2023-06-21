@@ -14,7 +14,6 @@ import android.view.WindowManager;
 
 import com.flyzebra.utils.ByteUtil;
 import com.flyzebra.utils.FlyLog;
-import com.quectel.qcarapi.cb.IQCarAudioDataCB;
 import com.quectel.qcarapi.stream.QCarAudio;
 import com.quectel.qcarapi.stream.QCarCamera;
 import com.quectel.qcarapi.stream.QCarCamera.FrameInfo;
@@ -22,7 +21,7 @@ import com.quectel.qcarapi.stream.QCarCamera.FrameInfo;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class MdvrActivity extends AppCompatActivity implements IQCarAudioDataCB {
+public class MdvrActivity extends AppCompatActivity {
 
     static {
         System.loadLibrary("mmqcar_qcar_jni");
@@ -36,8 +35,12 @@ public class MdvrActivity extends AppCompatActivity implements IQCarAudioDataCB 
     private QCarCamera qCarCamera = null;
     private int camer_open_ret = -1;
     private QCarAudio qCarAudio = null;
-
     private static final Handler mHander = new Handler(Looper.getMainLooper());
+    private AtomicBoolean is_stop = new AtomicBoolean(true);
+    private Thread mainVideoThread = null;
+    private final ByteBuffer[] videoBuffer = new ByteBuffer[MAX_CAM];
+    private final Object workLock = new Object();
+
     private final Runnable camerTask = new Runnable() {
         @Override
         public void run() {
@@ -58,20 +61,24 @@ public class MdvrActivity extends AppCompatActivity implements IQCarAudioDataCB 
                 }
                 qCarCamera.startVideoStream(0);
 
-                QCarAudio.getInstance().setMute(false);
                 if (qCarAudio == null) {
                     qCarAudio = QCarAudio.getInstance();
                 }
-                qCarAudio.configureAudioParam(QCarAudio.QUEC_SAMPLINGRATE_48,
+                qCarAudio.setMute(false);
+                int ret = qCarAudio.configureAudioParam(QCarAudio.QUEC_SAMPLINGRATE_48,
                         2,
                         QCarAudio.QUEC_PCMSAMPLEFORMAT_FIXED_16,
                         QCarAudio.QUEC_SPEAKER_FRONT_LEFT | QCarAudio.QUEC_SPEAKER_FRONT_RIGHT,
                         QCarAudio.QUEC_BYTEORDER_LITTLEENDIAN);
+                FlyLog.e("configureAudioParam ret=%d", ret);
                 qCarAudio.setSplitChannelAndByteNums(4, 1);
-                qCarAudio.registerQCarAudioDataCB(MdvrActivity.this);
-                for (int i = 0; i < MAX_CAM; i++) {
-                    qCarAudio.startAudioStream(i + 12);
-                }
+                qCarAudio.registerQCarAudioDataCB((channelNum, pBuf, nLen) -> {
+                    FlyLog.e("channel=%d:%s", channelNum, ByteUtil.bytes2String(pBuf, 48));
+                });
+                qCarAudio.startAudioStream(0);
+                qCarAudio.startAudioStream(1);
+                qCarAudio.startAudioStream(2);
+                qCarAudio.startAudioStream(3);
                 qCarAudio.startRecorder();
 
                 for (int i = 0; i < MAX_CAM; i++) {
@@ -87,37 +94,6 @@ public class MdvrActivity extends AppCompatActivity implements IQCarAudioDataCB 
             }
         }
     };
-
-    private class MySurfaceCallback implements SurfaceHolder.Callback {
-        private int num = 0;
-
-        public MySurfaceCallback(int num) {
-            this.num = num;
-        }
-
-        @Override
-        public void surfaceCreated(@NonNull SurfaceHolder holder) {
-            mSurface[num] = holder.getSurface();
-            starPreviewCamera(num);
-        }
-
-        @Override
-        public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int width, int height) {
-
-        }
-
-        @Override
-        public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
-            mSurface[num] = null;
-            stopPreviewCamera(num);
-        }
-    }
-
-
-    private AtomicBoolean is_stop = new AtomicBoolean(true);
-    private Thread mainVideoThread = null;
-    private final ByteBuffer[] videoBuffer = new ByteBuffer[MAX_CAM];
-    private final Object workLock = new Object();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -154,21 +130,22 @@ public class MdvrActivity extends AppCompatActivity implements IQCarAudioDataCB 
             }
         }, "mdvr-cam0");
         mainVideoThread.start();
-
         is_stop.set(false);
     }
 
-    @Override
-    public void onAudioChannelStream(int i, byte[] bytes, int i1) {
-        boolean flag = false;
-        for (byte b : bytes) {
-            if (b != 0) {
-                flag = true;
-                break;
-            }
+
+    private void starPreviewCamera(int num) {
+        if (qCarCamera != null && mSurface[num] != null && !isPreview[num]) {
+            isPreview[num] = true;
+            qCarCamera.startPreview(num, mSurface[num], 1280, 720, QCarCamera.YUV420_NV21);
         }
-        FlyLog.e("onAudioChannelStream recv pcm channel=%d, size=%d", i, i1);
-        FlyLog.e(ByteUtil.bytes2String(bytes, 48));
+    }
+
+    private void stopPreviewCamera(int num) {
+        if (qCarCamera != null) {
+            isPreview[num] = false;
+            qCarCamera.stopPreview(num);
+        }
     }
 
     @Override
@@ -204,17 +181,28 @@ public class MdvrActivity extends AppCompatActivity implements IQCarAudioDataCB 
         FlyLog.d("MdvrTest exit!");
     }
 
-    private void starPreviewCamera(int num) {
-        if (qCarCamera != null && mSurface[num] != null && !isPreview[num]) {
-            isPreview[num] = true;
-            qCarCamera.startPreview(num, mSurface[num], 1280, 720, QCarCamera.YUV420_NV21);
-        }
-    }
+    private class MySurfaceCallback implements SurfaceHolder.Callback {
+        private int num = 0;
 
-    private void stopPreviewCamera(int num) {
-        if (qCarCamera != null) {
-            isPreview[num] = false;
-            qCarCamera.stopPreview(num);
+        public MySurfaceCallback(int num) {
+            this.num = num;
+        }
+
+        @Override
+        public void surfaceCreated(@NonNull SurfaceHolder holder) {
+            mSurface[num] = holder.getSurface();
+            starPreviewCamera(num);
+        }
+
+        @Override
+        public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int width, int height) {
+
+        }
+
+        @Override
+        public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
+            mSurface[num] = null;
+            stopPreviewCamera(num);
         }
     }
 }
