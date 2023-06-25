@@ -1,15 +1,13 @@
 package com.flyzebra.dvrtest.opengl;
 
 import android.content.Context;
-import android.graphics.SurfaceTexture;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 
-import com.flyzebra.dvrtest.Config;
 import com.flyzebra.dvrtest.R;
 import com.flyzebra.utils.FlyLog;
+import com.flyzebra.utils.GlShaderUtil;
 
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -22,16 +20,16 @@ import javax.microedition.khronos.opengles.GL10;
  * Time: 18-5-14 下午9:00.
  * Discription: This is GlRender
  */
-public class GlRender implements GLSurfaceView.Renderer, SurfaceTexture.OnFrameAvailableListener {
+public class GlRender implements GLSurfaceView.Renderer {
     private Context context;
     private FloatBuffer vertexBuffer;
     private FloatBuffer textureBuffer;
     //顶点坐标
     static float vertexData[] = {   // in counterclockwise order:
             -1f, -1f, 0.0f, // bottom left
-            1f, -1f, 0.0f, // bottom right
-            -1f, 1f, 0.0f, // top left
-            1f, 1f, 0.0f,  // top right
+            +1f, -1f, 0.0f, // bottom right
+            -1f, +1f, 0.0f, // top left
+            +1f, +1f, 0.0f,  // top right
     };
     //纹理坐标
     static float textureData[] = {   // in counterclockwise order:
@@ -41,18 +39,24 @@ public class GlRender implements GLSurfaceView.Renderer, SurfaceTexture.OnFrameA
             1f, 0f, 0.0f,  // top right
     };
 
-    private int programId_yuv;
-    private int avPosition_yuv;
-    private int afPosition_yuv;
+    protected float[] vMatrixData = {
+            1, 0, 0, 0,
+            0, 1, 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 1
+    };
+
+    private int glprogram;
+    protected int vPosition;
+    protected int fPosition;
+    protected int vMatrix;
     private int sampler_y;
-    private int sampler_u;
-    private int sampler_v;
-    private int[] textureid_yuv;
-    int w;
-    int h;
-    Buffer y;
-    Buffer u;
-    Buffer v;
+    private int sampler_uv;
+    private int[] textureIds = new int[2];
+    private int width;
+    private int height;
+    private ByteBuffer y;
+    private ByteBuffer uv;
 
     private final Object objectLock = new Object();
 
@@ -73,53 +77,18 @@ public class GlRender implements GLSurfaceView.Renderer, SurfaceTexture.OnFrameA
     }
 
     public void setSize(int width, int height) {
-        w = width;
-        h = height;
-        y = ByteBuffer.wrap(new byte[w * h]);
-        u = ByteBuffer.wrap(new byte[w * h / 4]);
-        v = ByteBuffer.wrap(new byte[w * h / 4]);
+        this.width = width;
+        this.height = height;
+        y = ByteBuffer.wrap(new byte[this.width * this.height]);
+        uv = ByteBuffer.wrap(new byte[this.width * this.height / 2]);
     }
 
-    public void pushYuvdata(byte[] yy, byte[] uu, byte[] vv) {
+    public void pushNv21data(byte[] nv21, int width, int height) {
         synchronized (objectLock) {
-            //YUV422 TO YUV420
-            if (yy.length / uu.length == 2) {
-                ((ByteBuffer) y).put(yy, 0, yy.length);
-                int length = yy.length + uu.length / 2 + vv.length / 2;
-                int index = 0;
-                for (int i = yy.length; i < length; i += 2) {
-                    ((ByteBuffer) u).put(uu[index]);
-                    ((ByteBuffer) v).put(vv[index]);
-                    index += 2;
-                }
-            } else {
-                ((ByteBuffer) y).put(yy, 0, Config.VIDEO_WIDTH * Config.VIDEO_HEIGHT);
-                //((ByteBuffer) u).put(uu,0,Config.VIDEO_WIDTH * Config.VIDEO_HEIGHT/4);
-                //((ByteBuffer) v).put(vv,0,Config.VIDEO_WIDTH * Config.VIDEO_HEIGHT/4);
-                for (int i = 0; i < w * h / 4; i++) {
-                    if (i % 2 == 0) {
-                        ((ByteBuffer) u).put(vv[i]);
-                        ((ByteBuffer) v).put(uu[i]);
-                    } else {
-                        ((ByteBuffer) u).put(uu[i]);
-                        ((ByteBuffer) v).put(vv[i]);
-                    }
-                }
-            }
+            y.put(nv21, 0, width * height);
+            uv.put(nv21, width * height, width * height / 2);
             y.flip();
-            u.flip();
-            v.flip();
-        }
-    }
-
-    public void pushYuvdata(byte[] yuv, int width, int height) {
-        synchronized (objectLock) {
-            ((ByteBuffer) y).put(yuv, 0, width * height);
-            ((ByteBuffer) u).put(yuv, width * height, width * height / 4);
-            ((ByteBuffer) v).put(yuv, width * height + width * height / 4, width * height / 4);
-            y.flip();
-            u.flip();
-            v.flip();
+            uv.flip();
         }
     }
 
@@ -127,31 +96,26 @@ public class GlRender implements GLSurfaceView.Renderer, SurfaceTexture.OnFrameA
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
         FlyLog.d("onSurfaceCreated");
         GLES20.glClearColor(0f, 0f, 0f, 1f);
-
-        //创建一个渲染程序
-        String vertexShader = GlShaderUtils.readRawTextFile(context, R.raw.vertex_shader);
-        String fragmentShader = GlShaderUtils.readRawTextFile(context, R.raw.fragment_yuv);
-        programId_yuv = GlShaderUtils.createProgram(vertexShader, fragmentShader);
-
-        //得到着色器中的属性
-        avPosition_yuv = GLES20.glGetAttribLocation(programId_yuv, "av_Position");
-        afPosition_yuv = GLES20.glGetAttribLocation(programId_yuv, "af_Position");
-        sampler_y = GLES20.glGetUniformLocation(programId_yuv, "sampler_y");
-        sampler_u = GLES20.glGetUniformLocation(programId_yuv, "sampler_u");
-        sampler_v = GLES20.glGetUniformLocation(programId_yuv, "sampler_v");
-
-        //创建纹理
-        textureid_yuv = new int[3];
-        GLES20.glGenTextures(3, textureid_yuv, 0);
-        for (int i = 0; i < 3; i++) {
-            //绑定纹理
-            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureid_yuv[i]);
-            //设置环绕和过滤方式
+        String vertexShader = GlShaderUtil.readRawTextFile(context, R.raw.vertex_nv21);
+        String fragmentShader = GlShaderUtil.readRawTextFile(context, R.raw.fragment_nv21);
+        glprogram = GlShaderUtil.createProgram(vertexShader, fragmentShader);
+        vPosition = GLES20.glGetAttribLocation(glprogram, "vPosition");
+        fPosition = GLES20.glGetAttribLocation(glprogram, "fPosition");
+        vMatrix = GLES20.glGetUniformLocation(glprogram, "vMatrix");
+        sampler_y = GLES20.glGetUniformLocation(glprogram, "sampler_y");
+        sampler_uv = GLES20.glGetUniformLocation(glprogram, "sampler_uv");
+        GLES20.glGenTextures(textureIds.length, textureIds, 0);
+        for (int textureId : textureIds) {
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId);
             GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_REPEAT);
             GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_REPEAT);
             GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
             GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
         }
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
+        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+        GLES20.glEnable(GLES20.GL_BLEND);
+        GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
     }
 
     @Override
@@ -163,42 +127,27 @@ public class GlRender implements GLSurfaceView.Renderer, SurfaceTexture.OnFrameA
     public void onDrawFrame(GL10 gl) {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
         GLES20.glClearColor(0f, 0f, 0f, 1f);
-        if (w > 0 && h > 0 && y != null && u != null && v != null) {
-            GLES20.glUseProgram(programId_yuv);
-            GLES20.glEnableVertexAttribArray(avPosition_yuv);
-            GLES20.glVertexAttribPointer(avPosition_yuv, 3, GLES20.GL_FLOAT, false, 12, vertexBuffer);//为顶点属性赋值
-            GLES20.glEnableVertexAttribArray(afPosition_yuv);
-            GLES20.glVertexAttribPointer(afPosition_yuv, 3, GLES20.GL_FLOAT, false, 12, textureBuffer);
-
+        synchronized (objectLock) {
             GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureid_yuv[0]);
-            synchronized (objectLock) {
-                GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_LUMINANCE, w, h, 0, GLES20.GL_LUMINANCE, GLES20.GL_UNSIGNED_BYTE, y);//
-            }
-            GLES20.glUniform1i(sampler_y, 0);
-
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureIds[0]);
+            GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_LUMINANCE, width, height, 0, GLES20.GL_LUMINANCE, GLES20.GL_UNSIGNED_BYTE, y);//
             GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
-            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureid_yuv[1]);
-            synchronized (objectLock) {
-                GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_LUMINANCE, w / 2, h / 2, 0, GLES20.GL_LUMINANCE, GLES20.GL_UNSIGNED_BYTE, u);
-            }
-            GLES20.glUniform1i(sampler_u, 1);
-
-            GLES20.glActiveTexture(GLES20.GL_TEXTURE2);
-            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureid_yuv[2]);
-            synchronized (objectLock) {
-                GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_LUMINANCE, w / 2, h / 2, 0, GLES20.GL_LUMINANCE, GLES20.GL_UNSIGNED_BYTE, v);
-            }
-            GLES20.glUniform1i(sampler_v, 2);
-            y.clear();
-            u.clear();
-            v.clear();
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureIds[1]);
+            GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_LUMINANCE_ALPHA, width / 2, height / 2, 0, GLES20.GL_LUMINANCE_ALPHA, GLES20.GL_UNSIGNED_BYTE, uv);
         }
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
-    }
 
-    @Override
-    public void onFrameAvailable(SurfaceTexture surfaceTexture) {
-        FlyLog.d("updateSurface");
+        GLES20.glUseProgram(glprogram);
+        GLES20.glUniformMatrix4fv(vMatrix, 1, false, vMatrixData, 0);
+        GLES20.glUniform1i(sampler_y, 0);
+        GLES20.glUniform1i(sampler_uv, 1);
+
+        GLES20.glEnableVertexAttribArray(vPosition);
+        GLES20.glEnableVertexAttribArray(fPosition);
+        GLES20.glVertexAttribPointer(vPosition, 3, GLES20.GL_FLOAT, false, 0, vertexBuffer);
+        GLES20.glVertexAttribPointer(fPosition, 3, GLES20.GL_FLOAT, false, 0, textureBuffer);
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
+        GLES20.glDisableVertexAttribArray(vPosition);
+        GLES20.glDisableVertexAttribArray(fPosition);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
     }
 }

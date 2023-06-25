@@ -1,9 +1,7 @@
-package com.flyzebra.dvrtest.opengl;
+package com.flyzebra.utils;
 
 import android.content.Context;
 import android.opengl.GLES20;
-
-import com.flyzebra.utils.FlyLog;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,7 +13,7 @@ import java.io.InputStreamReader;
  * Time: 18-5-14 下午9:00.
  * Discription: This is GlShaderUtils
  */
-public class GlShaderUtils {
+public class GlShaderUtil {
     public static String readRawTextFile(Context context, int resId) {
         InputStream inputStream = context.getResources().openRawResource(resId);
         try {

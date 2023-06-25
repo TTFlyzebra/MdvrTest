@@ -48,13 +48,8 @@ public class GlVideoView extends GLSurfaceView implements SurfaceHolder.Callback
         super.surfaceDestroyed(surfaceHolder);
     }
 
-    public void pushYuvdata(byte[] y, byte[] u, byte[] v) {
-        glRender.pushYuvdata(y, u, v);
-        requestRender();
-    }
-
-    public void pushYuvdata(byte[] yuv, int width, int height) {
-        glRender.pushYuvdata(yuv, width, height);
+    public void pushNv21data(byte[] nv21, int width, int height) {
+        glRender.pushNv21data(nv21, width, height);
         requestRender();
     }
 }

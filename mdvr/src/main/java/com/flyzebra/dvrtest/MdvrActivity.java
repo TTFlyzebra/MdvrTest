@@ -12,9 +12,8 @@ import android.view.SurfaceView;
 import android.view.Window;
 import android.view.WindowManager;
 
-import com.flyzebra.utils.ByteUtil;
+import com.flyzebra.dvrtest.opengl.GlVideoView;
 import com.flyzebra.utils.FlyLog;
-import com.quectel.qcarapi.stream.QCarAudio;
 import com.quectel.qcarapi.stream.QCarCamera;
 import com.quectel.qcarapi.stream.QCarCamera.FrameInfo;
 
@@ -28,18 +27,17 @@ public class MdvrActivity extends AppCompatActivity {
     }
 
     private final int MAX_CAM = 4;
-    private final SurfaceView[] mSurfaceViews = new SurfaceView[MAX_CAM];
-    private final int[] mSurfaceViewIds = new int[]{R.id.sv01, R.id.sv02, R.id.sv03, R.id.sv04};
+    private final GlVideoView[] mGlVideoViews = new GlVideoView[MAX_CAM];
+    private final int[] mGlVideoViewIds = new int[]{R.id.sv01, R.id.sv02, R.id.sv03, R.id.sv04};
     private final Surface[] mSurface = new Surface[MAX_CAM];
     private final boolean[] isPreview = new boolean[MAX_CAM];
     private QCarCamera qCarCamera = null;
     private int camer_open_ret = -1;
-    private QCarAudio qCarAudio = null;
+    //private QCarAudio qCarAudio = null;
     private static final Handler mHander = new Handler(Looper.getMainLooper());
     private AtomicBoolean is_stop = new AtomicBoolean(true);
-    private Thread mainVideoThread = null;
+    private VideoYuvThread[] yuvThreads = new VideoYuvThread[4];
     private final ByteBuffer[] videoBuffer = new ByteBuffer[MAX_CAM];
-    private final Object workLock = new Object();
 
     private final Runnable camerTask = new Runnable() {
         @Override
@@ -55,39 +53,31 @@ public class MdvrActivity extends AppCompatActivity {
                     return;
                 }
                 FlyLog.d("camera open success!");
-
                 for (int i = 0; i < MAX_CAM; i++) {
-                    qCarCamera.setVideoSize(i, Config.VIDEO_WIDTH, Config.VIDEO_HEIGHT);
-                }
-                qCarCamera.startVideoStream(0);
-
-                if (qCarAudio == null) {
-                    qCarAudio = QCarAudio.getInstance();
-                }
-                qCarAudio.setMute(false);
-                int ret = qCarAudio.configureAudioParam(QCarAudio.QUEC_SAMPLINGRATE_48,
-                        2,
-                        QCarAudio.QUEC_PCMSAMPLEFORMAT_FIXED_16,
-                        QCarAudio.QUEC_SPEAKER_FRONT_LEFT | QCarAudio.QUEC_SPEAKER_FRONT_RIGHT,
-                        QCarAudio.QUEC_BYTEORDER_LITTLEENDIAN);
-                FlyLog.e("configureAudioParam ret=%d", ret);
-                qCarAudio.setSplitChannelAndByteNums(4, 1);
-                qCarAudio.registerQCarAudioDataCB((channelNum, pBuf, nLen) -> {
-                    FlyLog.e("channel=%d:%s", channelNum, ByteUtil.bytes2String(pBuf, 48));
-                });
-                qCarAudio.startAudioStream(0);
-                qCarAudio.startAudioStream(1);
-                qCarAudio.startAudioStream(2);
-                qCarAudio.startAudioStream(3);
-                qCarAudio.startRecorder();
-
-                for (int i = 0; i < MAX_CAM; i++) {
-                    starPreviewCamera(i);
+                    yuvThreads[i] = new VideoYuvThread(i);
+                    yuvThreads[i].start();
                 }
 
-                synchronized (workLock) {
-                    workLock.notifyAll();
-                }
+                //if (qCarAudio == null) {
+                //    qCarAudio = QCarAudio.getInstance();
+                //}
+                //qCarAudio.setMute(false);
+                //int ret = qCarAudio.configureAudioParam(QCarAudio.QUEC_SAMPLINGRATE_48,
+                //        2,
+                //        QCarAudio.QUEC_PCMSAMPLEFORMAT_FIXED_16,
+                //        QCarAudio.QUEC_SPEAKER_FRONT_LEFT | QCarAudio.QUEC_SPEAKER_FRONT_RIGHT,
+                //        QCarAudio.QUEC_BYTEORDER_LITTLEENDIAN);
+                //FlyLog.e("configureAudioParam ret=%d", ret);
+                //qCarAudio.setSplitChannelAndByteNums(4, 1);
+                //qCarAudio.registerQCarAudioDataCB((channelNum, pBuf, nLen) -> {
+                //    FlyLog.e("channel=%d:%s", channelNum, ByteUtil.bytes2String(pBuf, 48));
+                //});
+                //qCarAudio.startAudioStream(0);
+                //qCarAudio.startAudioStream(1);
+                //qCarAudio.startAudioStream(2);
+                //qCarAudio.startAudioStream(3);
+                //qCarAudio.startRecorder();
+
             } catch (Exception e) {
                 FlyLog.e(e.toString());
                 mHander.postDelayed(camerTask, 1000);
@@ -105,104 +95,65 @@ public class MdvrActivity extends AppCompatActivity {
         for (int i = 0; i < MAX_CAM; i++) {
             mSurface[i] = null;
             isPreview[i] = false;
-            mSurfaceViews[i] = findViewById(mSurfaceViewIds[i]);
-            mSurfaceViews[i].getHolder().addCallback(new MySurfaceCallback(i));
+            mGlVideoViews[i] = findViewById(mGlVideoViewIds[i]);
         }
         mHander.post(camerTask);
-
-        for (int i = 0; i < MAX_CAM; i++) {
-            videoBuffer[i] = ByteBuffer.allocateDirect(Config.VIDEO_WIDTH * Config.VIDEO_HEIGHT * 3 / 2);
-        }
-
-        mainVideoThread = new Thread(() -> {
-            synchronized (workLock) {
-                try {
-                    if (camer_open_ret != 0 && !is_stop.get()) {
-                        workLock.wait();
-                    }
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            while (!is_stop.get()) {
-                FrameInfo info = qCarCamera.getVideoFrameInfo(0, videoBuffer[0]);
-                //FlyLog.e("camera=%d ptsSec=%d,ptsUsec=%d,frameID=%d", 0, info.ptsSec, info.ptsUsec, info.frameID);
-            }
-        }, "mdvr-cam0");
-        mainVideoThread.start();
         is_stop.set(false);
-    }
-
-
-    private void starPreviewCamera(int num) {
-        if (qCarCamera != null && mSurface[num] != null && !isPreview[num]) {
-            isPreview[num] = true;
-            qCarCamera.startPreview(num, mSurface[num], 1280, 720, QCarCamera.YUV420_NV21);
-        }
-    }
-
-    private void stopPreviewCamera(int num) {
-        if (qCarCamera != null) {
-            isPreview[num] = false;
-            qCarCamera.stopPreview(num);
-        }
     }
 
     @Override
     protected void onDestroy() {
-        try {
-            is_stop.set(true);
-            synchronized (workLock) {
-                workLock.notifyAll();
+        is_stop.set(true);
+        mHander.removeCallbacksAndMessages(null);
+
+        for (int i = 0; i < MAX_CAM; i++) {
+            try {
+                if (yuvThreads != null) yuvThreads[i].join();
+            } catch (InterruptedException e) {
+                FlyLog.e(e.toString());
             }
-            mainVideoThread.join();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
         }
 
-        try {
-            if (qCarAudio != null) {
-                qCarAudio.registerQCarAudioDataCB(null);
-                qCarAudio.stopRecorder();
-            }
-        } catch (Exception e) {
-            FlyLog.e(e.toString());
-        }
-        mHander.removeCallbacksAndMessages(null);
-        if (camer_open_ret == 0) {
+        if (camer_open_ret == 0 && qCarCamera != null) {
             for (int i = 0; i < MAX_CAM; i++) {
                 qCarCamera.stopVideoStream(i);
             }
             qCarCamera.cameraClose();
+            qCarCamera.release();
         }
-        qCarCamera.release();
+
+        //try {
+        //    if (qCarAudio != null) {
+        //        qCarAudio.registerQCarAudioDataCB(null);
+        //        qCarAudio.stopRecorder();
+        //    }
+        //} catch (Exception e) {
+        //    FlyLog.e(e.toString());
+        //}
 
         super.onDestroy();
         FlyLog.d("MdvrTest exit!");
     }
 
-    private class MySurfaceCallback implements SurfaceHolder.Callback {
-        private int num = 0;
+    private class VideoYuvThread extends Thread implements Runnable {
+        private final int number;
 
-        public MySurfaceCallback(int num) {
-            this.num = num;
+        public VideoYuvThread(int number) {
+            this.number = number;
+            setName("camera-" + number);
         }
 
         @Override
-        public void surfaceCreated(@NonNull SurfaceHolder holder) {
-            mSurface[num] = holder.getSurface();
-            starPreviewCamera(num);
-        }
-
-        @Override
-        public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int width, int height) {
-
-        }
-
-        @Override
-        public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
-            mSurface[num] = null;
-            stopPreviewCamera(num);
+        public void run() {
+            qCarCamera.setVideoSize(number, Config.VIDEO_WIDTH, Config.VIDEO_HEIGHT);
+            videoBuffer[number] = ByteBuffer.wrap(new byte[Config.VIDEO_WIDTH * Config.VIDEO_HEIGHT * 3 / 2]);
+            qCarCamera.setVideoColorFormat(number, QCarCamera.YUV420_NV21);
+            qCarCamera.startVideoStream(number);
+            while (!is_stop.get()) {
+                FrameInfo info = qCarCamera.getVideoFrameInfo(number, videoBuffer[number]);
+                //FlyLog.e("camera=%d ptsSec=%d,ptsUsec=%d,frameID=%d", number, info.ptsSec, info.ptsUsec, info.frameID);
+                mGlVideoViews[number].pushNv21data(videoBuffer[number].array(), Config.VIDEO_WIDTH, Config.VIDEO_HEIGHT);
+            }
         }
     }
 }
