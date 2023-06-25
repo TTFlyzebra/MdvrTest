@@ -14,5 +14,5 @@ dependencyResolutionManagement {
 }
 rootProject.name = "MdvrTest"
 include ':mdvr'
-include ':rtmplib'
+include ':corelib'
 include ':utils'

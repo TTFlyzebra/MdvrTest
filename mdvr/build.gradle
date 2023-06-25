@@ -80,5 +80,5 @@ dependencies {
     implementation files('libs/gson-2.7.jar')
     implementation files('libs/qcar_encoder.aar')
     implementation project(path: ':utils')
-    implementation project(path: ':rtmplib')
+    implementation project(path: ':corelib')
 }
