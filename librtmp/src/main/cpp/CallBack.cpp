@@ -10,8 +10,8 @@ CallBack::CallBack(JavaVM *jvm, JNIEnv *env, jobject thiz) {
     javeVM = jvm;
     jniEnv = env;
     jObject = jniEnv->NewGlobalRef(thiz);
-    jclass  cls = jniEnv->GetObjectClass(jObject);
-    if(!cls) {
+    jclass cls = jniEnv->GetObjectClass(jObject);
+    if (!cls) {
         FLOGE("find jclass faild");
         return;
     }
@@ -22,16 +22,16 @@ CallBack::CallBack(JavaVM *jvm, JNIEnv *env, jobject thiz) {
 CallBack::~CallBack() {
     int status = javeVM->GetEnv((void **) &jniEnv, JNI_VERSION_1_4);
     bool isAttacked = false;
-    if(status < 0) {
+    if (status < 0) {
         status = javeVM->AttachCurrentThread(&jniEnv, nullptr);
-        if(status < 0) {
+        if (status < 0) {
             FLOGE("onVideoEncode: failed to attach current thread");
             return;
         }
         isAttacked = true;
     }
     jniEnv->DeleteGlobalRef(jObject);
-    if(isAttacked){
+    if (isAttacked) {
         (javeVM)->DetachCurrentThread();
     }
     FLOGI("%s()", __func__);
@@ -40,16 +40,16 @@ CallBack::~CallBack() {
 void CallBack::javaOnError(int error) {
     int status = javeVM->GetEnv((void **) &jniEnv, JNI_VERSION_1_4);
     bool isAttacked = false;
-    if(status < 0) {
+    if (status < 0) {
         status = javeVM->AttachCurrentThread(&jniEnv, nullptr);
-        if(status < 0) {
+        if (status < 0) {
             FLOGE("onStop: failed to attach current thread");
             return;
         }
         isAttacked = true;
     }
     jniEnv->CallVoidMethod(jObject, onError, error);
-    if(isAttacked){
+    if (isAttacked) {
         (javeVM)->DetachCurrentThread();
     }
 }

@@ -14,7 +14,7 @@ dependencyResolutionManagement {
 }
 rootProject.name = "MdvrTest"
 include ':mdvr'
-include ':libcore'
+include ':libzebra'
 include ':libutils'
 include ':librtmp'
 include ':libyuv'

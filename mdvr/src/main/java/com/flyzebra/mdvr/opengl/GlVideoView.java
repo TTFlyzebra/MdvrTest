@@ -27,7 +27,7 @@ public class GlVideoView extends GLSurfaceView implements SurfaceHolder.Callback
     private void init(Context context) {
         setEGLContextClientVersion(2);
         glRender = new GlRender(context);
-        glRender.setSize(Config.VIDEO_WIDTH, Config.VIDEO_HEIGHT);
+        glRender.setSize(Config.CAM_WIDTH, Config.CAM_HEIGHT);
         setRenderer(glRender);
         setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
         getHolder().addCallback(this);
@@ -48,8 +48,8 @@ public class GlVideoView extends GLSurfaceView implements SurfaceHolder.Callback
         super.surfaceDestroyed(surfaceHolder);
     }
 
-    public void pushNv21data(byte[] nv21, int width, int height) {
-        glRender.pushNv21data(nv21, width, height);
+    public void pushNv21data(byte[] nv21, int size, int width, int height) {
+        glRender.pushNv21data(nv21, size, width, height);
         requestRender();
     }
 }

@@ -83,7 +83,7 @@ public class GlRender implements GLSurfaceView.Renderer {
         uv = ByteBuffer.wrap(new byte[this.width * this.height / 2]);
     }
 
-    public void pushNv21data(byte[] nv21, int width, int height) {
+    public void pushNv21data(byte[] nv21, int size, int width, int height) {
         synchronized (objectLock) {
             y.put(nv21, 0, width * height);
             uv.put(nv21, width * height, width * height / 2);
