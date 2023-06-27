@@ -1,10 +1,10 @@
-package com.flyzebra.dvrtest.opengl;
+package com.flyzebra.mdvr.opengl;
 
 import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 
-import com.flyzebra.dvrtest.R;
+import com.flyzebra.mdvr.R;
 import com.flyzebra.utils.FlyLog;
 import com.flyzebra.utils.GlShaderUtil;
 

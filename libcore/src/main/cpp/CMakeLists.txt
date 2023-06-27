@@ -1,18 +1,18 @@
 cmake_minimum_required(VERSION 3.22.1)
 
-project("rtmp")
+project("zebra")
 
 include_directories(${CMAKE_SOURCE_DIR})
 
 add_library(
-        rtmp
+        zebra
         SHARED
-        rtmp.cpp)
+        zebra.cpp)
 
 find_library(
         log-lib
         log)
 
 target_link_libraries(
-        rtmp
+        zebra
         ${log-lib})

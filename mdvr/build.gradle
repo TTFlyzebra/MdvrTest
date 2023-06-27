@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace 'com.flyzebra.dvrtest'
+    namespace 'com.flyzebra.mdvr'
     compileSdk rootProject.ext.compileSdk
 
     defaultConfig {
-        applicationId "com.flyzebra.dvrtest"
+        applicationId "com.flyzebra.mdvr"
         minSdk rootProject.ext.minSdk
         targetSdk rootProject.ext.targetSdk
         versionCode 1

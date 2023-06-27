@@ -1,4 +1,4 @@
-package com.flyzebra.dvrtest;
+package com.flyzebra.mdvr;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -9,7 +9,7 @@ import android.view.Surface;
 import android.view.Window;
 import android.view.WindowManager;
 
-import com.flyzebra.dvrtest.opengl.GlVideoView;
+import com.flyzebra.mdvr.opengl.GlVideoView;
 import com.flyzebra.utils.FlyLog;
 import com.quectel.qcarapi.stream.QCarCamera;
 import com.quectel.qcarapi.stream.QCarCamera.FrameInfo;

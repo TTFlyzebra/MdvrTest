@@ -1,11 +1,11 @@
-package com.flyzebra.dvrtest.opengl;
+package com.flyzebra.mdvr.opengl;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
 import android.view.SurfaceHolder;
 
-import com.flyzebra.dvrtest.Config;
+import com.flyzebra.mdvr.Config;
 
 /**
  * Author: FlyZebra
