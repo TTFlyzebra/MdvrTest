@@ -4,12 +4,12 @@ plugins {
 
 android {
     namespace 'com.flyzebra.dvrtest'
-    compileSdk 33
+    compileSdk rootProject.ext.compileSdk
 
     defaultConfig {
         applicationId "com.flyzebra.dvrtest"
-        minSdk 25
-        targetSdk 33
+        minSdk rootProject.ext.minSdk
+        targetSdk rootProject.ext.targetSdk
         versionCode 1
         versionName "1.0"
         flavorDimensions "versionCode"
@@ -79,6 +79,6 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.3'
     implementation files('libs/gson-2.7.jar')
     implementation files('libs/qcar_encoder.aar')
-    implementation project(path: ':utils')
-    implementation project(path: ':corelib')
+    implementation project(path: ':libutils')
+    implementation project(path: ':libcore')
 }
