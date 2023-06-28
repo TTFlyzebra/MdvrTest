@@ -1,17 +1,14 @@
 package com.flyzebra.mdvr;
 
 import static com.flyzebra.mdvr.Config.MAX_CAM;
-import static com.flyzebra.mdvr.Config.RTMP_URL;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Window;
 import android.view.WindowManager;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.flyzebra.mdvr.audio.AudioService;
-import com.flyzebra.mdvr.camera.CameraService;
-import com.flyzebra.mdvr.net.RtmpService;
 import com.flyzebra.mdvr.opengl.GlVideoView;
 import com.flyzebra.notify.INotify;
 import com.flyzebra.notify.Notify;
@@ -28,42 +25,30 @@ public class MdvrActivity extends AppCompatActivity implements INotify {
     private final GlVideoView[] mGlVideoViews = new GlVideoView[MAX_CAM];
     private final int[] mGlVideoViewIds = new int[]{R.id.sv01, R.id.sv02, R.id.sv03, R.id.sv04};
 
-    private final CameraService cameraService = new CameraService(this);
-    private final AudioService audioService = new AudioService(this);
-    private final RtmpService[] rtmpServices = new RtmpService[MAX_CAM];
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        FlyLog.d("MdvrActiviy start!");
+
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_main);
-        for (int i = 0; i < MAX_CAM; i++) {
-            mGlVideoViews[i] = findViewById(mGlVideoViewIds[i]);
-        }
+
+        startService(new Intent(this, MdvrService.class));
         Notify.get().registerListener(this);
 
         for (int i = 0; i < MAX_CAM; i++) {
-            rtmpServices[i] = new RtmpService(i);
-            rtmpServices[i].start(RTMP_URL+"/camera"+i);
+            mGlVideoViews[i] = findViewById(mGlVideoViewIds[i]);
         }
 
-        cameraService.onCreate(Config.CAM_WIDTH, Config.CAM_HEIGHT);
-        audioService.onCreate(Config.MIC_SAMPLE, Config.MIC_CHANNEL, Config.MIC_FORMAT);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         Notify.get().unregisterListener(this);
-
-        for (int i = 0; i < MAX_CAM; i++) {
-            rtmpServices[i].stop();
-        }
-
-        audioService.onDistory();
-        cameraService.onDerstory();
-        FlyLog.d("MdvrTest exit!");
+        stopService(new Intent(this, MdvrService.class));
+        FlyLog.d("MdvrActiviy exit!");
     }
 
     @Override

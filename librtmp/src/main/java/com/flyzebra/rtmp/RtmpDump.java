@@ -11,20 +11,22 @@ public class RtmpDump {
     }
 
     private long pRtmpPointer = -1;
-    private int channel;
+    private int mChannel;
 
     public RtmpDump(int channel) {
-        this.channel = channel;
+        this.mChannel = channel;
     }
 
     public void init(String rtmp_url) {
-        pRtmpPointer = _init(channel, rtmp_url);
+        FlyLog.d("RtmpDump[%d][%s] init!", mChannel, rtmp_url);
+        pRtmpPointer = _init(mChannel, rtmp_url);
     }
 
     public void release() {
         long pointer = pRtmpPointer;
         pRtmpPointer = -1;
         _release(pointer);
+        FlyLog.d("RtmpDump[%d] release!", mChannel);
     }
 
     public void sendSpsPps(byte[] sps, int spsLen, byte[] pps, int ppsLen) {
@@ -58,7 +60,7 @@ public class RtmpDump {
     }
 
     public void onError(int errCode) {
-        FlyLog.e("RtmpDump onError %d", errCode);
+        FlyLog.e("RtmpDump[%d] onError %d", mChannel, errCode);
     }
 
     private native long _init(int channel, String url);

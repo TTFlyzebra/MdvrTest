@@ -13,7 +13,7 @@
 RtmpDump::RtmpDump(JavaVM *jvm, JNIEnv *env, jobject thiz, int channel, const char *url)
         : mChannel(channel), send_t(nullptr), rtmp(nullptr), is_connect(false), _vps(nullptr),
           _sps(nullptr), _pps(nullptr), _head(nullptr) {
-    FLOGD("%s()", __func__);
+//    FLOGD("%s()", __func__);
 
     memset(rtmp_url, 0, sizeof(rtmp_url));
     memcpy(rtmp_url, url, strlen(url));
@@ -64,7 +64,7 @@ RtmpDump::~RtmpDump() {
         free(_head);
         _head = nullptr;
     }
-    FLOGD("%s()", __func__);
+//    FLOGD("%s()", __func__);
 }
 
 void RtmpDump::rtmpConnect() {

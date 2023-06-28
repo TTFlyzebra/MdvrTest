@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * rn9175音频，四路麦克风使用一路48k2channels16bit录入，每路为48k1channel8bit
  * 实际每路转为48k1channel16bit
  */
-public class AudioService {
+public class PcmService {
     private final Context mContext;
     private int sampleRate;
     private AudioRecord mAudioRecord;
@@ -29,11 +29,12 @@ public class AudioService {
     private final byte[] pcm = new byte[pcmSize];
     private Thread mRecordThread = null;
 
-    public AudioService(Context context) {
+    public PcmService(Context context) {
         this.mContext = context;
     }
 
     public void onCreate(int sample, int channel, int format) {
+        FlyLog.d("PcmService start!");
         this.sampleRate = sample;
         int bufferSize = AudioRecord.getMinBufferSize(sample, channel, format);
         if (ActivityCompat.checkSelfPermission(mContext,
@@ -92,5 +93,6 @@ public class AudioService {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        FlyLog.d("PcmService exit!");
     }
 }

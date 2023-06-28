@@ -15,7 +15,7 @@ import com.quectel.qcarapi.stream.QCarCamera;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class CameraService implements Runnable {
+public class YuvService implements Runnable {
     private Context mContext;
     private int width;
     private int height;
@@ -27,11 +27,12 @@ public class CameraService implements Runnable {
     private final VideoYuvThread[] yuvThreads = new VideoYuvThread[4];
     private final ByteBuffer[] videoBuffer = new ByteBuffer[MAX_CAM];
 
-    public CameraService(Context context) {
+    public YuvService(Context context) {
         mContext = context;
     }
 
     public void onCreate(int width, int height) {
+        FlyLog.d("YuvService start!");
         this.width = width;
         this.height = height;
         is_stop.set(false);
@@ -46,7 +47,7 @@ public class CameraService implements Runnable {
         camer_open_ret = qCarCamera.cameraOpen(4, 1);
         if (camer_open_ret != 0) {
             FlyLog.e("QCarCamera open failed, ret=%d", camer_open_ret);
-            mHandler.postDelayed(CameraService.this, 1000);
+            mHandler.postDelayed(YuvService.this, 1000);
             return;
         }
         FlyLog.d("QCarCamera open success!");
@@ -74,8 +75,8 @@ public class CameraService implements Runnable {
             while (!is_stop.get()) {
                 QCarCamera.FrameInfo info = qCarCamera.getVideoFrameInfo(channel, videoBuffer[channel]);
                 //FlyLog.e("camera=%d ptsSec=%d,ptsUsec=%d,frameID=%d", number, info.ptsSec, info.ptsUsec, info.frameID);
-                //long ptsUsec = info.ptsSec * 1000000 + info.ptsUsec;
-                long ptsUsec = System.nanoTime() / 1000;
+                long ptsUsec = info.ptsSec * 1000000 + info.ptsUsec;
+                //long ptsUsec = System.nanoTime() / 1000;
                 byte[] params = new byte[14];
                 ByteUtil.shortToBytes((short) channel, params, 0, true);
                 ByteUtil.shortToBytes((short) width, params, 2, true);
@@ -105,5 +106,6 @@ public class CameraService implements Runnable {
             qCarCamera.cameraClose();
             qCarCamera.release();
         }
+        FlyLog.d("YuvService exit!");
     }
 }

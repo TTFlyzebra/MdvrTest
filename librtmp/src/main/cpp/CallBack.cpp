@@ -6,7 +6,7 @@
 #include "utils/FlyLog.h"
 
 CallBack::CallBack(JavaVM *jvm, JNIEnv *env, jobject thiz) {
-    FLOGI("%s()", __func__);
+//    FLOGI("%s()", __func__);
     javeVM = jvm;
     jniEnv = env;
     jObject = jniEnv->NewGlobalRef(thiz);
@@ -34,7 +34,7 @@ CallBack::~CallBack() {
     if (isAttacked) {
         (javeVM)->DetachCurrentThread();
     }
-    FLOGI("%s()", __func__);
+//    FLOGI("%s()", __func__);
 }
 
 void CallBack::javaOnError(int error) {
