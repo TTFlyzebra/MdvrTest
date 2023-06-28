@@ -78,7 +78,7 @@ public class MdvrActivity extends AppCompatActivity implements INotify {
             int width = ByteUtil.bytes2Short(params, 2, true);
             int height = ByteUtil.bytes2Short(params, 4, true);
 //            long ptsUsec = ByteUtil.bytes2Long(params, 6, true);
-            mGlVideoViews[channel].pushNv21data(data, size, width, height);
+            mGlVideoViews[channel].pushNv12data(data, size, width, height);
         }
     }
 }

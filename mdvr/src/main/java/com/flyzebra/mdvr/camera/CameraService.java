@@ -74,7 +74,8 @@ public class CameraService implements Runnable {
             while (!is_stop.get()) {
                 QCarCamera.FrameInfo info = qCarCamera.getVideoFrameInfo(channel, videoBuffer[channel]);
                 //FlyLog.e("camera=%d ptsSec=%d,ptsUsec=%d,frameID=%d", number, info.ptsSec, info.ptsUsec, info.frameID);
-                long ptsUsec = info.ptsSec * 1000000 + info.ptsUsec;
+                //long ptsUsec = info.ptsSec * 1000000 + info.ptsUsec;
+                long ptsUsec = System.nanoTime() / 1000;
                 byte[] params = new byte[14];
                 ByteUtil.shortToBytes((short) channel, params, 0, true);
                 ByteUtil.shortToBytes((short) width, params, 2, true);

@@ -25,7 +25,8 @@ public class AudioService {
     private int sampleRate;
     private AudioRecord mAudioRecord;
     private final AtomicBoolean is_stop = new AtomicBoolean(true);
-    private final byte[] pcm = new byte[1024];
+    int pcmSize = (int) (Config.MIC_SAMPLE * 1.0f * 16 / 8 * 2 / 25.0f);
+    private final byte[] pcm = new byte[pcmSize];
     private Thread mRecordThread = null;
 
     public AudioService(Context context) {
@@ -44,35 +45,38 @@ public class AudioService {
         mRecordThread = new Thread(() -> {
             mAudioRecord.startRecording();
             while (!is_stop.get()) {
-                int readSize = mAudioRecord.read(pcm, 0, pcm.length);
-                if (readSize > 0) {
-                    byte[] pcm_0 = new byte[readSize / 2];
-                    byte[] pcm_1 = new byte[readSize / 2];
-                    byte[] pcm_2 = new byte[readSize / 2];
-                    byte[] pcm_3 = new byte[readSize / 2];
-                    for (int i = 0; i < readSize / 4; i++) {
-                        pcm_0[i * 2 + 1] = pcm[i * 4 + 1];
-                        pcm_1[i * 2 + 1] = pcm[i * 4];
-                        pcm_2[i * 2 + 1] = pcm[i * 4 + 3];
-                        pcm_3[i * 2 + 1] = pcm[i * 4 + 2];
-                    }
-
-                    byte[] params = new byte[12];
-                    ByteUtil.intToBytes(sampleRate, params, 2, true);
-                    ByteUtil.shortToBytes((short) Config.MIC_CHANNELS, params, 6, true);
-                    ByteUtil.intToBytes(Config.MIC_BIT_RATE, params, 8, true);
-
-                    ByteUtil.shortToBytes((short) 0, params, 0, true);
-                    Notify.get().handledata(NotifyType.NOTI_MICOUT_PCM, pcm_0, readSize / 2, params);
-                    ByteUtil.shortToBytes((short) 1, params, 0, true);
-                    Notify.get().handledata(NotifyType.NOTI_MICOUT_PCM, pcm_1, readSize / 2, params);
-                    ByteUtil.shortToBytes((short) 2, params, 0, true);
-                    Notify.get().handledata(NotifyType.NOTI_MICOUT_PCM, pcm_2, readSize / 2, params);
-                    ByteUtil.shortToBytes((short) 3, params, 0, true);
-                    Notify.get().handledata(NotifyType.NOTI_MICOUT_PCM, pcm_3, readSize / 2, params);
-                }else{
-                    FlyLog.e("Audio read mic buffer error, readSize=%d", readSize);
+                int readSize = 0;
+                while (!is_stop.get() && readSize < pcmSize) {
+                    int readLen = mAudioRecord.read(pcm, readSize, pcmSize - readSize);
+                    readSize += readLen;
                 }
+                if (is_stop.get()) break;
+
+                byte[] pcm_0 = new byte[readSize / 2];
+                byte[] pcm_1 = new byte[readSize / 2];
+                byte[] pcm_2 = new byte[readSize / 2];
+                byte[] pcm_3 = new byte[readSize / 2];
+                for (int i = 0; i < readSize / 4; i++) {
+                    pcm_0[i * 2 + 1] = pcm[i * 4 + 1];
+                    pcm_1[i * 2 + 1] = pcm[i * 4];
+                    pcm_2[i * 2 + 1] = pcm[i * 4 + 3];
+                    pcm_3[i * 2 + 1] = pcm[i * 4 + 2];
+                }
+
+                byte[] params = new byte[20];
+                ByteUtil.intToBytes(sampleRate, params, 2, true);
+                ByteUtil.shortToBytes((short) Config.MIC_CHANNELS, params, 6, true);
+                ByteUtil.intToBytes(Config.MIC_BIT_RATE, params, 8, true);
+                ByteUtil.longToBytes(System.nanoTime() / 1000, params, 12, true);
+
+                ByteUtil.shortToBytes((short) 0, params, 0, true);
+                Notify.get().handledata(NotifyType.NOTI_MICOUT_PCM, pcm_0, readSize / 2, params);
+                ByteUtil.shortToBytes((short) 1, params, 0, true);
+                Notify.get().handledata(NotifyType.NOTI_MICOUT_PCM, pcm_1, readSize / 2, params);
+                ByteUtil.shortToBytes((short) 2, params, 0, true);
+                Notify.get().handledata(NotifyType.NOTI_MICOUT_PCM, pcm_2, readSize / 2, params);
+                ByteUtil.shortToBytes((short) 3, params, 0, true);
+                Notify.get().handledata(NotifyType.NOTI_MICOUT_PCM, pcm_3, readSize / 2, params);
             }
             mAudioRecord.stop();
         });

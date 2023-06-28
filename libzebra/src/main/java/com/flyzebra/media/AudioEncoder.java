@@ -29,10 +29,6 @@ public class AudioEncoder implements Runnable {
         mCallBack = cb;
     }
 
-    public boolean isCodecInit() {
-        return is_codec_init.get();
-    }
-
     public void initCodec(String mimeType, int sample, int channels, int bitrate) {
         synchronized (codecLock) {
             try {

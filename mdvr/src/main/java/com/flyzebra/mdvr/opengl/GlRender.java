@@ -82,10 +82,10 @@ public class GlRender implements GLSurfaceView.Renderer {
         uv = ByteBuffer.wrap(new byte[this.width * this.height / 2]);
     }
 
-    public void pushNv21data(byte[] nv21, int size, int width, int height) {
+    public void pushNv12data(byte[] nv12, int size, int width, int height) {
         synchronized (objectLock) {
-            y.put(nv21, 0, width * height);
-            uv.put(nv21, width * height, width * height / 2);
+            y.put(nv12, 0, width * height);
+            uv.put(nv12, width * height, width * height / 2);
             y.flip();
             uv.flip();
         }
@@ -94,8 +94,8 @@ public class GlRender implements GLSurfaceView.Renderer {
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
         GLES20.glClearColor(0f, 0f, 0f, 1f);
-        String vertexShader = GlShaderUtil.readRawTextFile(context, R.raw.vertex_nv21);
-        String fragmentShader = GlShaderUtil.readRawTextFile(context, R.raw.fragment_nv21);
+        String vertexShader = GlShaderUtil.readRawTextFile(context, R.raw.vertex_nv12);
+        String fragmentShader = GlShaderUtil.readRawTextFile(context, R.raw.fragment_nv12);
         glprogram = GlShaderUtil.createProgram(vertexShader, fragmentShader);
         vPosition = GLES20.glGetAttribLocation(glprogram, "vPosition");
         fPosition = GLES20.glGetAttribLocation(glprogram, "fPosition");

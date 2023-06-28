@@ -202,7 +202,7 @@ int RtmpDump::_sendSpsPps(const char *sps, int sps_len, const char *pps, int pps
     }
     packet->m_packetType = RTMP_PACKET_TYPE_VIDEO;
     packet->m_nBodySize = 2 + 3 + 5 + 1 + 2 + sps_len + 1 + 2 + pps_len;
-    packet->m_nChannel = 0x08 + mChannel;
+    packet->m_nChannel = 0x04 + mChannel;
     packet->m_nTimeStamp = 0;
     packet->m_hasAbsTimestamp = 0;
     packet->m_headerType = RTMP_PACKET_SIZE_LARGE;
@@ -325,7 +325,7 @@ int RtmpDump::_sendVpsSpsPps(const char *vps, int vps_len, const char *sps, int 
     i += pps_len;
     packet->m_packetType = RTMP_PACKET_TYPE_VIDEO;
     packet->m_nBodySize = i;
-    packet->m_nChannel = 0x08 + mChannel;
+    packet->m_nChannel = 0x04 + mChannel;
     packet->m_nTimeStamp = 0;
     packet->m_hasAbsTimestamp = 0;
     packet->m_headerType = RTMP_PACKET_SIZE_LARGE;
@@ -350,7 +350,7 @@ void RtmpDump::sendAvc(const char *data, int size, long pts) {
     }
     packet->m_packetType = RTMP_PACKET_TYPE_VIDEO;
     packet->m_nBodySize = 9 + size;
-    packet->m_nChannel = 0x08 + mChannel;
+    packet->m_nChannel = 0x04 + mChannel;
     packet->m_nTimeStamp = pts / 1000;
     packet->m_hasAbsTimestamp = 0;
     packet->m_headerType = RTMP_PACKET_SIZE_MEDIUM;
@@ -379,7 +379,7 @@ void RtmpDump::sendHevc(const char *data, int size, long pts) {
     int i = 0;
     packet->m_packetType = RTMP_PACKET_TYPE_VIDEO;
     packet->m_nBodySize = 9 + size;
-    packet->m_nChannel = 0x08 + mChannel;
+    packet->m_nChannel = 0x04 + mChannel;
     packet->m_nTimeStamp = pts / 1000;
     packet->m_hasAbsTimestamp = 0;
     packet->m_headerType = RTMP_PACKET_SIZE_MEDIUM;
@@ -436,7 +436,7 @@ int RtmpDump::_sendAacHead(const char *head, int headLen) {
 
     packet->m_packetType = RTMP_PACKET_TYPE_AUDIO;
     packet->m_nBodySize = bodySize;
-    packet->m_nChannel = 0x18 + mChannel;
+    packet->m_nChannel = 0x14 + mChannel;
     packet->m_hasAbsTimestamp = 0;
     packet->m_nTimeStamp = 0;
     packet->m_headerType = RTMP_PACKET_SIZE_MEDIUM;
@@ -472,7 +472,7 @@ void RtmpDump::sendAac(const char *data, int size, long pts) {
 
     packet->m_packetType = RTMP_PACKET_TYPE_AUDIO;
     packet->m_nBodySize = bodySize;
-    packet->m_nChannel =0x18 + mChannel;
+    packet->m_nChannel =0x14 + mChannel;
     packet->m_hasAbsTimestamp = pts / 1000;
     packet->m_nTimeStamp = 0;
     packet->m_headerType = RTMP_PACKET_SIZE_LARGE;

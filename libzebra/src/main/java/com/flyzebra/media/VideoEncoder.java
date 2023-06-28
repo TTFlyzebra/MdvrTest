@@ -29,10 +29,6 @@ public class VideoEncoder implements Runnable {
         mCallBack = cb;
     }
 
-    public boolean isCodecInit() {
-        return is_codec_init.get();
-    }
-
     public void initCodec(String mimeType, int width, int height, int bitrate) {
         synchronized (codecLock) {
             try {
