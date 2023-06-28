@@ -40,7 +40,6 @@ public class MdvrActivity extends AppCompatActivity implements INotify {
         for (int i = 0; i < MAX_CAM; i++) {
             mGlVideoViews[i] = findViewById(mGlVideoViewIds[i]);
         }
-
     }
 
     @Override

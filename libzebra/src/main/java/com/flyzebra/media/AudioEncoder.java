@@ -19,7 +19,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class AudioEncoder implements Runnable {
     private final int mChannel;
     private MediaCodec codec = null;
-    private final Object codecLock = new Object();
     private final AtomicBoolean is_codec_init = new AtomicBoolean(false);
     private Thread mOutThread = null;
     private final AudioEncoderCB mCallBack;
@@ -30,58 +29,52 @@ public class AudioEncoder implements Runnable {
     }
 
     public void initCodec(String mimeType, int sample, int channels, int bitrate) {
-        synchronized (codecLock) {
-            try {
-                MediaFormat audioFormat = new MediaFormat();
-                audioFormat.setString(MediaFormat.KEY_MIME, mimeType);
-                audioFormat.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC);
-                audioFormat.setInteger(MediaFormat.KEY_SAMPLE_RATE, sample);
-                audioFormat.setInteger(MediaFormat.KEY_CHANNEL_COUNT, channels);
-                audioFormat.setInteger(MediaFormat.KEY_BIT_RATE, bitrate);
-                audioFormat.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, bitrate / 4);
-                codec = MediaCodec.createEncoderByType(mimeType);
-                codec.configure(audioFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
-                codec.start();
-                is_codec_init.set(true);
-                mOutThread = new Thread(this);
-                mOutThread.start();
-            } catch (Exception e) {
-                FlyLog.e(e.toString());
-            }
+        try {
+            MediaFormat audioFormat = new MediaFormat();
+            audioFormat.setString(MediaFormat.KEY_MIME, mimeType);
+            audioFormat.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC);
+            audioFormat.setInteger(MediaFormat.KEY_SAMPLE_RATE, sample);
+            audioFormat.setInteger(MediaFormat.KEY_CHANNEL_COUNT, channels);
+            audioFormat.setInteger(MediaFormat.KEY_BIT_RATE, bitrate);
+            audioFormat.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, bitrate / 4);
+            codec = MediaCodec.createEncoderByType(mimeType);
+            codec.configure(audioFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
+            codec.start();
+            is_codec_init.set(true);
+            mOutThread = new Thread(this);
+            mOutThread.start();
+        } catch (Exception e) {
+            FlyLog.e(e.toString());
         }
     }
 
     public void inPumData(byte[] data, int size, long pts) {
-        synchronized (codecLock) {
-            if (!is_codec_init.get() || data == null || size <= 0) return;
-            int inIndex = codec.dequeueInputBuffer(200000);
-            if (inIndex < 0) {
-                FlyLog.e("AudioEncoder codec->dequeueInputBuffer inIdex=%d error!", inIndex);
-                return;
-            }
-
-            ByteBuffer buffer = codec.getInputBuffer(inIndex);
-            if (buffer == null) {
-                FlyLog.e("AudioEncoder codec->getInputBuffer inIdex=%d error!", inIndex);
-                return;
-            }
-            buffer.put(data, 0, size);
-            codec.queueInputBuffer(inIndex, 0, size, pts, 0);
+        if (!is_codec_init.get() || data == null || size <= 0) return;
+        int inIndex = codec.dequeueInputBuffer(200000);
+        if (inIndex < 0) {
+            FlyLog.e("AudioEncoder codec->dequeueInputBuffer inIdex=%d error!", inIndex);
+            return;
         }
+
+        ByteBuffer buffer = codec.getInputBuffer(inIndex);
+        if (buffer == null) {
+            FlyLog.e("AudioEncoder codec->getInputBuffer inIdex=%d error!", inIndex);
+            return;
+        }
+        buffer.put(data, 0, size);
+        codec.queueInputBuffer(inIndex, 0, size, pts, 0);
     }
 
     public void releaseCodec() {
-        synchronized (codecLock) {
-            is_codec_init.set(false);
-            try {
-                mOutThread.join();
-            } catch (InterruptedException e) {
-                FlyLog.e(e.toString());
-            }
-            codec.stop();
-            codec.release();
-            codec = null;
+        is_codec_init.set(false);
+        try {
+            mOutThread.join();
+        } catch (InterruptedException e) {
+            FlyLog.e(e.toString());
         }
+        codec.stop();
+        codec.release();
+        codec = null;
     }
 
     @Override
@@ -114,7 +107,9 @@ public class AudioEncoder implements Runnable {
                         int size = outputBuffer.remaining();
                         byte[] data = new byte[size];
                         outputBuffer.get(data, 0, size);
-                        mCallBack.notifyAacData(mChannel, data, size, mBufferInfo.presentationTimeUs);
+                        if(is_codec_init.get()){
+                            mCallBack.notifyAacData(mChannel, data, size, mBufferInfo.presentationTimeUs);
+                        }
                     }
                     codec.releaseOutputBuffer(outputIndex, false);
                     break;

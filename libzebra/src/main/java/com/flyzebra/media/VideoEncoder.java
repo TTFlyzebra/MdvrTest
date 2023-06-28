@@ -19,7 +19,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class VideoEncoder implements Runnable {
     private final int mChannel;
     private MediaCodec codec = null;
-    private final Object codecLock = new Object();
     private final AtomicBoolean is_codec_init = new AtomicBoolean(false);
     private Thread mOutThread = null;
     private final VideoEncoderCB mCallBack;
@@ -30,57 +29,51 @@ public class VideoEncoder implements Runnable {
     }
 
     public void initCodec(String mimeType, int width, int height, int bitrate) {
-        synchronized (codecLock) {
-            try {
-                MediaFormat format = MediaFormat.createVideoFormat(mimeType, width, height);
-                format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar);
-                format.setInteger(MediaFormat.KEY_BIT_RATE, bitrate);
-                format.setInteger(MediaFormat.KEY_FRAME_RATE, 25);
-                format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 3);
-                format.setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CBR);
-                codec = MediaCodec.createEncoderByType(mimeType);
-                codec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
-                codec.start();
-                is_codec_init.set(true);
-                mOutThread = new Thread(this);
-                mOutThread.start();
-            } catch (Exception e) {
-                FlyLog.e(e.toString());
-            }
+        try {
+            MediaFormat format = MediaFormat.createVideoFormat(mimeType, width, height);
+            format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar);
+            format.setInteger(MediaFormat.KEY_BIT_RATE, bitrate);
+            format.setInteger(MediaFormat.KEY_FRAME_RATE, 25);
+            format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 3);
+            format.setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CBR);
+            codec = MediaCodec.createEncoderByType(mimeType);
+            codec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
+            codec.start();
+            is_codec_init.set(true);
+            mOutThread = new Thread(this);
+            mOutThread.start();
+        } catch (Exception e) {
+            FlyLog.e(e.toString());
         }
     }
 
     public void inYuvData(byte[] data, int size, long pts) {
-        synchronized (codecLock) {
-            if (!is_codec_init.get() || data == null || size <= 0) return;
-            int inIndex = codec.dequeueInputBuffer(200000);
-            if (inIndex < 0) {
-                FlyLog.e("VideoEncoder codec->dequeueInputBuffer inIdex=%d error!", inIndex);
-                return;
-            }
-
-            ByteBuffer buffer = codec.getInputBuffer(inIndex);
-            if (buffer == null) {
-                FlyLog.e("VideoEncoder codec->getInputBuffer inIdex=%d error!", inIndex);
-                return;
-            }
-            buffer.put(data, 0, size);
-            codec.queueInputBuffer(inIndex, 0, size, pts, 0);
+        if (!is_codec_init.get() || data == null || size <= 0) return;
+        int inIndex = codec.dequeueInputBuffer(200000);
+        if (inIndex < 0) {
+            FlyLog.e("VideoEncoder codec->dequeueInputBuffer inIdex=%d error!", inIndex);
+            return;
         }
+
+        ByteBuffer buffer = codec.getInputBuffer(inIndex);
+        if (buffer == null) {
+            FlyLog.e("VideoEncoder codec->getInputBuffer inIdex=%d error!", inIndex);
+            return;
+        }
+        buffer.put(data, 0, size);
+        codec.queueInputBuffer(inIndex, 0, size, pts, 0);
     }
 
     public void releaseCodec() {
-        synchronized (codecLock) {
-            is_codec_init.set(false);
-            try {
-                mOutThread.join();
-            } catch (InterruptedException e) {
-                FlyLog.e(e.toString());
-            }
-            codec.stop();
-            codec.release();
-            codec = null;
+        is_codec_init.set(false);
+        try {
+            mOutThread.join();
+        } catch (InterruptedException e) {
+            FlyLog.e(e.toString());
         }
+        codec.stop();
+        codec.release();
+        codec = null;
     }
 
     @Override
