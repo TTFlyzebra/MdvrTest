@@ -24,9 +24,9 @@ extern "C" jint JNI_OnLoad(JavaVM *vm, void *reserved) {
 
 extern "C"
 JNIEXPORT jlong JNICALL
-Java_com_flyzebra_rtmp_RtmpDump__1init(JNIEnv *env, jobject clazz, jstring jurl) {
+Java_com_flyzebra_rtmp_RtmpDump__1init(JNIEnv *env, jobject clazz, jint channel, jstring jurl) {
     const char *url = env->GetStringUTFChars(jurl, JNI_FALSE);
-    auto *rtmpDump = new RtmpDump(javaVM, env, clazz, url);
+    auto *rtmpDump = new RtmpDump(javaVM, env, clazz, channel, url);
     env->ReleaseStringUTFChars(jurl, url);
     return reinterpret_cast<jlong>(rtmpDump);
 }

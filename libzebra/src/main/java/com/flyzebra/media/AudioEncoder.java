@@ -17,12 +17,12 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AudioEncoder implements Runnable {
-    private int mChannel;
+    private final int mChannel;
     private MediaCodec codec = null;
     private final Object codecLock = new Object();
     private final AtomicBoolean is_codec_init = new AtomicBoolean(false);
     private Thread mOutThread = null;
-    private AudioEncoderCB mCallBack;
+    private final AudioEncoderCB mCallBack;
 
     public AudioEncoder(int channel, AudioEncoderCB cb) {
         mChannel = channel;

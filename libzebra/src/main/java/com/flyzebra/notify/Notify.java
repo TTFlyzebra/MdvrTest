@@ -16,14 +16,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Notify {
-    private static List<INotify> notifys = new ArrayList<>();
-    private static HandlerThread mSendThread = new HandlerThread("Notify_data");
+    private static final List<INotify> notifys = new ArrayList<>();
+    private final Object listLock = new Object();
+    private static final HandlerThread mDataThread = new HandlerThread("Notify_data");
 
     static {
-        mSendThread.start();
+        mDataThread.start();
     }
 
-    private static final Handler tHandler = new Handler(mSendThread.getLooper());
+    private static final Handler tHandler = new Handler(mDataThread.getLooper());
 
     private Notify() {
     }
@@ -37,22 +38,30 @@ public class Notify {
     }
 
     public void registerListener(INotify notify) {
-        notifys.add(notify);
+        synchronized (listLock){
+            notifys.add(notify);
+        }
     }
 
     public void unregisterListener(INotify notify) {
-        notifys.remove(notify);
+        synchronized (listLock){
+            notifys.remove(notify);
+        }
     }
 
     public void notifydata(byte[] data, int size) {
-        for (INotify notify : notifys) {
-            notify.notify(data, size);
+        synchronized (listLock) {
+            for (INotify notify : notifys) {
+                notify.notify(data, size);
+            }
         }
     }
 
     public void handledata(int type, byte[] data, int size, byte[] params) {
-        for (INotify notify : notifys) {
-            notify.handle(type, data, size, params);
+        synchronized (listLock) {
+            for (INotify notify : notifys) {
+                notify.handle(type, data, size, params);
+            }
         }
     }
 

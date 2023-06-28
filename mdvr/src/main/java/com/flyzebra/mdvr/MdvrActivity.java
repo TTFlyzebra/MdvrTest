@@ -3,11 +3,11 @@ package com.flyzebra.mdvr;
 import static com.flyzebra.mdvr.Config.MAX_CAM;
 import static com.flyzebra.mdvr.Config.RTMP_URL;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.os.Bundle;
 import android.view.Window;
 import android.view.WindowManager;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.flyzebra.mdvr.audio.AudioService;
 import com.flyzebra.mdvr.camera.CameraService;
@@ -28,9 +28,9 @@ public class MdvrActivity extends AppCompatActivity implements INotify {
     private final GlVideoView[] mGlVideoViews = new GlVideoView[MAX_CAM];
     private final int[] mGlVideoViewIds = new int[]{R.id.sv01, R.id.sv02, R.id.sv03, R.id.sv04};
 
-    private CameraService cameraService = new CameraService(this);
-    private AudioService audioService = new AudioService(this);
-    private RtmpService[] rtmpServices = new RtmpService[MAX_CAM];
+    private final CameraService cameraService = new CameraService(this);
+    private final AudioService audioService = new AudioService(this);
+    private final RtmpService[] rtmpServices = new RtmpService[MAX_CAM];
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,8 +44,8 @@ public class MdvrActivity extends AppCompatActivity implements INotify {
         Notify.get().registerListener(this);
 
         for (int i = 0; i < MAX_CAM; i++) {
-            rtmpServices[i] = new RtmpService(i, RTMP_URL+"/camera"+i);
-            rtmpServices[i].start();
+            rtmpServices[i] = new RtmpService(i);
+            rtmpServices[i].start(RTMP_URL+"/camera"+i);
         }
 
         cameraService.onCreate(Config.CAM_WIDTH, Config.CAM_HEIGHT);

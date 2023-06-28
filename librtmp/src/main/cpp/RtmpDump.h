@@ -17,7 +17,7 @@ class RTMPPacket;
 
 class RtmpDump {
 public:
-    RtmpDump(JavaVM *jvm, JNIEnv *env, jobject thiz, const char* url);
+    RtmpDump(JavaVM *jvm, JNIEnv *env, jobject thiz, int channel, const char* url);
 
     ~RtmpDump();
 
@@ -51,6 +51,8 @@ private:
     std::mutex mlock_stop;
 
     CallBack *callBack;
+
+    int mChannel;
 
     char rtmp_url[1024];
     std::thread *send_t;

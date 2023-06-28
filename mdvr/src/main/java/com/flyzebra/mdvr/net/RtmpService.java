@@ -7,6 +7,9 @@
  */
 package com.flyzebra.mdvr.net;
 
+import android.os.Handler;
+import android.os.HandlerThread;
+
 import com.flyzebra.mdvr.Config;
 import com.flyzebra.media.AudioEncoder;
 import com.flyzebra.media.AudioEncoderCB;
@@ -20,23 +23,29 @@ import com.flyzebra.utils.ByteUtil;
 import com.flyzebra.utils.FlyLog;
 
 public class RtmpService implements VideoEncoderCB, AudioEncoderCB, INotify {
-    private int channel;
-    private String rtmp_url;
-    private VideoEncoder videoEncoder;
-    private AudioEncoder audioEncoder;
-    private RtmpDump rtmpDump;
+    private final int channel;
+    private final VideoEncoder videoEncoder;
+    private final AudioEncoder audioEncoder;
+    private final RtmpDump rtmpDump;
 
-    public RtmpService(int channel, String rtmp_url) {
+    private static final HandlerThread mRtmpThread = new HandlerThread("rtmp_service");
+
+    static {
+        mRtmpThread.start();
+    }
+
+    private static final Handler tHandler = new Handler(mRtmpThread.getLooper());
+
+    public RtmpService(int channel) {
         this.channel = channel;
-        this.rtmp_url = rtmp_url;
-        rtmpDump = new RtmpDump();
+        rtmpDump = new RtmpDump(channel);
         videoEncoder = new VideoEncoder(channel, this);
         audioEncoder = new AudioEncoder(channel, this);
     }
 
-    public void start() {
+    public void start(String rtmp_url) {
         rtmpDump.init(rtmp_url);
-        FlyLog.e("rtmpDump.init %s=%s", channel, rtmp_url);
+        FlyLog.d("rtmpDump init channel=%d, rtmp_url=%s", channel, rtmp_url);
         Notify.get().registerListener(this);
     }
 
@@ -120,7 +129,7 @@ public class RtmpService implements VideoEncoderCB, AudioEncoderCB, INotify {
 
     @Override
     public void notifyAvcData(int channel, byte[] data, int size, long pts) {
-        rtmpDump.sendAvc(data, size, pts);
+        rtmpDump.sendAvc(data, size, pts/1000);
     }
 
     @Override
@@ -135,7 +144,7 @@ public class RtmpService implements VideoEncoderCB, AudioEncoderCB, INotify {
 
     @Override
     public void notifyAacData(int channel, byte[] data, int size, long pts) {
-        rtmpDump.sendAac(data, size, pts);
+        rtmpDump.sendAac(data, size, pts/1000);
     }
 
     @Override

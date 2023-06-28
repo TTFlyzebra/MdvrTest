@@ -5,7 +5,6 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 
 import com.flyzebra.mdvr.R;
-import com.flyzebra.utils.FlyLog;
 import com.flyzebra.utils.GlShaderUtil;
 
 import java.nio.ByteBuffer;
@@ -21,22 +20,22 @@ import javax.microedition.khronos.opengles.GL10;
  * Discription: This is GlRender
  */
 public class GlRender implements GLSurfaceView.Renderer {
-    private Context context;
-    private FloatBuffer vertexBuffer;
-    private FloatBuffer textureBuffer;
+    private final Context context;
+    private final FloatBuffer vertexBuffer;
+    private final FloatBuffer textureBuffer;
     //顶点坐标
-    static float vertexData[] = {   // in counterclockwise order:
+    static float[] vertexData = {   // in counterclockwise order:
             -1f, -1f, 0.0f, // bottom left
             +1f, -1f, 0.0f, // bottom right
             -1f, +1f, 0.0f, // top left
             +1f, +1f, 0.0f,  // top right
     };
     //纹理坐标
-    static float textureData[] = {   // in counterclockwise order:
-            0f, 1f, 0.0f, // bottom left
-            1f, 1f, 0.0f, // bottom right
-            0f, 0f, 0.0f, // top left
-            1f, 0f, 0.0f,  // top right
+    static float[] textureData = {   // in counterclockwise order:
+            0.0f, 1.0f, 0.0f, // bottom left
+            1.0f, 1.0f, 0.0f, // bottom right
+            0.0f, 0.0f, 0.0f, // top left
+            1.0f, 0.0f, 0.0f,  // top right
     };
 
     protected float[] vMatrixData = {
@@ -52,7 +51,7 @@ public class GlRender implements GLSurfaceView.Renderer {
     protected int vMatrix;
     private int sampler_y;
     private int sampler_uv;
-    private int[] textureIds = new int[2];
+    private final int[] textureIds = new int[2];
     private int width;
     private int height;
     private ByteBuffer y;
@@ -94,7 +93,6 @@ public class GlRender implements GLSurfaceView.Renderer {
 
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-        FlyLog.d("onSurfaceCreated");
         GLES20.glClearColor(0f, 0f, 0f, 1f);
         String vertexShader = GlShaderUtil.readRawTextFile(context, R.raw.vertex_nv21);
         String fragmentShader = GlShaderUtil.readRawTextFile(context, R.raw.fragment_nv21);

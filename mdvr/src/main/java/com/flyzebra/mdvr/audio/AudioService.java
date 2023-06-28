@@ -21,13 +21,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * 实际每路转为48k1channel16bit
  */
 public class AudioService {
-    private Context mContext;
+    private final Context mContext;
     private int sampleRate;
-    private int channelCount;
-    private int audioFormat;
     private AudioRecord mAudioRecord;
-    private AtomicBoolean is_stop = new AtomicBoolean(true);
-    private byte[] pcm = new byte[1024];
+    private final AtomicBoolean is_stop = new AtomicBoolean(true);
+    private final byte[] pcm = new byte[1024];
     private Thread mRecordThread = null;
 
     public AudioService(Context context) {
@@ -36,8 +34,6 @@ public class AudioService {
 
     public void onCreate(int sample, int channel, int format) {
         this.sampleRate = sample;
-        this.channelCount = channel;
-        this.audioFormat = format;
         int bufferSize = AudioRecord.getMinBufferSize(sample, channel, format);
         if (ActivityCompat.checkSelfPermission(mContext,
                 Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {

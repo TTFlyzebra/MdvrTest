@@ -10,9 +10,9 @@
 #include "utils/FlyLog.h"
 #include "librtmp/rtmp.h"
 
-RtmpDump::RtmpDump(JavaVM *jvm, JNIEnv *env, jobject thiz, const char *url)
-        : send_t(nullptr), rtmp(nullptr), is_connect(false), _vps(nullptr), _sps(nullptr),
-          _pps(nullptr), _head(nullptr) {
+RtmpDump::RtmpDump(JavaVM *jvm, JNIEnv *env, jobject thiz, int channel, const char *url)
+        : mChannel(channel), send_t(nullptr), rtmp(nullptr), is_connect(false), _vps(nullptr),
+          _sps(nullptr), _pps(nullptr), _head(nullptr) {
     FLOGD("%s()", __func__);
 
     memset(rtmp_url, 0, sizeof(rtmp_url));
@@ -202,7 +202,7 @@ int RtmpDump::_sendSpsPps(const char *sps, int sps_len, const char *pps, int pps
     }
     packet->m_packetType = RTMP_PACKET_TYPE_VIDEO;
     packet->m_nBodySize = 2 + 3 + 5 + 1 + 2 + sps_len + 1 + 2 + pps_len;
-    packet->m_nChannel = 0x04;
+    packet->m_nChannel = 0x08 + mChannel;
     packet->m_nTimeStamp = 0;
     packet->m_hasAbsTimestamp = 0;
     packet->m_headerType = RTMP_PACKET_SIZE_LARGE;
@@ -231,7 +231,7 @@ int RtmpDump::_sendSpsPps(const char *sps, int sps_len, const char *pps, int pps
     packet->m_body[i++] = (pps_len) & 0xff;
     memcpy(packet->m_body + i, pps, pps_len);
     ret = RTMP_SendPacket(rtmp, packet, 0);
-    if(ret == FALSE){
+    if (ret == FALSE) {
         FLOGE("_sendSpsPps failed!");
     }
     RTMPPacket_Free(packet);
@@ -325,12 +325,12 @@ int RtmpDump::_sendVpsSpsPps(const char *vps, int vps_len, const char *sps, int 
     i += pps_len;
     packet->m_packetType = RTMP_PACKET_TYPE_VIDEO;
     packet->m_nBodySize = i;
-    packet->m_nChannel = 0x04;
+    packet->m_nChannel = 0x08 + mChannel;
     packet->m_nTimeStamp = 0;
     packet->m_hasAbsTimestamp = 0;
     packet->m_headerType = RTMP_PACKET_SIZE_LARGE;
     ret = RTMP_SendPacket(rtmp, packet, 0);
-    if(ret == FALSE){
+    if (ret == FALSE) {
         FLOGE("_sendVpsSpsPps failed!");
     }
     RTMPPacket_Free(packet);
@@ -350,7 +350,7 @@ void RtmpDump::sendAvc(const char *data, int size, long pts) {
     }
     packet->m_packetType = RTMP_PACKET_TYPE_VIDEO;
     packet->m_nBodySize = 9 + size;
-    packet->m_nChannel = 0x04;
+    packet->m_nChannel = 0x08 + mChannel;
     packet->m_nTimeStamp = pts / 1000;
     packet->m_hasAbsTimestamp = 0;
     packet->m_headerType = RTMP_PACKET_SIZE_MEDIUM;
@@ -379,7 +379,7 @@ void RtmpDump::sendHevc(const char *data, int size, long pts) {
     int i = 0;
     packet->m_packetType = RTMP_PACKET_TYPE_VIDEO;
     packet->m_nBodySize = 9 + size;
-    packet->m_nChannel = 0x04;
+    packet->m_nChannel = 0x08 + mChannel;
     packet->m_nTimeStamp = pts / 1000;
     packet->m_hasAbsTimestamp = 0;
     packet->m_headerType = RTMP_PACKET_SIZE_MEDIUM;
@@ -436,12 +436,12 @@ int RtmpDump::_sendAacHead(const char *head, int headLen) {
 
     packet->m_packetType = RTMP_PACKET_TYPE_AUDIO;
     packet->m_nBodySize = bodySize;
-    packet->m_nChannel = 0x05;
+    packet->m_nChannel = 0x18 + mChannel;
     packet->m_hasAbsTimestamp = 0;
     packet->m_nTimeStamp = 0;
     packet->m_headerType = RTMP_PACKET_SIZE_MEDIUM;
     ret = RTMP_SendPacket(rtmp, packet, 0);
-    if(ret == FALSE){
+    if (ret == FALSE) {
         FLOGE("_sendAacHead failed!");
     }
     RTMPPacket_Free(packet);
@@ -472,7 +472,7 @@ void RtmpDump::sendAac(const char *data, int size, long pts) {
 
     packet->m_packetType = RTMP_PACKET_TYPE_AUDIO;
     packet->m_nBodySize = bodySize;
-    packet->m_nChannel = 0x05;
+    packet->m_nChannel =0x18 + mChannel;
     packet->m_hasAbsTimestamp = pts / 1000;
     packet->m_nTimeStamp = 0;
     packet->m_headerType = RTMP_PACKET_SIZE_LARGE;

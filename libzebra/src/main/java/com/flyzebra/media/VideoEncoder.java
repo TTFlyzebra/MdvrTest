@@ -17,12 +17,12 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class VideoEncoder implements Runnable {
-    private int mChannel;
+    private final int mChannel;
     private MediaCodec codec = null;
     private final Object codecLock = new Object();
     private final AtomicBoolean is_codec_init = new AtomicBoolean(false);
     private Thread mOutThread = null;
-    private VideoEncoderCB mCallBack;
+    private final VideoEncoderCB mCallBack;
 
     public VideoEncoder(int channel, VideoEncoderCB cb) {
         mChannel = channel;

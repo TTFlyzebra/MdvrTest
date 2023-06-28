@@ -11,12 +11,14 @@ public class RtmpDump {
     }
 
     private long pRtmpPointer = -1;
+    private int channel;
 
-    public RtmpDump() {
+    public RtmpDump(int channel) {
+        this.channel = channel;
     }
 
     public void init(String rtmp_url) {
-        pRtmpPointer = _init(rtmp_url);
+        pRtmpPointer = _init(channel, rtmp_url);
     }
 
     public void release() {
@@ -59,7 +61,7 @@ public class RtmpDump {
         FlyLog.e("RtmpDump onError %d", errCode);
     }
 
-    private native long _init(String url);
+    private native long _init(int channel, String url);
 
     private native void _release(long pRtmpPointer);
 

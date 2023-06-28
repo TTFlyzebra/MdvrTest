@@ -6,7 +6,6 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 
-import com.flyzebra.mdvr.Config;
 import com.flyzebra.notify.Notify;
 import com.flyzebra.notify.NotifyType;
 import com.flyzebra.utils.ByteUtil;
@@ -20,12 +19,12 @@ public class CameraService implements Runnable {
     private Context mContext;
     private int width;
     private int height;
-    private Handler mHandler = new Handler(Looper.getMainLooper());
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
     private QCarCamera qCarCamera = null;
     private int camer_open_ret = -1;
 
-    private AtomicBoolean is_stop = new AtomicBoolean(true);
-    private VideoYuvThread[] yuvThreads = new VideoYuvThread[4];
+    private final AtomicBoolean is_stop = new AtomicBoolean(true);
+    private final VideoYuvThread[] yuvThreads = new VideoYuvThread[4];
     private final ByteBuffer[] videoBuffer = new ByteBuffer[MAX_CAM];
 
     public CameraService(Context context) {
@@ -46,11 +45,11 @@ public class CameraService implements Runnable {
         }
         camer_open_ret = qCarCamera.cameraOpen(4, 1);
         if (camer_open_ret != 0) {
-            FlyLog.e("camera open failed, ret=%d", camer_open_ret);
+            FlyLog.e("QCarCamera open failed, ret=%d", camer_open_ret);
             mHandler.postDelayed(CameraService.this, 1000);
             return;
         }
-        FlyLog.d("camera open success!");
+        FlyLog.d("QCarCamera open success!");
         for (int i = 0; i < MAX_CAM; i++) {
             yuvThreads[i] = new VideoYuvThread(i);
             yuvThreads[i].start();
@@ -70,7 +69,7 @@ public class CameraService implements Runnable {
             qCarCamera.setVideoSize(channel, width, height);
             final int size = width * height * 3 / 2;
             videoBuffer[channel] = ByteBuffer.wrap(new byte[size]);
-            qCarCamera.setVideoColorFormat(channel, QCarCamera.YUV420_NV21);
+            qCarCamera.setVideoColorFormat(channel, QCarCamera.YUV420_NV12);
             qCarCamera.startVideoStream(channel);
             while (!is_stop.get()) {
                 QCarCamera.FrameInfo info = qCarCamera.getVideoFrameInfo(channel, videoBuffer[channel]);
