@@ -67,8 +67,9 @@ public class AacService implements AudioEncoderCB, INotify {
     }
 
     public void onDistory() {
-        Notify.get().unregisterListener(this);
+        FlyLog.d("AacService[%d] will exit!", mChannel);
         is_stop.set(true);
+        Notify.get().unregisterListener(this);
         synchronized (pcmLock) {
             pcmLock.notifyAll();
         }

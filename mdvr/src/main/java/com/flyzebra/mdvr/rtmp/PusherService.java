@@ -103,6 +103,7 @@ public class PusherService implements INotify {
     }
 
     public void onDestory() {
+        FlyLog.d("PusherService[%d] will exit !", mChannel);
         Notify.get().unregisterListener(this);
         is_stop.set(true);
         synchronized (sendLock) {
@@ -114,7 +115,7 @@ public class PusherService implements INotify {
             throw new RuntimeException(e);
         }
         rtmpDump.release();
-        FlyLog.d("RtmpPusherService[%d] exit !", mChannel);
+        FlyLog.d("PusherService[%d] exit !", mChannel);
     }
 
     private void sendAacHead(int channel, byte[] head, int headLen) {

@@ -87,6 +87,7 @@ public class PcmService {
     }
 
     public void onDistory() {
+        FlyLog.d("PcmService will exit!");
         is_stop.set(true);
         try {
             mRecordThread.join();

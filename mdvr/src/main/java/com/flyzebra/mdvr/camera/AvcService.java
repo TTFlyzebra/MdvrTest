@@ -69,8 +69,9 @@ public class AvcService implements VideoEncoderCB, INotify {
     }
 
     public void onDistory() {
-        Notify.get().unregisterListener(this);
+        FlyLog.d("AvcService[%d] will exit!", mChannel);
         is_stop.set(true);
+        Notify.get().unregisterListener(this);
         synchronized (yuvLock) {
             yuvLock.notifyAll();
         }

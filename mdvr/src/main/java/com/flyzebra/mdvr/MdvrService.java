@@ -18,11 +18,11 @@ import com.flyzebra.notify.INotify;
 import com.flyzebra.utils.FlyLog;
 
 public class MdvrService extends Service implements INotify {
-    private final YuvService cameraRecorderService = new YuvService(this);
-    private final AvcService[] cameraEncoderServices = new AvcService[MAX_CAM];
-    private final PcmService audioRecorderService = new PcmService(this);
-    private final AacService[] audioEncoderServices = new AacService[MAX_CAM];
-    private final PusherService[] rtmpPusherServices = new PusherService[MAX_CAM];
+    private final YuvService yuvServices = new YuvService(this);
+    private final AvcService[] avcServices = new AvcService[MAX_CAM];
+    private final PcmService pcmServices = new PcmService(this);
+    private final AacService[] aacServices = new AacService[MAX_CAM];
+    private final PusherService[] rtmpPushers = new PusherService[MAX_CAM];
 
     @Nullable
     @Override
@@ -35,40 +35,41 @@ public class MdvrService extends Service implements INotify {
         FlyLog.d("MdvrService start!");
 
         for (int i = 0; i < MAX_CAM; i++) {
-            cameraEncoderServices[i] = new AvcService(i);
-            audioEncoderServices[i] = new AacService(i);
-            rtmpPusherServices[i] = new PusherService(i);
+            avcServices[i] = new AvcService(i);
+            aacServices[i] = new AacService(i);
+            rtmpPushers[i] = new PusherService(i);
         }
 
         for (int i = 0; i < MAX_CAM; i++) {
-            cameraEncoderServices[i].onCreate();
+            avcServices[i].onCreate();
         }
 
         for (int i = 0; i < MAX_CAM; i++) {
-            audioEncoderServices[i].onCreate();
+            aacServices[i].onCreate();
         }
 
         for (int i = 0; i < MAX_CAM; i++) {
-            rtmpPusherServices[i].onCreate(RTMP_URL + "/camera" + i);
+            rtmpPushers[i].onCreate(RTMP_URL + "/camera" + i);
         }
 
-        cameraRecorderService.onCreate(Config.CAM_WIDTH, Config.CAM_HEIGHT);
-        audioRecorderService.onCreate(Config.MIC_SAMPLE, Config.MIC_CHANNEL, Config.MIC_FORMAT);
+        yuvServices.onCreate(Config.CAM_WIDTH, Config.CAM_HEIGHT);
+        pcmServices.onCreate(Config.MIC_SAMPLE, Config.MIC_CHANNEL, Config.MIC_FORMAT);
     }
 
     @Override
     public void onDestroy() {
+        FlyLog.d("MdvrService will exit!");
         for (int i = 0; i < MAX_CAM; i++) {
-            cameraEncoderServices[i].onDistory();
+            avcServices[i].onDistory();
         }
         for (int i = 0; i < MAX_CAM; i++) {
-            audioEncoderServices[i].onDistory();
+            aacServices[i].onDistory();
         }
         for (int i = 0; i < MAX_CAM; i++) {
-            rtmpPusherServices[i].onDestory();
+            rtmpPushers[i].onDestory();
         }
-        cameraRecorderService.onDerstory();
-        audioRecorderService.onDistory();
+        yuvServices.onDerstory();
+        pcmServices.onDistory();
         FlyLog.d("MdvrService exit!");
     }
 
