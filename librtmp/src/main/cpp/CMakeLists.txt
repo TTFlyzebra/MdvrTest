@@ -5,8 +5,8 @@ project("rtmpdump")
 include_directories(
         ${CMAKE_SOURCE_DIR}
         ${CMAKE_SOURCE_DIR}/include)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DNO_CRYPTO")
-#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_OPENSSL")
+#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DNO_CRYPTO")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_OPENSSL")
 
 add_library(
         rtmpdump
@@ -22,29 +22,29 @@ add_library(
         librtmp/parseurl.c
         librtmp/rtmp.c)
 
-#add_library(
-#        ssl
-#        SHARED
-#        IMPORTED)
-#
-#set_target_properties(
-#        ssl
-#        PROPERTIES IMPORTED_LOCATION
-#        ${CMAKE_SOURCE_DIR}/libs/${ANDROID_ABI}/libssl.so)
-#
-#add_library(
-#        crypto
-#        SHARED
-#        IMPORTED)
-#
-#set_target_properties(
-#        crypto
-#        PROPERTIES IMPORTED_LOCATION
-#        ${CMAKE_SOURCE_DIR}/libs/${ANDROID_ABI}/libcrypto.so)
+add_library(
+        ssl
+        STATIC
+        IMPORTED)
+
+set_target_properties(
+        ssl
+        PROPERTIES IMPORTED_LOCATION
+        ${CMAKE_SOURCE_DIR}/libs/${ANDROID_ABI}/libssl.a)
+
+add_library(
+        crypto
+        STATIC
+        IMPORTED)
+
+set_target_properties(
+        crypto
+        PROPERTIES IMPORTED_LOCATION
+        ${CMAKE_SOURCE_DIR}/libs/${ANDROID_ABI}/libcrypto.a)
 
 target_link_libraries(
         rtmpdump
-#        ssl
-#        crypto
-#        z
+        ssl
+        crypto
+        z
         log)
