@@ -7,7 +7,7 @@ include_directories(${CMAKE_SOURCE_DIR})
 add_library(
         zebra
         SHARED
-        zebra.cpp)
+        Fzebra_jni.cpp)
 
 find_library(
         log-lib

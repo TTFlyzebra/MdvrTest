@@ -23,6 +23,7 @@ public class RtmpDump {
     }
 
     public void release() {
+        if (pRtmpPointer < 0) return;
         long pointer = pRtmpPointer;
         pRtmpPointer = -1;
         _release(pointer);
@@ -30,32 +31,32 @@ public class RtmpDump {
     }
 
     public void sendSpsPps(byte[] sps, int spsLen, byte[] pps, int ppsLen) {
-        if (pRtmpPointer == -1) return;
+        if (pRtmpPointer < 0) return;
         _sendSpsPps(pRtmpPointer, sps, spsLen, pps, ppsLen);
     }
 
     public void sendVpsSpsPps(byte[] vsp, int vspLen, byte[] sps, int spsLen, byte[] pps, int ppsLen) {
-        if (pRtmpPointer == -1) return;
+        if (pRtmpPointer < 0) return;
         _sendVpsSpsPps(pRtmpPointer, vsp, vspLen, sps, spsLen, pps, ppsLen);
     }
 
     public void sendAvc(byte[] data, int size, long pts) {
-        if (pRtmpPointer == -1) return;
+        if (pRtmpPointer < 0) return;
         _sendAvc(pRtmpPointer, data, size, pts);
     }
 
     public void sendHevc(byte[] data, int size, long pts) {
-        if (pRtmpPointer == -1) return;
+        if (pRtmpPointer < 0) return;
         _sendHevc(pRtmpPointer, data, size, pts);
     }
 
     public void sendAacHead(byte[] head, int size) {
-        if (pRtmpPointer == -1) return;
+        if (pRtmpPointer < 0) return;
         _sendAacHead(pRtmpPointer, head, size);
     }
 
     public void sendAac(byte[] data, int size, long pts) {
-        if (pRtmpPointer == -1) return;
+        if (pRtmpPointer < 0) return;
         _sendAac(pRtmpPointer, data, size, pts);
     }
 
