@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class AacService implements AudioEncoderCB, INotify {
     private final int mChannel;
 
-    int pcmSize = (int) (Config.MIC_SAMPLE * 1.0f * 16 / 8 * 1 / 25.0f);
+    int pcmSize = (int) (Config.MIC_SAMPLE * 1.0f * 16 / 8 * 2 / 25.0f);
     int pcmBufSize = pcmSize + 8;
     private final ByteBuffer pcmBuf = ByteBuffer.wrap(new byte[pcmBufSize * 15]);
     private Thread pcmThread;
@@ -45,20 +45,19 @@ public class AacService implements AudioEncoderCB, INotify {
             audioEncoder.initCodec(Config.MIC_MIME_TYPE, Config.MIC_SAMPLE, Config.MIC_CHANNELS, Config.MIC_BIT_RATE);
             while (!is_stop.get()) {
                 synchronized (pcmLock) {
-                    if (pcmBuf.position() < pcmBufSize) {
+                    if (!is_stop.get() && pcmBuf.position() < pcmBufSize) {
                         try {
                             pcmLock.wait();
                         } catch (InterruptedException e) {
                             throw new RuntimeException(e);
                         }
-                    } else {
-                        pcmBuf.flip();
-                        ptsUsec = pcmBuf.getLong();
-                        pcmBuf.get(pcm);
-                        pcmBuf.compact();
                     }
+                    if (is_stop.get()) break;
+                    pcmBuf.flip();
+                    ptsUsec = pcmBuf.getLong();
+                    pcmBuf.get(pcm);
+                    pcmBuf.compact();
                 }
-                if (is_stop.get()) break;
                 audioEncoder.inPumData(pcm, pcmSize, ptsUsec);
             }
             audioEncoder.releaseCodec();
@@ -67,7 +66,6 @@ public class AacService implements AudioEncoderCB, INotify {
     }
 
     public void onDistory() {
-        FlyLog.d("AacService[%d] will exit!", mChannel);
         is_stop.set(true);
         Notify.get().unregisterListener(this);
         synchronized (pcmLock) {
@@ -84,14 +82,14 @@ public class AacService implements AudioEncoderCB, INotify {
     @Override
     public void notifyAacHead(int channel, byte[] head, int headLen) {
         byte[] params = new byte[2];
-        ByteUtil.shortToBytes((short) channel,params,0,true);
+        ByteUtil.shortToBytes((short) channel, params, 0, true);
         Notify.get().handledata(NotifyType.NOTI_SNDOUT_SPS, head, headLen, params);
     }
 
     @Override
     public void notifyAacData(int channel, byte[] data, int size, long pts) {
         byte[] params = new byte[10];
-        ByteUtil.shortToBytes((short) channel,params,0,true);
+        ByteUtil.shortToBytes((short) channel, params, 0, true);
         ByteUtil.longToBytes(pts, params, 2, true);
         Notify.get().handledata(NotifyType.NOTI_SNDOUT_AAC, data, size, params);
     }

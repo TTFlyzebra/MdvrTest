@@ -107,7 +107,7 @@ public class AudioEncoder implements Runnable {
                         int size = outputBuffer.remaining();
                         byte[] data = new byte[size];
                         outputBuffer.get(data, 0, size);
-                        if(is_codec_init.get()){
+                        if (is_codec_init.get()) {
                             mCallBack.notifyAacData(mChannel, data, size, mBufferInfo.presentationTimeUs);
                         }
                     }

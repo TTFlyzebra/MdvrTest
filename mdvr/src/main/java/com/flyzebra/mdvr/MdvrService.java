@@ -33,11 +33,17 @@ public class MdvrService extends Service implements INotify {
     @Override
     public void onCreate() {
         FlyLog.d("MdvrService start!");
+        yuvServices.onCreate(Config.CAM_WIDTH, Config.CAM_HEIGHT);
+        pcmServices.onCreate(Config.MIC_SAMPLE, Config.MIC_CHANNEL, Config.MIC_FORMAT);
 
         for (int i = 0; i < MAX_CAM; i++) {
+            rtmpPushers[i] = new PusherService(i);
             avcServices[i] = new AvcService(i);
             aacServices[i] = new AacService(i);
-            rtmpPushers[i] = new PusherService(i);
+        }
+
+        for (int i = 0; i < MAX_CAM; i++) {
+            rtmpPushers[i].onCreate(RTMP_URL + "/camera" + i);
         }
 
         for (int i = 0; i < MAX_CAM; i++) {
@@ -47,18 +53,13 @@ public class MdvrService extends Service implements INotify {
         for (int i = 0; i < MAX_CAM; i++) {
             aacServices[i].onCreate();
         }
-
-        for (int i = 0; i < MAX_CAM; i++) {
-            rtmpPushers[i].onCreate(RTMP_URL + "/camera" + i);
-        }
-
-        yuvServices.onCreate(Config.CAM_WIDTH, Config.CAM_HEIGHT);
-        pcmServices.onCreate(Config.MIC_SAMPLE, Config.MIC_CHANNEL, Config.MIC_FORMAT);
     }
 
     @Override
     public void onDestroy() {
         FlyLog.d("MdvrService will exit!");
+        yuvServices.onDerstory();
+        pcmServices.onDistory();
         for (int i = 0; i < MAX_CAM; i++) {
             avcServices[i].onDistory();
         }
@@ -68,8 +69,6 @@ public class MdvrService extends Service implements INotify {
         for (int i = 0; i < MAX_CAM; i++) {
             rtmpPushers[i].onDestory();
         }
-        yuvServices.onDerstory();
-        pcmServices.onDistory();
         FlyLog.d("MdvrService exit!");
     }
 

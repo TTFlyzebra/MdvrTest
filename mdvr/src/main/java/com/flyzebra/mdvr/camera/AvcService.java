@@ -47,20 +47,19 @@ public class AvcService implements VideoEncoderCB, INotify {
             videoEncoder.initCodec(Config.CAM_MIME_TYPE, Config.CAM_WIDTH, Config.CAM_HEIGHT, Config.CAM_BIT_RATE);
             while (!is_stop.get()) {
                 synchronized (yuvLock) {
-                    if (yuvBuf.position() < yuvBufSize) {
+                    if (!is_stop.get() && yuvBuf.position() < yuvBufSize) {
                         try {
                             yuvLock.wait();
                         } catch (InterruptedException e) {
                             throw new RuntimeException(e);
                         }
-                    } else {
-                        yuvBuf.flip();
-                        ptsUsec = yuvBuf.getLong();
-                        yuvBuf.get(yuv);
-                        yuvBuf.compact();
                     }
+                    if (is_stop.get()) break;
+                    yuvBuf.flip();
+                    ptsUsec = yuvBuf.getLong();
+                    yuvBuf.get(yuv);
+                    yuvBuf.compact();
                 }
-                if (is_stop.get()) break;
                 videoEncoder.inYuvData(yuv, yuvSize, ptsUsec);
             }
             videoEncoder.releaseCodec();
@@ -69,7 +68,6 @@ public class AvcService implements VideoEncoderCB, INotify {
     }
 
     public void onDistory() {
-        FlyLog.d("AvcService[%d] will exit!", mChannel);
         is_stop.set(true);
         Notify.get().unregisterListener(this);
         synchronized (yuvLock) {

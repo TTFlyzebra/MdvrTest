@@ -47,7 +47,7 @@ private:
     int _sendAacHead(const char *head, int headLen);
 
 private:
-    bool is_stop;
+    volatile bool is_stop;
     std::mutex mlock_stop;
 
     CallBack *callBack;
@@ -61,7 +61,7 @@ private:
     std::condition_variable mcond_send;
 
     RTMP *rtmp;
-    bool is_connect;
+    std::mutex mlock_rtmp;
 
     char* _vps;
     int vpsLen;

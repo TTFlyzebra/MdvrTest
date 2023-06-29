@@ -22,9 +22,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class PusherService implements INotify {
     private final int mChannel;
     private final RtmpDump rtmpDump;
-
     private AtomicBoolean is_stop = new AtomicBoolean(true);
-
     private final ByteBuffer sendBuf = ByteBuffer.wrap(new byte[Config.CAM_WIDTH * Config.CAM_HEIGHT * 10]);
     private Thread sendThread;
     private final Object sendLock = new Object();
@@ -42,8 +40,8 @@ public class PusherService implements INotify {
         sendThread = new Thread(() -> {
             int type = 0;
             int size = 0;
-            byte[] data = new byte[Config.CAM_WIDTH * Config.CAM_HEIGHT * 3 / 2];
             int paramsLen;
+            byte[] data = new byte[Config.CAM_WIDTH * Config.CAM_HEIGHT * 3 / 2];
             byte[] params = new byte[1024];
             while (!is_stop.get()) {
                 synchronized (sendLock) {
@@ -53,17 +51,16 @@ public class PusherService implements INotify {
                         } catch (InterruptedException e) {
                             throw new RuntimeException(e);
                         }
-                    } else {
-                        sendBuf.flip();
-                        type = sendBuf.getInt();
-                        size = sendBuf.getInt();
-                        sendBuf.get(data, 0, size);
-                        paramsLen = sendBuf.getInt();
-                        sendBuf.get(params, 0, paramsLen);
-                        sendBuf.compact();
                     }
+                    if (is_stop.get()) break;
+                    sendBuf.flip();
+                    type = sendBuf.getInt();
+                    size = sendBuf.getInt();
+                    sendBuf.get(data, 0, size);
+                    paramsLen = sendBuf.getInt();
+                    sendBuf.get(params, 0, paramsLen);
+                    sendBuf.compact();
                 }
-                if (is_stop.get()) break;
                 handleSendData(type, data, size, params);
             }
         }, "send-" + mChannel);
@@ -103,9 +100,8 @@ public class PusherService implements INotify {
     }
 
     public void onDestory() {
-        FlyLog.d("PusherService[%d] will exit !", mChannel);
-        Notify.get().unregisterListener(this);
         is_stop.set(true);
+        Notify.get().unregisterListener(this);
         synchronized (sendLock) {
             sendLock.notifyAll();
         }

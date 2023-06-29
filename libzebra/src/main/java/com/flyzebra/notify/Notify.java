@@ -11,13 +11,16 @@ import android.os.Handler;
 import android.os.HandlerThread;
 
 import com.flyzebra.utils.ByteUtil;
+import com.flyzebra.utils.FlyLog;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Notify {
     private static final List<INotify> notifys = new ArrayList<>();
     private final Object listLock = new Object();
+    private final AtomicInteger listCount = new AtomicInteger(0);
     private static final HandlerThread mDataThread = new HandlerThread("Notify_data");
 
     static {
@@ -27,6 +30,7 @@ public class Notify {
     private static final Handler tHandler = new Handler(mDataThread.getLooper());
 
     private Notify() {
+        listCount.set(0);
     }
 
     private static class NotifyHolder {
@@ -38,31 +42,47 @@ public class Notify {
     }
 
     public void registerListener(INotify notify) {
-        synchronized (listLock){
+        while (listCount.get() > 0) {
+            FlyLog.d("handled did not end ...");
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        synchronized (listLock) {
             notifys.add(notify);
         }
     }
 
     public void unregisterListener(INotify notify) {
-        synchronized (listLock){
+        while (listCount.get() > 0) {
+            FlyLog.d("handled did not end ...");
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        synchronized (listLock) {
             notifys.remove(notify);
         }
     }
 
     public void notifydata(byte[] data, int size) {
-        synchronized (listLock) {
-            for (INotify notify : notifys) {
-                notify.notify(data, size);
-            }
+        listCount.incrementAndGet();
+        for (INotify notify : notifys) {
+            notify.notify(data, size);
         }
+        listCount.decrementAndGet();
     }
 
     public void handledata(int type, byte[] data, int size, byte[] params) {
-        synchronized (listLock) {
-            for (INotify notify : notifys) {
-                notify.handle(type, data, size, params);
-            }
+        listCount.incrementAndGet();
+        for (INotify notify : notifys) {
+            notify.handle(type, data, size, params);
         }
+        listCount.decrementAndGet();
     }
 
     public void miniNotify(byte[] command, int size, long tid, long uid, byte[] params) {

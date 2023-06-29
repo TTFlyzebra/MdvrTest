@@ -39,6 +39,27 @@ public class YuvService implements Runnable {
         mHandler.post(this);
     }
 
+    public void onDerstory() {
+        is_stop.set(true);
+        mHandler.removeCallbacksAndMessages(null);
+        for (int i = 0; i < MAX_CAM; i++) {
+            try {
+                if (yuvThreads[i] != null) yuvThreads[i].join();
+            } catch (InterruptedException e) {
+                FlyLog.e(e.toString());
+            }
+        }
+
+        if (camer_open_ret == 0 && qCarCamera != null) {
+            for (int i = 0; i < MAX_CAM; i++) {
+                qCarCamera.stopVideoStream(i);
+            }
+            qCarCamera.cameraClose();
+            qCarCamera.release();
+        }
+        FlyLog.d("YuvService exit!");
+    }
+
     @Override
     public void run() {
         if (qCarCamera == null) {
@@ -85,27 +106,5 @@ public class YuvService implements Runnable {
                 Notify.get().handledata(NotifyType.NOTI_CAMOUT_YUV, videoBuffer[channel].array(), size, params);
             }
         }
-    }
-
-    public void onDerstory() {
-        FlyLog.d("YuvService will exit!");
-        is_stop.set(true);
-        mHandler.removeCallbacksAndMessages(null);
-        for (int i = 0; i < MAX_CAM; i++) {
-            try {
-                if (yuvThreads[i] != null) yuvThreads[i].join();
-            } catch (InterruptedException e) {
-                FlyLog.e(e.toString());
-            }
-        }
-
-        if (camer_open_ret == 0 && qCarCamera != null) {
-            for (int i = 0; i < MAX_CAM; i++) {
-                qCarCamera.stopVideoStream(i);
-            }
-            qCarCamera.cameraClose();
-            qCarCamera.release();
-        }
-        FlyLog.d("YuvService exit!");
     }
 }

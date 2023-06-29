@@ -45,6 +45,11 @@ public class PcmService {
         mAudioRecord = new AudioRecord(MediaRecorder.AudioSource.CAMCORDER, sample, channel, format, bufferSize);
         mRecordThread = new Thread(() -> {
             mAudioRecord.startRecording();
+            int cPcmSize = pcmSize;
+            byte[] pcm_0 = new byte[cPcmSize];
+            byte[] pcm_1 = new byte[cPcmSize];
+            byte[] pcm_2 = new byte[cPcmSize];
+            byte[] pcm_3 = new byte[cPcmSize];
             while (!is_stop.get()) {
                 int readSize = 0;
                 while (!is_stop.get() && readSize < pcmSize) {
@@ -53,15 +58,11 @@ public class PcmService {
                 }
                 if (is_stop.get()) break;
 
-                byte[] pcm_0 = new byte[readSize / 2];
-                byte[] pcm_1 = new byte[readSize / 2];
-                byte[] pcm_2 = new byte[readSize / 2];
-                byte[] pcm_3 = new byte[readSize / 2];
                 for (int i = 0; i < readSize / 4; i++) {
-                    pcm_0[i * 2 + 1] = pcm[i * 4 + 1];
-                    pcm_1[i * 2 + 1] = pcm[i * 4];
-                    pcm_2[i * 2 + 1] = pcm[i * 4 + 3];
-                    pcm_3[i * 2 + 1] = pcm[i * 4 + 2];
+                    pcm_0[i * 4 + 3] = pcm[i * 4 + 1];
+                    pcm_1[i * 4 + 3] = pcm[i * 4];
+                    pcm_2[i * 4 + 3] = pcm[i * 4 + 3];
+                    pcm_3[i * 4 + 3] = pcm[i * 4 + 2];
                 }
 
                 byte[] params = new byte[20];
@@ -71,13 +72,13 @@ public class PcmService {
                 ByteUtil.longToBytes(System.nanoTime() / 1000, params, 12, true);
 
                 ByteUtil.shortToBytes((short) 0, params, 0, true);
-                Notify.get().handledata(NotifyType.NOTI_MICOUT_PCM, pcm_0, readSize / 2, params);
+                Notify.get().handledata(NotifyType.NOTI_MICOUT_PCM, pcm_0, cPcmSize, params);
                 ByteUtil.shortToBytes((short) 1, params, 0, true);
-                Notify.get().handledata(NotifyType.NOTI_MICOUT_PCM, pcm_1, readSize / 2, params);
+                Notify.get().handledata(NotifyType.NOTI_MICOUT_PCM, pcm_1, cPcmSize, params);
                 ByteUtil.shortToBytes((short) 2, params, 0, true);
-                Notify.get().handledata(NotifyType.NOTI_MICOUT_PCM, pcm_2, readSize / 2, params);
+                Notify.get().handledata(NotifyType.NOTI_MICOUT_PCM, pcm_2, cPcmSize, params);
                 ByteUtil.shortToBytes((short) 3, params, 0, true);
-                Notify.get().handledata(NotifyType.NOTI_MICOUT_PCM, pcm_3, readSize / 2, params);
+                Notify.get().handledata(NotifyType.NOTI_MICOUT_PCM, pcm_3, cPcmSize, params);
             }
             mAudioRecord.stop();
         });
@@ -87,7 +88,6 @@ public class PcmService {
     }
 
     public void onDistory() {
-        FlyLog.d("PcmService will exit!");
         is_stop.set(true);
         try {
             mRecordThread.join();
