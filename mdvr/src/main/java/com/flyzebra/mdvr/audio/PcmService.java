@@ -81,7 +81,7 @@ public class PcmService {
                 Notify.get().handledata(NotifyType.NOTI_MICOUT_PCM, pcm_3, cPcmSize, params);
             }
             mAudioRecord.stop();
-        });
+        }, "audio-pcm");
 
         is_stop.set(false);
         mRecordThread.start();

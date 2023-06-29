@@ -10,96 +10,43 @@
 #include "utils/FlyLog.h"
 #include "librtmp/rtmp.h"
 
-RtmpDump::RtmpDump(JavaVM *jvm, JNIEnv *env, jobject thiz, int channel, const char *url)
-        : mChannel(channel), send_t(nullptr), rtmp(nullptr), _vps(nullptr), _sps(nullptr),
-          _pps(nullptr), _head(nullptr) {
-    memset(rtmp_url, 0, sizeof(rtmp_url));
-    memcpy(rtmp_url, url, strlen(url));
-
+RtmpDump::RtmpDump(JavaVM *jvm, JNIEnv *env, jobject thiz)
+        : rtmp(nullptr) {
     callBack = new CallBack(jvm, env, thiz);
-    {
-        std::lock_guard<std::mutex> lock_stop(mlock_stop);
-        is_stop = false;
-    }
-    send_t = new std::thread(&RtmpDump::sendThread, this);
 }
 
 RtmpDump::~RtmpDump() {
-    {
-        std::lock_guard<std::mutex> lock_stop(mlock_stop);
-        is_stop = true;
-    }
-
-    RTMP_Close(rtmp);
-
-    {
-        std::lock_guard<std::mutex> lock(mlock_send);
-        mcond_send.notify_all();
-    }
-
-    if (send_t != nullptr) {
-        send_t->join();
-        send_t = nullptr;
-    }
     delete callBack;
-
-    if (_vps) {
-        free(_vps);
-        _vps = nullptr;
-    }
-    if (_sps) {
-        free(_sps);
-        _sps = nullptr;
-    }
-    if (_pps) {
-        free(_pps);
-        _pps = nullptr;
-    }
-    if (_head) {
-        free(_head);
-        _head = nullptr;
-    }
-
-    {
-        std::lock_guard<std::mutex> lock(mlock_send);
-        while (!sendPackets.empty()) {
-            auto packet = sendPackets.front();
-            sendPackets.pop();
-            RTMPPacket_Free(packet);
-            free(packet);
-        }
-    }
 }
 
-void RtmpDump::rtmpConnect() {
-    std::lock_guard<std::mutex> lock(mlock_rtmp);
+bool RtmpDump::open(int channel, const char *url) {
+    mChannel = channel;
+
+    memset(rtmp_url, 0, sizeof(rtmp_url));
+    memcpy(rtmp_url, url, strlen(url));
+
     rtmp = RTMP_Alloc();
     if (rtmp == nullptr) {
         FLOGE("RTMP_Alloc failed");
-        return;
+        return false;
     }
     RTMP_Init(rtmp);
     rtmp->Link.timeout = 5;
     rtmp->Link.lFlags |= RTMP_LF_LIVE;
-
-    char url[1024];
-    sprintf(url, "%s", rtmp_url);
-    int ret = RTMP_SetupURL(rtmp, url);
+    int ret = RTMP_SetupURL(rtmp, rtmp_url);
     if (ret == FALSE) {
         RTMP_Free(rtmp);
         rtmp = nullptr;
-        FLOGE("RTMP_SetupURL %s-%s failed. ret=%d", rtmp_url, url, ret);
-        return;
+        FLOGE("RTMP_SetupURL %s failed. ret=%d", rtmp_url, ret);
+        return false;
     }
-
     RTMP_EnableWrite(rtmp);
-
     ret = RTMP_Connect(rtmp, nullptr);
     if (!ret) {
         RTMP_Free(rtmp);
         rtmp = nullptr;
         FLOGE("RTMP_Connect ret=%d", ret);
-        return;
+        return false;
     }
 
     ret = RTMP_ConnectStream(rtmp, 0);
@@ -108,127 +55,115 @@ void RtmpDump::rtmpConnect() {
         RTMP_Close(rtmp);
         RTMP_Free(rtmp);
         rtmp = nullptr;
-        FLOGE("RTMP_ConnectStream ret=%s", ret);
-        return;
+        FLOGE("RTMP_ConnectStream ret=%d", ret);
+        return false;
+    }
+
+    return true;
+}
+
+void RtmpDump::close() {
+    if (rtmp != nullptr) {
+        RTMP_Close(rtmp);
+        RTMP_Free(rtmp);
+        rtmp = nullptr;
     }
 }
 
-void RtmpDump::rtmpDisconnect() {
-    {
-        std::lock_guard<std::mutex> lock(mlock_send);
-        while (!sendPackets.empty()) {
-            auto packet = sendPackets.front();
-            sendPackets.pop();
-            RTMPPacket_Free(packet);
-            free(packet);
-        }
+bool RtmpDump::sendAacHead(const char *head, int headLen) {
+    auto *packet = static_cast<RTMPPacket *>(malloc(sizeof(RTMPPacket)));
+    RTMPPacket_Reset(packet);
+    int bodySize = 2 + headLen;
+    int ret = RTMPPacket_Alloc(packet, bodySize);
+    if (!ret) {
+        callBack->javaOnError(-2);
+        return FALSE;
     }
-    {
-        std::lock_guard<std::mutex> lock(mlock_rtmp);
-        if (rtmp != nullptr) {
-            RTMP_Close(rtmp);
-            RTMP_Free(rtmp);
-            rtmp = nullptr;
-        }
+    // SoundFormat(4bits):10=AAC；
+    // SoundRate(2bits):3=44kHz；
+    // SoundSize(1bit):1=16-bit samples；
+    // SoundType(1bit):1=Stereo sound；
+    packet->m_body[0] = 0xAE;
+    // 1表示AAC raw，
+    // 0表示AAC sequence header
+    packet->m_body[1] = 0x00;
+    memcpy(&packet->m_body[2], head, headLen);
+
+    packet->m_packetType = RTMP_PACKET_TYPE_AUDIO;
+    packet->m_nBodySize = bodySize;
+    packet->m_nChannel = 0x14 + mChannel;
+    packet->m_hasAbsTimestamp = 0;
+    packet->m_nTimeStamp = 0;
+    packet->m_headerType = RTMP_PACKET_SIZE_MEDIUM;
+
+    ret = RTMP_SendPacket(rtmp, packet, 0);
+    if (ret == FALSE) {
+        FLOGE("sendAacHead[%d] failed errno[%d]!", mChannel, errno);
     }
+    RTMPPacket_Free(packet);
+    free(packet);
+    return ret;
 }
 
-void RtmpDump::sendThread() {
-    int ret;
-    bool is_send_video_head;
-    bool is_send_audio_head;
+bool RtmpDump::sendAacData(const char *data, int size, long pts) {
+    auto *packet = static_cast<RTMPPacket *>(malloc(sizeof(RTMPPacket)));
+    RTMPPacket_Reset(packet);
+    int bodySize = 2 + size;
+    int ret = RTMPPacket_Alloc(packet, bodySize);
+    if (!ret) {
+        callBack->javaOnError(-2);
+        return FALSE;
+    }
+    // SoundFormat(4bits):10=AAC；
+    // SoundRate(2bits):3=44kHz；
+    // SoundSize(1bit):1=16-bit samples；
+    // SoundType(1bit):1=Stereo sound；
+    packet->m_body[0] = 0xAE;
+    // 1表示AAC raw，
+    // 0表示AAC sequence header
+    packet->m_body[1] = 0x01;
+    memcpy(&packet->m_body[2], data, size);
 
-    while (!is_stop) {
-        if (rtmp == nullptr) {
-            is_send_video_head = false;
-            is_send_audio_head = false;
+    packet->m_packetType = RTMP_PACKET_TYPE_AUDIO;
+    packet->m_nBodySize = bodySize;
+    packet->m_nChannel = 0x14 + mChannel;
+    packet->m_hasAbsTimestamp = pts / 1000;
+    packet->m_nTimeStamp = 0;
+    packet->m_headerType = RTMP_PACKET_SIZE_LARGE;
 
-            std::lock_guard<std::mutex> lock(mlock_send);
-            while (!sendPackets.empty()) {
-                auto packet = sendPackets.front();
-                sendPackets.pop();
-                RTMPPacket_Free(packet);
-                free(packet);
-            }
+    ret = RTMP_SendPacket(rtmp, packet, 0);
+    if (ret == FALSE) {
+        FLOGE("sendAacData[%d] failed errno[%d]!", mChannel, errno);
+    }
+    RTMPPacket_Free(packet);
+    free(packet);
+    return ret;
+}
 
-            rtmpConnect();
-        }
-        if (rtmp == nullptr) {
-            FLOGE("Rtmp connect faile, wait one second and try again!");
-            usleep(1000000);
-            continue;
-        }
-        {
-            std::unique_lock<std::mutex> lock(mlock_send);
-            while (!is_stop && sendPackets.empty()) {
-                mcond_send.wait(lock);
-            }
-        }
-
-        if (is_stop) {
-            rtmpDisconnect();
-            break;
-        }
-
-        if (!is_send_video_head) {
-            int ret1 = FALSE;
-            std::lock_guard<std::mutex> lock_stop(mlock_stop);
-            if (_vps != nullptr && _sps != nullptr && _pps != nullptr) {
-                ret1 = _sendVpsSpsPps(_vps, vpsLen, _sps, spsLen, _pps, ppsLen);
-            } else if (_sps != nullptr && _pps != nullptr) {
-                ret1 = _sendSpsPps(_sps, spsLen, _pps, ppsLen);
-            }
-            if (ret1 == TRUE) {
-                is_send_video_head = true;
+bool RtmpDump::sendAvcHead(const char *data, int size) {
+    int sps_ptr = -1;
+    int pps_ptr = -1;
+    for (int i = 0; i < size - 4; i++) {
+        if (data[i] == 0x00 && data[i + 1] == 0x00 && data[i + 2] == 0x00 && data[i + 3] == 0x01) {
+            if (sps_ptr == -1) {
+                sps_ptr = i;
+                i += 3;
             } else {
-                //FLOGE("Rtmp send video head faile!");
-                rtmpDisconnect();
-                continue;
+                pps_ptr = i;
+                break;
             }
-        }
-
-        if (!is_send_audio_head && _head != nullptr) {
-            int ret2 = _sendAacHead(_head, headLen);
-            if (ret2 == TRUE) {
-                is_send_audio_head = true;
-            } else {
-                //FLOGE("Rtmp send audio head faile!");
-                //rtmpDisconnect();
-                //continue;
-            }
-        }
-
-        RTMPPacket *packet = nullptr;
-
-        {
-            std::lock_guard<std::mutex> lock(mlock_send);
-            packet = sendPackets.front();
-            sendPackets.pop();
-        }
-
-        ret = RTMP_SendPacket(rtmp, packet, 0);
-        RTMPPacket_Free(packet);
-        free(packet);
-
-        if (ret == FALSE) {
-            FLOGE("RTMP_SendPacket failed, ret = %d", ret);
-            rtmpDisconnect();
-            continue;
         }
     }
-}
+    if (sps_ptr == -1 || pps_ptr == -1) {
+        FLOGE("Get sps pps error!");
+        return false;
+    }
+    int sps_len = pps_ptr - 4;
+    const char *sps = data + sps_ptr + 4;
+    int pps_len = size - pps_ptr - 4;
+    const char *pps = data + pps_ptr + 4;
 
-void RtmpDump::sendSpsPps(const char *sps, int sps_len, const char *pps, int pps_len) {
-    _sps = static_cast<char *>(malloc(sps_len * sizeof(char)));
-    spsLen = sps_len;
-    memcpy(_sps, sps, spsLen);
-    _pps = static_cast<char *>(malloc(pps_len * sizeof(char)));
-    ppsLen = pps_len;
-    memcpy(_pps, pps, ppsLen);
-}
-
-int RtmpDump::_sendSpsPps(const char *sps, int sps_len, const char *pps, int pps_len) {
-    RTMPPacket *packet = static_cast<RTMPPacket *>(malloc(sizeof(RTMPPacket)));
+    auto *packet = static_cast<RTMPPacket *>(malloc(sizeof(RTMPPacket)));
     RTMPPacket_Reset(packet);
     int ret = RTMPPacket_Alloc(packet, 2 + 3 + 5 + 1 + 2 + sps_len + 1 + 2 + pps_len);
     if (!ret) {
@@ -265,31 +200,75 @@ int RtmpDump::_sendSpsPps(const char *sps, int sps_len, const char *pps, int pps
     packet->m_body[i++] = (pps_len >> 8) & 0xff;
     packet->m_body[i++] = (pps_len) & 0xff;
     memcpy(packet->m_body + i, pps, pps_len);
+
     ret = RTMP_SendPacket(rtmp, packet, 0);
     if (ret == FALSE) {
-        FLOGE("_sendSpsPps failed!");
+        FLOGE("sendAvcHead[%d] failed errno[%d]!", mChannel, errno);
     }
     RTMPPacket_Free(packet);
     free(packet);
     return ret;
 }
 
-void RtmpDump::sendVpsSpsPps(const char *vps, int vps_len, const char *sps, int sps_len,
-                             const char *pps, int pps_len) {
-    _vps = static_cast<char *>(malloc(vps_len * sizeof(char)));
-    vpsLen = vps_len;
-    memcpy(_vps, vps, vpsLen);
-    _sps = static_cast<char *>(malloc(sps_len * sizeof(char)));
-    spsLen = sps_len;
-    memcpy(_sps, sps, spsLen);
-    _pps = static_cast<char *>(malloc(pps_len * sizeof(char)));
-    ppsLen = pps_len;
-    memcpy(_pps, pps, ppsLen);
+bool RtmpDump::sendAvcData(const char *data, int size, long pts) {
+    auto *packet = static_cast<RTMPPacket *>(malloc(sizeof(RTMPPacket)));
+    RTMPPacket_Reset(packet);
+    int ret = RTMPPacket_Alloc(packet, 9 + size);
+    if (!ret) {
+        callBack->javaOnError(-2);
+        return FALSE;
+    }
+    packet->m_packetType = RTMP_PACKET_TYPE_VIDEO;
+    packet->m_nBodySize = 9 + size;
+    packet->m_nChannel = 0x04 + mChannel;
+    packet->m_nTimeStamp = pts / 1000;
+    packet->m_hasAbsTimestamp = 0;
+    packet->m_headerType = RTMP_PACKET_SIZE_MEDIUM;
+    //packet->m_nInfoField2 	= rtmp->m_stream_id;
+    memcpy(packet->m_body, (data[0] & 0x1f) != 1 ? "\x17\x01" : "\x27\x01", 2);
+    memcpy(packet->m_body + 2, "\x00\x00\x00", 3);
+    AMF_EncodeInt32(packet->m_body + 5, packet->m_body + 9, size);
+    memcpy(packet->m_body + 9, data, size);
+
+    ret = RTMP_SendPacket(rtmp, packet, 0);
+    if (ret == FALSE) {
+        FLOGE("sendAvcData[%d] failed errno[%d]!", mChannel, errno);
+    }
+    RTMPPacket_Free(packet);
+    free(packet);
+    return ret;
 }
 
-int RtmpDump::_sendVpsSpsPps(const char *vps, int vps_len, const char *sps, int sps_len,
-                             const char *pps, int pps_len) {
-    RTMPPacket *packet = static_cast<RTMPPacket *>(malloc(sizeof(RTMPPacket)));
+bool RtmpDump::sendHevcHead(const char *data, int size) {
+    int vps_p = -1;
+    int sps_p = -1;
+    int pps_p = -1;
+    for (int i = 0; i < size - 4; i++) {
+        if (data[i] == 0x00 && data[i + 1] == 0x00 && data[i + 2] == 0x00 && data[i + 3] == 0x01) {
+            if (vps_p == -1) {
+                vps_p = i;
+                i += 3;
+            } else if (sps_p == -1) {
+                sps_p = i;
+                i += 3;
+            } else {
+                pps_p = i;
+                break;
+            }
+        }
+    }
+    if (vps_p == -1 || sps_p == -1 || pps_p == -1) {
+        FLOGE("Get vps sps pps error!");
+        return false;
+    }
+    int vps_len = sps_p - 4;
+    const char *vps = data + vps_p + 4;
+    int sps_len = pps_p - sps_p - 4;
+    const char *sps = data + sps_p + 4;
+    int pps_len = size - pps_p - 4;
+    const char *pps = data + pps_p + 4;
+
+    auto *packet = static_cast<RTMPPacket *>(malloc(sizeof(RTMPPacket)));
     RTMPPacket_Reset(packet);
     int ret = RTMPPacket_Alloc(packet, 43 + vps_len + sps_len + pps_len);
     if (!ret) {
@@ -362,48 +341,23 @@ int RtmpDump::_sendVpsSpsPps(const char *vps, int vps_len, const char *sps, int 
     packet->m_nTimeStamp = 0;
     packet->m_hasAbsTimestamp = 0;
     packet->m_headerType = RTMP_PACKET_SIZE_LARGE;
+
     ret = RTMP_SendPacket(rtmp, packet, 0);
     if (ret == FALSE) {
-        FLOGE("_sendVpsSpsPps failed!");
+        FLOGE("sendHevcHead[%d] failed errno[%d]!", mChannel, errno);
     }
     RTMPPacket_Free(packet);
     free(packet);
     return ret;
 }
 
-void RtmpDump::sendAvc(const char *data, int size, long pts) {
-    RTMPPacket *packet = static_cast<RTMPPacket *>(malloc(sizeof(RTMPPacket)));
+bool RtmpDump::sendHevcData(const char *data, int size, long pts) {
+    auto *packet = static_cast<RTMPPacket *>(malloc(sizeof(RTMPPacket)));
     RTMPPacket_Reset(packet);
     int ret = RTMPPacket_Alloc(packet, 9 + size);
     if (!ret) {
         callBack->javaOnError(-2);
-        return;
-    }
-    packet->m_packetType = RTMP_PACKET_TYPE_VIDEO;
-    packet->m_nBodySize = 9 + size;
-    packet->m_nChannel = 0x04 + mChannel;
-    packet->m_nTimeStamp = pts / 1000;
-    packet->m_hasAbsTimestamp = 0;
-    packet->m_headerType = RTMP_PACKET_SIZE_MEDIUM;
-    //packet->m_nInfoField2 	= rtmp->m_stream_id;
-    memcpy(packet->m_body, (data[0] & 0x1f) != 1 ? "\x17\x01" : "\x27\x01", 2);
-    memcpy(packet->m_body + 2, "\x00\x00\x00", 3);
-    AMF_EncodeInt32(packet->m_body + 5, packet->m_body + 9, size);
-    memcpy(packet->m_body + 9, data, size);
-    {
-        std::lock_guard<std::mutex> lock(mlock_send);
-        sendPackets.push(packet);
-        mcond_send.notify_one();
-    }
-}
-
-void RtmpDump::sendHevc(const char *data, int size, long pts) {
-    RTMPPacket *packet = static_cast<RTMPPacket *>(malloc(sizeof(RTMPPacket)));
-    RTMPPacket_Reset(packet);
-    int ret = RTMPPacket_Alloc(packet, 9 + size);
-    if (!ret) {
-        callBack->javaOnError(-2);
-        return;
+        return FALSE;
     }
     int i = 0;
     packet->m_packetType = RTMP_PACKET_TYPE_VIDEO;
@@ -429,82 +383,11 @@ void RtmpDump::sendHevc(const char *data, int size, long pts) {
     packet->m_body[i++] = (size) & 0xff;
     memcpy(&packet->m_body[i], data, size);
 
-    {
-        std::lock_guard<std::mutex> lock(mlock_send);
-        sendPackets.push(packet);
-        mcond_send.notify_one();
-    }
-}
-
-void RtmpDump::sendAacHead(const char *head, int size) {
-    _head = static_cast<char *>(malloc(size * sizeof(char)));
-    headLen = size;
-    memcpy(_head, head, headLen);
-}
-
-int RtmpDump::_sendAacHead(const char *head, int headLen) {
-    RTMPPacket *packet = static_cast<RTMPPacket *>(malloc(sizeof(RTMPPacket)));
-    RTMPPacket_Reset(packet);
-    int bodySize = 2 + headLen;
-    int ret = RTMPPacket_Alloc(packet, bodySize);
-    if (!ret) {
-        callBack->javaOnError(-2);
-        return FALSE;
-    }
-    // SoundFormat(4bits):10=AAC；
-    // SoundRate(2bits):3=44kHz；
-    // SoundSize(1bit):1=16-bit samples；
-    // SoundType(1bit):1=Stereo sound；
-    packet->m_body[0] = 0xAE;
-    // 1表示AAC raw，
-    // 0表示AAC sequence header
-    packet->m_body[1] = 0x00;
-    memcpy(&packet->m_body[2], head, headLen);
-
-    packet->m_packetType = RTMP_PACKET_TYPE_AUDIO;
-    packet->m_nBodySize = bodySize;
-    packet->m_nChannel = 0x14 + mChannel;
-    packet->m_hasAbsTimestamp = 0;
-    packet->m_nTimeStamp = 0;
-    packet->m_headerType = RTMP_PACKET_SIZE_MEDIUM;
     ret = RTMP_SendPacket(rtmp, packet, 0);
     if (ret == FALSE) {
-        FLOGE("_sendAacHead failed!");
+        FLOGE("sendHevcData[%d] failed errno[%d]!", mChannel, errno);
     }
     RTMPPacket_Free(packet);
     free(packet);
     return ret;
-}
-
-void RtmpDump::sendAac(const char *data, int size, long pts) {
-    RTMPPacket *packet = static_cast<RTMPPacket *>(malloc(sizeof(RTMPPacket)));
-    RTMPPacket_Reset(packet);
-    int bodySize = 2 + size;
-    int ret = RTMPPacket_Alloc(packet, bodySize);
-    if (!ret) {
-        callBack->javaOnError(-2);
-        return;
-    }
-    // SoundFormat(4bits):10=AAC；
-    // SoundRate(2bits):3=44kHz；
-    // SoundSize(1bit):1=16-bit samples；
-    // SoundType(1bit):1=Stereo sound；
-    packet->m_body[0] = 0xAE;
-    // 1表示AAC raw，
-    // 0表示AAC sequence header
-    packet->m_body[1] = 0x01;
-    memcpy(&packet->m_body[2], data, size);
-
-    packet->m_packetType = RTMP_PACKET_TYPE_AUDIO;
-    packet->m_nBodySize = bodySize;
-    packet->m_nChannel = 0x14 + mChannel;
-    packet->m_hasAbsTimestamp = pts / 1000;
-    packet->m_nTimeStamp = 0;
-    packet->m_headerType = RTMP_PACKET_SIZE_LARGE;
-
-    {
-        std::lock_guard<std::mutex> lock(mlock_send);
-        sendPackets.push(packet);
-        mcond_send.notify_one();
-    }
 }

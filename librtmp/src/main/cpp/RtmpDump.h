@@ -13,65 +13,36 @@
 #include "CallBack.h"
 
 class RTMP;
+
 class RTMPPacket;
 
 class RtmpDump {
 public:
-    RtmpDump(JavaVM *jvm, JNIEnv *env, jobject thiz, int channel, const char* url);
+    RtmpDump(JavaVM *jvm, JNIEnv *env, jobject thiz);
 
     ~RtmpDump();
 
-    void sendSpsPps(const char *sps, int spsLen, const char *pps, int ppsLen);
+    bool open(int channel, const char *url);
 
-    void sendVpsSpsPps(const char *vps, int vpsLen, const char *sps, int spsLen, const char *pps, int ppsLen);
+    void close();
 
-    void sendAvc(const char *data, int size, long pts);
+    bool sendAacHead(const char *head, int size);
 
-    void sendHevc(const char *data, int size, long pts);
+    bool sendAacData(const char *data, int size, long pts);
 
-    void sendAacHead(const char *head, int size);
+    bool sendAvcHead(const char *data, int size);
 
-    void sendAac(const char *data, int size, long pts);
+    bool sendAvcData(const char *data, int size, long pts);
 
-private:
-    void rtmpConnect();
+    bool sendHevcHead(const char *data, int size);
 
-    void rtmpDisconnect();
-
-    void sendThread();
-
-    int _sendSpsPps(const char *sps, int spsLen, const char *pps, int ppsLen);
-
-    int _sendVpsSpsPps(const char *vps, int vpsLen, const char *sps, int spsLen, const char *pps, int ppsLen);
-
-    int _sendAacHead(const char *head, int headLen);
+    bool sendHevcData(const char *data, int size, long pts);
 
 private:
-    volatile bool is_stop;
-    std::mutex mlock_stop;
-
     CallBack *callBack;
-
     int mChannel;
-
     char rtmp_url[1024];
-    std::thread *send_t;
-    std::mutex mlock_send;
-    std::queue<RTMPPacket*> sendPackets;
-    std::condition_variable mcond_send;
-
     RTMP *rtmp;
-    std::mutex mlock_rtmp;
-
-    char* _vps;
-    int vpsLen;
-    char* _sps;
-    int spsLen;
-    char* _pps;
-    int ppsLen;
-
-    char* _head;
-    int headLen;
 };
 
 

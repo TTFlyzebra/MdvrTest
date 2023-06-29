@@ -63,7 +63,7 @@ public class AvcService implements VideoEncoderCB, INotify {
                 videoEncoder.inYuvData(yuv, yuvSize, ptsUsec);
             }
             videoEncoder.releaseCodec();
-        }, "yuv-" + mChannel);
+        }, "camera-avc" + mChannel);
         yuvThread.start();
     }
 

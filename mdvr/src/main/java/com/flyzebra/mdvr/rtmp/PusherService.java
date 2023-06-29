@@ -22,29 +22,47 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class PusherService implements INotify {
     private final int mChannel;
     private final AtomicBoolean is_stop = new AtomicBoolean(true);
+    private final AtomicBoolean is_rtmp = new AtomicBoolean(false);
     private final ByteBuffer sendBuf = ByteBuffer.wrap(new byte[Config.CAM_WIDTH * Config.CAM_HEIGHT * 10]);
     private Thread sendThread;
     private final Object sendLock = new Object();
+    private byte[] videoHead = null;
+    private byte[] audioHead = null;
 
     public PusherService(int channel) {
         mChannel = channel;
     }
 
     public void onCreate(String rtmp_url) {
-        FlyLog.d("RtmpPusherService[%d][%s] start !", mChannel, rtmp_url);
+        FlyLog.d("PusherService[%d][%s] start !", mChannel, rtmp_url);
         Notify.get().registerListener(this);
         is_stop.set(false);
         sendThread = new Thread(() -> {
+            boolean is_send_audio_head = false;
+            boolean is_send_video_head = false;
             int type = 0;
             int size = 0;
             int paramsLen;
             byte[] data = new byte[Config.CAM_WIDTH * Config.CAM_HEIGHT * 3 / 2];
             byte[] params = new byte[1024];
-
-            RtmpDump rtmp = new RtmpDump(mChannel);
-            rtmp.init(rtmp_url);
-
+            RtmpDump rtmp = new RtmpDump();
             while (!is_stop.get()) {
+                if (!is_rtmp.get()) {
+                    is_send_audio_head = false;
+                    is_send_video_head = false;
+                    boolean flag = rtmp.open(mChannel, rtmp_url);
+                    is_rtmp.set(flag);
+                    if (is_stop.get()) break;
+                    if (!is_rtmp.get()) {
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                        continue;
+                    }
+                }
+
                 synchronized (sendLock) {
                     if (sendBuf.position() <= 0) {
                         try {
@@ -62,9 +80,44 @@ public class PusherService implements INotify {
                     sendBuf.get(params, 0, paramsLen);
                     sendBuf.compact();
                 }
-                handleSendData(rtmp, type, data, size, params);
+
+                boolean flag = true;
+                if (NotifyType.NOTI_CAMOUT_AVC == type) {
+                    long pts = ByteUtil.bytes2Long(params, 2, true);
+                    short format = ByteUtil.bytes2Short(params, 10, true);
+                    if (!is_send_video_head && videoHead != null) {
+                        if (format == AvcService.AVC) {
+                            flag = sendAvcHead(rtmp, videoHead, videoHead.length);
+                            if (flag) is_send_video_head = true;
+                        } else {
+                            flag = sendHevcHead(rtmp, videoHead, videoHead.length);
+                            if (flag) is_send_video_head = true;
+                        }
+                    }
+                    if (is_send_video_head) {
+                        if (format == AvcService.AVC) {
+                            flag = sendAvcData(rtmp, data, size, pts);
+                        } else {
+                            flag = sendHevcData(rtmp, data, size, pts);
+                        }
+                    }
+                } else if (NotifyType.NOTI_SNDOUT_AAC == type) {
+                    if (!is_send_audio_head && audioHead != null) {
+                        if (sendAacHead(rtmp, audioHead, audioHead.length))
+                            is_send_audio_head = true;
+                    }
+                    long pts = ByteUtil.bytes2Long(params, 2, true);
+                    flag = sendAacData(rtmp, data, size, pts);
+                }
+                if (!flag) {
+                    rtmp.close();
+                    is_rtmp.set(false);
+                }
             }
-            rtmp.release();
+            if (is_rtmp.get()) {
+                rtmp.close();
+                is_rtmp.set(false);
+            }
         }, "send-" + mChannel);
         sendThread.start();
     }
@@ -83,121 +136,28 @@ public class PusherService implements INotify {
         FlyLog.d("PusherService[%d] exit !", mChannel);
     }
 
-    private void handleSendData(RtmpDump rtmp, int type, byte[] data, int size, byte[] params) {
-        if (NotifyType.NOTI_SNDOUT_SPS == type) {
-            short channel = ByteUtil.bytes2Short(params, 0, true);
-            if (mChannel != channel) return;
-            sendAacHead(rtmp, channel, data, size);
-        } else if (NotifyType.NOTI_SNDOUT_AAC == type) {
-            short channel = ByteUtil.bytes2Short(params, 0, true);
-            if (mChannel != channel) return;
-            long pts = ByteUtil.bytes2Long(params, 2, true);
-            sendAacData(rtmp, channel, data, size, pts);
-        } else if (NotifyType.NOTI_CAMOUT_SPS == type) {
-            short channel = ByteUtil.bytes2Short(params, 0, true);
-            if (mChannel != channel) return;
-            short format = ByteUtil.bytes2Short(params, 2, true);
-            if (format == AvcService.AVC) {
-                sendAvcHead(rtmp, channel, data, size);
-            } else {
-                sendHevcHead(rtmp, channel, data, size);
-            }
-        } else if (NotifyType.NOTI_CAMOUT_AVC == type) {
-            short channel = ByteUtil.bytes2Short(params, 0, true);
-            if (mChannel != channel) return;
-            long pts = ByteUtil.bytes2Long(params, 2, true);
-            short format = ByteUtil.bytes2Short(params, 10, true);
-            if (format == AvcService.AVC) {
-                sendAvcData(rtmp, channel, data, size, pts);
-            } else {
-                sendHevcData(rtmp, channel, data, size, pts);
-            }
-        }
+    private boolean sendAacHead(RtmpDump rtmp, byte[] head, int headLen) {
+        return rtmp.writeAacHead(head, headLen);
     }
 
-    private void sendAacHead(RtmpDump rtmp, int channel, byte[] head, int headLen) {
-        rtmp.sendAacHead(head, headLen);
+    private boolean sendAacData(RtmpDump rtmp, byte[] data, int size, long pts) {
+        return rtmp.writeAacData(data, size, pts);
     }
 
-    private void sendAacData(RtmpDump rtmp, int channel, byte[] data, int size, long pts) {
-        rtmp.sendAac(data, size, pts);
+    private boolean sendAvcHead(RtmpDump rtmp, byte[] data, int size) {
+        return rtmp.writeAvcHead(data, size);
     }
 
-    private void sendAvcHead(RtmpDump rtmp, int channel, byte[] data, int size) {
-        try {
-            int sps_p = -1;
-            int pps_p = -1;
-            for (int i = 0; i < size; i++) {
-                if (data[i] == 0x00 && data[i + 1] == 0x00 && data[i + 2] == 0x00 && data[i + 3] == 0x01) {
-                    if (sps_p == -1) {
-                        sps_p = i;
-                        i += 3;
-                    } else {
-                        pps_p = i;
-                        break;
-                    }
-                }
-            }
-            if (sps_p == -1 || pps_p == -1) {
-                FlyLog.e("Get sps pps error!");
-                return;
-            }
-            int spsLen = pps_p - 4;
-            byte[] sps = new byte[spsLen];
-            System.arraycopy(data, 4, sps, 0, spsLen);
-            int ppsLen = size - pps_p - 4;
-            byte[] pps = new byte[ppsLen];
-            System.arraycopy(data, pps_p + 4, pps, 0, ppsLen);
-            rtmp.sendSpsPps(sps, spsLen, pps, ppsLen);
-        } catch (Exception e) {
-            FlyLog.e(e.toString());
-        }
+    private boolean sendAvcData(RtmpDump rtmp, byte[] data, int size, long pts) {
+        return rtmp.writeAvcData(data, size, pts);
     }
 
-    private void sendHevcHead(RtmpDump rtmp, int channel, byte[] data, int size) {
-        try {
-            int vps_p = -1;
-            int sps_p = -1;
-            int pps_p = -1;
-            for (int i = 0; i < size; i++) {
-                if (data[i] == 0x00 && data[i + 1] == 0x00 && data[i + 2] == 0x00 && data[i + 3] == 0x01) {
-                    if (vps_p == -1) {
-                        vps_p = i;
-                        i += 3;
-                    } else if (sps_p == -1) {
-                        sps_p = i;
-                        i += 3;
-                    } else {
-                        pps_p = i;
-                        break;
-                    }
-                }
-            }
-            if (vps_p == -1 || sps_p == -1 || pps_p == -1) {
-                FlyLog.e("Get vps sps pps error!");
-                return;
-            }
-            int vpsLen = sps_p - 4;
-            byte[] vps = new byte[vpsLen];
-            System.arraycopy(data, 4, vps, 0, vpsLen);
-            int spsLen = pps_p - sps_p - 4;
-            byte[] sps = new byte[spsLen];
-            System.arraycopy(data, sps_p + 4, sps, 0, spsLen);
-            int ppsLen = size - pps_p - 4;
-            byte[] pps = new byte[ppsLen];
-            System.arraycopy(data, pps_p + 4, pps, 0, ppsLen);
-            rtmp.sendVpsSpsPps(vps, vpsLen, sps, spsLen, pps, ppsLen);
-        } catch (Exception e) {
-            FlyLog.e(e.toString());
-        }
+    private boolean sendHevcHead(RtmpDump rtmp, byte[] data, int size) {
+        return rtmp.writeHevcHead(data, size);
     }
 
-    private void sendAvcData(RtmpDump rtmp, int channel, byte[] data, int size, long pts) {
-        rtmp.sendAvc(data, size, pts);
-    }
-
-    private void sendHevcData(RtmpDump rtmp, int channel, byte[] data, int size, long pts) {
-        rtmp.sendHevc(data, size, pts);
+    private boolean sendHevcData(RtmpDump rtmp, byte[] data, int size, long pts) {
+        return rtmp.writeHevcData(data, size, pts);
     }
 
     @Override
@@ -207,8 +167,20 @@ public class PusherService implements INotify {
 
     @Override
     public void handle(int type, byte[] data, int size, byte[] params) {
-        if (NotifyType.NOTI_SNDOUT_SPS == type || NotifyType.NOTI_SNDOUT_AAC == type ||
-                NotifyType.NOTI_CAMOUT_SPS == type || NotifyType.NOTI_CAMOUT_AVC == type) {
+        if (NotifyType.NOTI_SNDOUT_SPS == type) {
+            short channel = ByteUtil.bytes2Short(params, 0, true);
+            if (mChannel != channel) return;
+            audioHead = new byte[size];
+            System.arraycopy(data, 0, audioHead, 0, size);
+        } else if (NotifyType.NOTI_CAMOUT_SPS == type) {
+            short channel = ByteUtil.bytes2Short(params, 0, true);
+            if (mChannel != channel) return;
+            videoHead = new byte[size];
+            System.arraycopy(data, 0, videoHead, 0, size);
+        } else if (NotifyType.NOTI_SNDOUT_AAC == type || NotifyType.NOTI_CAMOUT_AVC == type) {
+            short channel = ByteUtil.bytes2Short(params, 0, true);
+            if (mChannel != channel) return;
+            if (!is_rtmp.get()) return;
             synchronized (sendLock) {
                 if (sendBuf.remaining() < (4 + 4 + size + params.length)) {
                     FlyLog.e("rtmp send buffer[%d] is full, clean all buffer!", mChannel);

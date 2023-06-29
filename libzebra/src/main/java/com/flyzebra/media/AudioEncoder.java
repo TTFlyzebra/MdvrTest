@@ -41,7 +41,7 @@ public class AudioEncoder implements Runnable {
             codec.configure(audioFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
             codec.start();
             is_codec_init.set(true);
-            mOutThread = new Thread(this);
+            mOutThread = new Thread(this, "a-encoder"+mChannel);
             mOutThread.start();
         } catch (Exception e) {
             FlyLog.e(e.toString());

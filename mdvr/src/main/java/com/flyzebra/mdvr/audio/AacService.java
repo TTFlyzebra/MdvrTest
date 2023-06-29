@@ -61,7 +61,7 @@ public class AacService implements AudioEncoderCB, INotify {
                 audioEncoder.inPumData(pcm, pcmSize, ptsUsec);
             }
             audioEncoder.releaseCodec();
-        }, "pcm-" + mChannel);
+        }, "audio-aac" + mChannel);
         pcmThread.start();
     }
 

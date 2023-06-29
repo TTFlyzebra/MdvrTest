@@ -40,7 +40,7 @@ public class VideoEncoder implements Runnable {
             codec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
             codec.start();
             is_codec_init.set(true);
-            mOutThread = new Thread(this);
+            mOutThread = new Thread(this, "v-encoder"+mChannel);
             mOutThread.start();
         } catch (Exception e) {
             FlyLog.e(e.toString());

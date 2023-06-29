@@ -4,15 +4,14 @@ package com.flyzebra.utils;
  * Author: FlyZebra
  * Created by flyzebra on 18-4-9-下午3:11.
  */
-
 public class ByteUtil {
     public static String bytes2HexString(byte[] bytes) {
         if (bytes == null || bytes.length == 1) {
             return null;
         }
-        StringBuffer sb = new StringBuffer("");
-        for (int i = 0; i < bytes.length; i++) {
-            String hv = Integer.toHexString(bytes[i] & 0xFF);
+        StringBuilder sb = new StringBuilder("");
+        for (byte aByte : bytes) {
+            String hv = Integer.toHexString(aByte & 0xFF);
             if (hv.length() < 2) {
                 sb.append(0);
             }
@@ -68,8 +67,7 @@ public class ByteUtil {
     }
 
     private static byte toByte(char c) {
-        byte b = (byte) "0123456789ABCDEF".indexOf(c);
-        return b;
+        return (byte) "0123456789ABCDEF".indexOf(c);
     }
 
     public static short bytes2Short(byte[] bytes, int offset, boolean littleEndian) {

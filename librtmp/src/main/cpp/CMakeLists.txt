@@ -5,8 +5,8 @@ project("rtmpdump")
 include_directories(
         ${CMAKE_SOURCE_DIR}
         ${CMAKE_SOURCE_DIR}/include)
-#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DNO_CRYPTO")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_OPENSSL")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DNO_CRYPTO")
+#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_OPENSSL")
 
 add_library(
         rtmpdump
@@ -18,7 +18,7 @@ add_library(
         buffer/LoopBuf.cpp
         librtmp/amf.c
         librtmp/hashswf.c
-        librtmp/FlyLog.c
+        librtmp/log.c
         librtmp/parseurl.c
         librtmp/rtmp.c)
 

@@ -13,71 +13,77 @@ public class RtmpDump {
     private long pRtmpPointer = -1;
     private int mChannel;
 
-    public RtmpDump(int channel) {
+    public RtmpDump() {
+    }
+
+    public boolean open(int channel, String rtmp_url) {
         this.mChannel = channel;
+        pRtmpPointer = _open(mChannel, rtmp_url);
+        if(pRtmpPointer > 0){
+            FlyLog.d("RtmpDump open [%d][%s] success!", mChannel, rtmp_url);
+            return true;
+        }else{
+            FlyLog.e("RtmpDump open [%d][%s] fail!", mChannel, rtmp_url);
+            return false;
+        }
     }
 
-    public void init(String rtmp_url) {
-        FlyLog.d("RtmpDump[%d][%s] init!", mChannel, rtmp_url);
-        pRtmpPointer = _init(mChannel, rtmp_url);
-    }
-
-    public void release() {
+    public void close() {
         if (pRtmpPointer < 0) return;
         long pointer = pRtmpPointer;
         pRtmpPointer = -1;
-        _release(pointer);
+        _close(pointer);
         FlyLog.d("RtmpDump[%d] release!", mChannel);
     }
 
-    public void sendSpsPps(byte[] sps, int spsLen, byte[] pps, int ppsLen) {
-        if (pRtmpPointer < 0) return;
-        _sendSpsPps(pRtmpPointer, sps, spsLen, pps, ppsLen);
+    public boolean writeAacHead(byte[] head, int size) {
+        if (pRtmpPointer < 0) return false;
+        return _writeAacHead(pRtmpPointer, head, size);
     }
 
-    public void sendVpsSpsPps(byte[] vsp, int vspLen, byte[] sps, int spsLen, byte[] pps, int ppsLen) {
-        if (pRtmpPointer < 0) return;
-        _sendVpsSpsPps(pRtmpPointer, vsp, vspLen, sps, spsLen, pps, ppsLen);
+    public boolean writeAacData(byte[] data, int size, long pts) {
+        if (pRtmpPointer < 0) return false;
+        return _writeAacData(pRtmpPointer, data, size, pts);
     }
 
-    public void sendAvc(byte[] data, int size, long pts) {
-        if (pRtmpPointer < 0) return;
-        _sendAvc(pRtmpPointer, data, size, pts);
+    public boolean writeAvcHead(byte[] data, int size) {
+        if (pRtmpPointer < 0) return false;
+        return _writeAvcHead(pRtmpPointer, data, size);
     }
 
-    public void sendHevc(byte[] data, int size, long pts) {
-        if (pRtmpPointer < 0) return;
-        _sendHevc(pRtmpPointer, data, size, pts);
+    public boolean writeAvcData(byte[] data, int size, long pts) {
+        if (pRtmpPointer < 0) return false;
+        return _writeAvcData(pRtmpPointer, data, size, pts);
     }
 
-    public void sendAacHead(byte[] head, int size) {
-        if (pRtmpPointer < 0) return;
-        _sendAacHead(pRtmpPointer, head, size);
+    public boolean writeHevcHead(byte[] data, int size) {
+        if (pRtmpPointer < 0) return false;
+        return _writeHevcHead(pRtmpPointer, data, size);
     }
 
-    public void sendAac(byte[] data, int size, long pts) {
-        if (pRtmpPointer < 0) return;
-        _sendAac(pRtmpPointer, data, size, pts);
+    public boolean writeHevcData(byte[] data, int size, long pts) {
+        if (pRtmpPointer < 0) return false;
+        return _writeHevcData(pRtmpPointer, data, size, pts);
     }
 
     public void onError(int errCode) {
         FlyLog.e("RtmpDump[%d] onError %d", mChannel, errCode);
     }
 
-    private native long _init(int channel, String url);
+    private native long _open(int channel, String url);
 
-    private native void _release(long pRtmpPointer);
+    private native void _close(long pRtmpPointer);
 
-    private native void _sendSpsPps(long pRtmpPointer, byte[] sps, int spsLen, byte[] pps, int ppsLen);
+    private native boolean _writeAacHead(long pRtmpPointer, byte[] head, int headLen);
 
-    private native void _sendVpsSpsPps(long pRtmpPointer, byte[] vsp, int vspLen, byte[] sps, int spsLen, byte[] pps, int ppsLen);
+    private native boolean _writeAacData(long pRtmpPointer, byte[] data, int size, long pts);
 
-    private native void _sendAvc(long pRtmpPointer, byte[] data, int size, long pts);
+    private native boolean _writeAvcHead(long pRtmpPointer, byte[] data, int size);
 
-    private native void _sendHevc(long pRtmpPointer, byte[] data, int size, long pts);
+    private native boolean _writeAvcData(long pRtmpPointer, byte[] data, int size, long pts);
 
-    private native void _sendAacHead(long pRtmpPointer, byte[] head, int headLen);
+    private native boolean _writeHevcHead(long pRtmpPointer, byte[] data, int size);
 
-    private native void _sendAac(long pRtmpPointer, byte[] data, int size, long pts);
+    private native boolean _writeHevcData(long pRtmpPointer, byte[] data, int size, long pts);
 
 }
