@@ -67,6 +67,10 @@ public class SoundService {
                 if (is_stop.get()) break;
 
                 for (int i = 0; i < readSize / 4; i++) {
+                    pcm_0[i * 4 + 1] = pcm[i * 4 + 1];
+                    pcm_1[i * 4 + 1] = pcm[i * 4];
+                    pcm_2[i * 4 + 1] = pcm[i * 4 + 3];
+                    pcm_3[i * 4 + 1] = pcm[i * 4 + 2];
                     pcm_0[i * 4 + 3] = pcm[i * 4 + 1];
                     pcm_1[i * 4 + 3] = pcm[i * 4];
                     pcm_2[i * 4 + 3] = pcm[i * 4 + 3];

@@ -15,7 +15,7 @@ Notify::Notify()
     :is_stop(false)
 {
     FLOGD("%s()", __func__);
-    dataBuf = BufferManager::instance()->createBuffer(1024*1024*10, 1024, "Notify");
+    dataBuf = BufferManager::get()->createBuffer(1024*1024*10, 1024, "Notify");
     data_t = new std::thread(&Notify::updataThread, this);
     SysUtil::setThreadName(data_t, "Notify_data");
 }
@@ -33,7 +33,7 @@ Notify::~Notify()
     }
     data_t->join();
     delete data_t;
-    BufferManager::instance()->releaseBuffer(dataBuf);
+    BufferManager::get()->releaseBuffer(dataBuf);
     FLOGD("%s()", __func__);
 }
 

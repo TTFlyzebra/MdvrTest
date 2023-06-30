@@ -3,23 +3,23 @@
 #include "utils/FlyLog.h"
 #include "Fzebra.h"
 
-JavaVM *jvm = nullptr;
+JavaVM *mJvm = nullptr;
 
 extern "C" jint JNI_OnLoad(JavaVM *jvm, void *reserved) {
-    jvm = jvm;
+    mJvm = jvm;
     JNIEnv *env = nullptr;
     jint result = -1;
-    if (jvm->GetEnv((void **) &env, JNI_VERSION_1_6) != JNI_OK) {
+    if (jvm->GetEnv((void **) &env, JNI_VERSION_1_4) != JNI_OK) {
         FLOGE("JNI OnLoad failed\n");
         return result;
     }
-    return JNI_VERSION_1_6;
+    return JNI_VERSION_1_4;
 }
 
 extern "C"
 JNIEXPORT jlong JNICALL
 Java_com_flyzebra_core_Fzebra__1init(JNIEnv *env, jobject thiz) {
-    auto *fzebra = new Fzebra(jvm, env, thiz);
+    auto *fzebra = new Fzebra(mJvm, env, thiz);
     return reinterpret_cast<jlong>(fzebra);
 }
 
@@ -50,4 +50,18 @@ Java_com_flyzebra_core_Fzebra__1handle(JNIEnv *env, jobject thiz, jlong p_obj, j
     fzebra->nativeHandledata(static_cast<NofifyType>(type), data, size, params);
     env->ReleaseByteArrayElements(jdata, (jbyte *) data, JNI_ABORT);
     env->ReleaseByteArrayElements(jparams, (jbyte *) params, JNI_ABORT);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_flyzebra_core_Fzebra__1enableRtspServer(JNIEnv *env, jobject thiz, jlong p_obj) {
+    auto *fzebra = reinterpret_cast<Fzebra *>(p_obj);
+    fzebra->startRtspServer();
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_flyzebra_core_Fzebra__1disableRtspServer(JNIEnv *env, jobject thiz, jlong p_obj) {
+    auto *fzebra = reinterpret_cast<Fzebra *>(p_obj);
+    fzebra->stopRtspServer();
 }

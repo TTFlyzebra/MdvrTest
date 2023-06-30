@@ -14,9 +14,9 @@ public:
     void javaOnError(int error);
 
 private:
-    JavaVM* javeVM ;
-    JNIEnv *jniEnv ;
-    jobject jObject;
+    JavaVM* mJvm ;
+    JNIEnv *mEnv ;
+    jobject mThiz;
     jmethodID onError;
 };
 

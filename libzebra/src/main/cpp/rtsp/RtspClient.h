@@ -8,12 +8,6 @@
 #include <arpa/inet.h>
 #include "base/BaseNotify.h"
 
-enum SiteLink{
-    SCREEN,
-    CAMERA,
-    NOSITE
-};
-
 class RtspServer;
 
 class RtspClient:public BaseNotify {
@@ -50,6 +44,7 @@ private:
 
 private:
     RtspServer* mServer;
+    int32_t mChannel;
     int32_t mSocket;
     bool is_disconnect;
 
@@ -64,7 +59,6 @@ private:
     std::vector<char> recvBuf;
     std::condition_variable mcond_recv;
 
-    SiteLink mSiteLink;
     int32_t is_use_tcp;
 
     int32_t v_rtp_socket;
@@ -94,12 +88,6 @@ private:
 
     fd_set set;
     struct timeval tv;
-
-    char mUid[8] = {'-','-','r','t','s','p','-','-'};
-    char heart_data[8] = {0x00};
-
-    std::vector<uint8_t> vec_sps;
-    std::vector<uint8_t> vec_pps;
 };
 
 #endif //F_ZEBRA_RRSPCLIENT_H

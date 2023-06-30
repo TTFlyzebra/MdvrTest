@@ -9,6 +9,8 @@
 #include "base/Notify.h"
 #include "FzebraCB.h"
 
+class RtspServer;
+
 class Fzebra : public INotify{
 public:
     Fzebra(JavaVM* jvm, JNIEnv *env, jobject thiz);
@@ -23,9 +25,16 @@ public:
 
     void nativeHandledata(NofifyType type, const char *data, int32_t size, const char *params);
 
+    void startRtspServer();
+
+    void stopRtspServer();
+
 private:
     Notify* N;
     FzebraCB* cb;
+
+    RtspServer* rtsp;
+
 };
 
 

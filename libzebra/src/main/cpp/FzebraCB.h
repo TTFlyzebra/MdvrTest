@@ -16,9 +16,9 @@ public:
     void javaHandledata(int32_t type, const char* data, int32_t size, const char* parmas);
 
 private:
-    JavaVM* javeVM ;
-    JNIEnv *jniEnv ;
-    jobject jObject;
+    JavaVM* mjvm ;
+    JNIEnv *mEnv ;
+    jobject mThiz;
 
     jmethodID notifydata;
     jmethodID handledata;

@@ -36,11 +36,7 @@ set_target_properties(
         PROPERTIES IMPORTED_LOCATION
         ${CMAKE_SOURCE_DIR}/libs/${ANDROID_ABI}/libyuv.a)
 
-find_library(
-        log-lib
-        log)
-
 target_link_libraries(
         zebra
         yuv
-        ${log-lib})
+        log)

@@ -6,6 +6,7 @@ import android.os.IBinder;
 
 import androidx.annotation.Nullable;
 
+import com.flyzebra.core.Fzebra;
 import com.flyzebra.core.notify.INotify;
 import com.flyzebra.mdvr.camera.CameraService;
 import com.flyzebra.mdvr.rtmp.RtmpService;
@@ -26,6 +27,8 @@ public class MdvrService extends Service implements INotify {
     @Override
     public void onCreate() {
         FlyLog.d("MdvrService start!");
+        Fzebra.get().init();
+        Fzebra.get().enableRtspServer();
         //start object
         rtmpService.onCreate();
         cameraService.onCreate();
@@ -34,6 +37,8 @@ public class MdvrService extends Service implements INotify {
 
     @Override
     public void onDestroy() {
+        Fzebra.get().release();
+        Fzebra.get().disableRtspServer();
         rtmpService.onDestory();
         cameraService.onDerstory();
         soundService.onDistory();

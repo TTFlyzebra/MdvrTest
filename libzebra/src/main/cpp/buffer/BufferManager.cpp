@@ -17,7 +17,7 @@ void BufferManager::release() {
     delete m_pInstance;
 }
 
-BufferManager *BufferManager::instance() {
+BufferManager *BufferManager::get() {
     return m_pInstance;
 }
 

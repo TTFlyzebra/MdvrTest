@@ -22,12 +22,10 @@
 
 RtspClient::RtspClient(RtspServer *server, Notify *notify, int32_t socket)
         : BaseNotify(notify), mServer(server), mSocket(socket), is_disconnect(false),
-          mSiteLink(NOSITE), is_use_tcp(true), v_rtp_socket(-1), vrtp_t(nullptr), v_rtcp_socket(-1),
-          vrtcp_t(nullptr), a_rtp_socket(-1), artp_t(nullptr), a_rtcp_socket(-1), artcp_t(nullptr),
+          is_use_tcp(true), v_rtp_socket(-1), vrtp_t(nullptr), v_rtcp_socket(-1), vrtcp_t(nullptr),
+          a_rtp_socket(-1), artp_t(nullptr), a_rtcp_socket(-1), artcp_t(nullptr),
           sequencenumber1(1234), sequencenumber2(4321) {
     FLOGD("%s()", __func__);
-    FD_ZERO(&set);
-    FD_SET(mSocket, &set);
     recv_t = new std::thread(&RtspClient::recvThread, this);
     SysUtil::setThreadName(recv_t, "RtspClient-recv");
     send_t = new std::thread(&RtspClient::sendThread, this);
@@ -39,7 +37,6 @@ RtspClient::RtspClient(RtspServer *server, Notify *notify, int32_t socket)
 }
 
 RtspClient::~RtspClient() {
-    FD_CLR(mSocket, &set);
     is_stop = true;
     shutdown(mSocket, SHUT_RDWR);
     close(mSocket);
@@ -99,23 +96,16 @@ RtspClient::~RtspClient() {
     FLOGD("%s()", __func__);
 }
 
-void
-RtspClient::handle(NofifyType type, const char *data, int32_t size, const char *params) {
+void RtspClient::handle(NofifyType type, const char *data, int32_t size, const char *params) {
     switch (type) {
-        case NOTI_SCREEN_AVC: {
-            if (mSiteLink == SCREEN) sendVFrame(data, size, 0);
-            break;
-        }
-        case NOTI_SNDOUT_AAC: {
-            if (mSiteLink == SCREEN) sendAFrame(data, size, 0);
-            break;
-        }
         case NOTI_CAMOUT_AVC: {
-            if (mSiteLink == CAMERA) sendVFrame(data, size, 0);
+            int16_t channel = ByteUtil::byte2int16(params, 0, true);
+            if (mChannel == channel) sendVFrame(data, size, 0);
             break;
         }
         case NOTI_MICOUT_AAC: {
-            if (mSiteLink == CAMERA) sendAFrame(data, size, 0);
+            int16_t channel = ByteUtil::byte2int16(params, 0, true);
+            if (mChannel == channel) sendAFrame(data, size, 0);
             break;
         }
     }
@@ -161,6 +151,8 @@ void RtspClient::sendThread() {
         while (!is_stop && !sendData.empty()) {
             tv.tv_sec = 2;
             tv.tv_usec = 0;
+            FD_ZERO(&set);
+            FD_SET(mSocket, &set);
             int32_t ret = select(mSocket + 1, nullptr, &set, nullptr, &tv);
             if (ret == 0) {
                 FLOGD("RtspClient sendThread select write error. ret[%d].", ret);
@@ -173,11 +165,13 @@ void RtspClient::sendThread() {
                     sendData.erase(sendData.begin(), sendData.begin() + sendLen);
                 } else {
                     if (sendLen < 0 && errno == EAGAIN) {
+                        FD_CLR(mSocket, &set);
                         continue;
                     }
                     disconnect();
                 }
             }
+            FD_CLR(mSocket, &set);
         }
     }
 }
@@ -334,13 +328,6 @@ void RtspClient::disconnect() {
         is_disconnect = true;
         shutdown(mSocket, SHUT_RDWR);
         close(mSocket);
-        switch (mSiteLink) {
-            case CAMERA:
-                break;
-            case SCREEN:
-            default:
-                break;
-        }
         mServer->disconnectClient(this);
     }
 }
@@ -362,25 +349,16 @@ void RtspClient::appendCommonResponse(std::string *response, int32_t cseq) {
 
 
 void RtspClient::onOptionsRequest(const char *data, int32_t cseq) {
-    if (strstr((const char *) data, ":8554/screen")) {
-        mSiteLink = SCREEN;
-    } else if (strstr((const char *) data, ":8554/camera")) {
-        mSiteLink = CAMERA;
-    } else {
-        mSiteLink = NOSITE;
+    if (strstr((const char *) data, ":8554/camera1") != nullptr) {
+        mChannel = 0;
+    } else if (strstr((const char *) data, ":8554/camera2") != nullptr) {
+        mChannel = 1;
+    } else if (strstr((const char *) data, ":8554/camera3") != nullptr) {
+        mChannel = 2;
+    } else if (strstr((const char *) data, ":8554/camera4") != nullptr) {
+        mChannel = 3;
     }
-    switch (mSiteLink) {
-        case CAMERA:
-            memset(heart_data, 0, 8);
-            heart_data[2] = 0x01;
-            break;
-        case SCREEN:
-        default:
-            memset(heart_data, 0, 8);
-            heart_data[0] = 0x01;
-            heart_data[1] = 0x01;
-            break;
-    }
+    FLOGE("onOptionsRequest [%d]%s", mChannel, data);
     std::string response = "RTSP/1.0 200 OK\r\n";
     appendCommonResponse(&response, cseq);
     response.append(
@@ -393,7 +371,7 @@ void RtspClient::onOptionsRequest(const char *data, int32_t cseq) {
 
 void RtspClient::onDescribeRequest(const char *data, int32_t cseq) {
     char temp[128];
-    struct sockaddr_in addr;
+    struct sockaddr_in addr{};
     socklen_t addrlen = sizeof(addr);
     getsockname(mSocket, (struct sockaddr *) &addr, &addrlen);
     std::string response = "RTSP/1.0 200 OK\r\n";
@@ -408,34 +386,21 @@ void RtspClient::onDescribeRequest(const char *data, int32_t cseq) {
     spd.append("m=video 0 RTP/AVP 96\r\n");
     spd.append("a=rtpmap:96 H264/90000\r\n");
 
-    switch (mSiteLink) {
-        case CAMERA: {
-            break;
-        }
-        case SCREEN:
-        default: {
-            break;
-        }
-    }
-    //wait 500ms second for sps pps
-    for (int i = 0; i < 50; i++) {
-        if (vec_sps.empty() || vec_pps.empty()) usleep(10000);
-    }
-    if (vec_sps.empty() || vec_pps.empty()) {
-        FLOGE("RtspClinet get pps pps error!");
-        return;
-    } else {
-        uint8_t sps[64] = {0};
-        uint8_t pps[64] = {0};
-        int32_t outLen = 0;
-        Base64::encode((const uint8_t *) &vec_sps[0], vec_sps.size(), sps, &outLen);
-        Base64::encode((const uint8_t *) &vec_pps[0], vec_pps.size(), pps, &outLen);
-        memset(temp, 0, strlen(temp));
-        sprintf(temp,
-                "a=fmtp:96 profile-level-id=1;packetization-mode=1;sprop-parameter-sets=%s,%s\r\n",
-                sps, pps);
-        spd.append(temp);
-    }
+    uint8_t sps[128] = {0};
+    uint8_t pps[128] = {0};
+    int32_t outLen = 0;
+
+    auto vec_sps = mServer->get_sps(mChannel);
+    auto vec_pps = mServer->get_pps(mChannel);
+    Base64::encode((const uint8_t *) &vec_sps[0], vec_sps.size(), sps, &outLen);
+    Base64::encode((const uint8_t *) &vec_pps[0], vec_pps.size(), pps, &outLen);
+
+    memset(temp, 0, strlen(temp));
+    sprintf(temp,
+            "a=fmtp:96 profile-level-id=1;packetization-mode=1;sprop-parameter-sets=%s,%s\r\n", sps,
+            pps);
+    spd.append(temp);
+
     spd.append("a=control:track1\r\n");
     spd.append("m=audio 0 RTP/AVP 97\r\n");
     switch (AUDIO_SAMPLE) {
@@ -694,10 +659,5 @@ void RtspClient::sendAFrame(const char *aac, int32_t size, int64_t ptsUsec) {
 }
 
 void RtspClient::selfFixedThread() {
-    while (!is_stop) {
-        for (int i = 0; i < 10; i++) {
-            usleep(100000);
-            if (is_stop) return;
-        }
-    }
+
 }

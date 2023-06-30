@@ -14,7 +14,7 @@ class BufferManager : public INotify{
 public:
     static void init();
     static void release();
-    static BufferManager* instance();
+    static BufferManager* get();
     void regNotify(Notify* notify);
     void unregNotify(Notify* notify);
     ~BufferManager();

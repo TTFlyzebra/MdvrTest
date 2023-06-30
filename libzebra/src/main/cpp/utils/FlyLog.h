@@ -8,7 +8,7 @@
 #include <android/Log.h>
 #include <stdio.h>
 
-#define TAG "ZEBRA-MCTL"
+#define TAG "ZEBRA-CORE"
 
 #define FLOGV(...) __android_log_print(ANDROID_LOG_VERBOSE,TAG ,__VA_ARGS__);printf(__VA_ARGS__);printf("\n")
 #define FLOGD(...) __android_log_print(ANDROID_LOG_DEBUG,TAG ,__VA_ARGS__);printf(__VA_ARGS__);printf("\n")

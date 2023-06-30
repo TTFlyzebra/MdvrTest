@@ -5,18 +5,16 @@
 #include "ByteUtil.h"
 #include <string.h>
 
-int16_t ByteUtil::getInt16(const char* data)
-{
-    return (int16_t)(data[0] & 0xFF) << 8 | (data[1] & 0xFF);
+int16_t ByteUtil::getInt16(const char *data) {
+    return (int16_t) (data[0] & 0xFF) << 8 | (data[1] & 0xFF);
 }
 
-int32_t ByteUtil::getInt32(const char* data)
-{
-    return (int32_t)(data[0] & 0xFF) << 24 | (data[1] & 0xFF) << 16 | (data[2] & 0xFF) << 8 | (data[3] & 0xFF);
+int32_t ByteUtil::getInt32(const char *data) {
+    return (int32_t) (data[0] & 0xFF) << 24 | (data[1] & 0xFF) << 16 | (data[2] & 0xFF) << 8 |
+           (data[3] & 0xFF);
 }
 
-void ByteUtil::int16ToData(char* data, int16_t i1, int16_t i2, int16_t i3, int16_t i4)
-{
+void ByteUtil::int16ToData(char *data, int16_t i1, int16_t i2, int16_t i3, int16_t i4) {
     data[0] = i1 >> 8 & 0xFF;
     data[1] = i1 & 0xFF;
     if (i2 == 0) return;
@@ -30,8 +28,7 @@ void ByteUtil::int16ToData(char* data, int16_t i1, int16_t i2, int16_t i3, int16
     data[7] = i4 & 0xFF;
 }
 
-void ByteUtil::int32ToData(char* data, int32_t i1, int32_t i2)
-{
+void ByteUtil::int32ToData(char *data, int32_t i1, int32_t i2) {
     data[0] = i1 >> 24 & 0xFF;
     data[1] = i1 >> 16 & 0xFF;
     data[2] = i1 >> 8 & 0xFF;
@@ -43,22 +40,18 @@ void ByteUtil::int32ToData(char* data, int32_t i1, int32_t i2)
     data[7] = i2 & 0xFF;
 }
 
-int64_t ByteUtil::sysIdToInt64(char* data)
-{
+int64_t ByteUtil::sysIdToInt64(char *data) {
     int64_t tid = 0;
     for (int i = 0; i < 9; i++) {
         int64_t ret = 0;
         char x = data[i] & 0xFF;
         if (x >= '0' && x <= '9') {
             ret = x - '0';
-        }
-        else if (x >= 'A' && x <= 'Z') {
+        } else if (x >= 'A' && x <= 'Z') {
             ret = x - 'A' + 10;
-        }
-        else if (x >= 'a' && x <= 'z') {
+        } else if (x >= 'a' && x <= 'z') {
             ret = x - 'a' + 10;
-        }
-        else {
+        } else {
             continue;
         }
         int64_t pow = 1;
@@ -71,17 +64,31 @@ int64_t ByteUtil::sysIdToInt64(char* data)
     return tid;
 }
 
-void ByteUtil::int64ToSysId(char* data, int64_t tid)
-{
+void ByteUtil::int64ToSysId(char *data, int64_t tid) {
     int64_t num = tid;
     for (int i = 0; i < 9; i++) {
         int8_t ni = (num % 36) & 0xFF;
         if (ni < 10) {
             data[8 - i] = ni + '0';
-        }
-        else {
+        } else {
             data[8 - i] = ni - 10 + 'A';
         }
         num = num / 36;
+    }
+}
+
+int16_t ByteUtil::byte2int16(const char *data, int32_t offset, bool littleEndian) {
+    int16_t value = 0;
+    for (int count = 0; count < 2; ++count) {
+        int shift = (littleEndian ? count : (1 - count)) << 3;
+        value |= ((int16_t) 0xff << shift) & ((int16_t) data[offset + count] << shift);
+    }
+    return value;
+}
+
+void ByteUtil::int16ToBytes(int16_t value, char *data, int offset, bool littleEndian) {
+    for (int count = 0; count < 2; ++count) {
+        int shift = (littleEndian ? count : (1 - count)) << 3;
+        data[count + offset] = (char) (value >> shift & 0xFF);
     }
 }
