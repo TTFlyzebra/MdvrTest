@@ -18,14 +18,14 @@ public:
     void regNotify(Notify* notify);
     void unregNotify(Notify* notify);
     ~BufferManager();
-    virtual void notify(const char* data, int32_t size) override;
-    virtual void handle(int32_t type, const char* data, int32_t size, int32_t p1, int32_t p2, int32_t p3, int64_t p4, int64_t tid) override;
+    void notify(const char* data, int32_t size) override;
+    void handle(NofifyType type, const char* data, int32_t size, const char* params) override;
     LoopBuf* createBuffer(size_t capacity, size_t itemsize, const char* tag);
     void releaseBuffer(LoopBuf* buffer);
 
 private:
     BufferManager();
-    void selfFixedThread();
+    void selfFixedThread() const;
 
 private:
     static BufferManager* m_pInstance;

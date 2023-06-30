@@ -11,8 +11,8 @@ class BaseNotify : public INotify {
 public:
     BaseNotify(Notify* notify);
     ~BaseNotify();
-    virtual void notify(const char* data, int32_t size) override;
-    virtual void handle(int32_t type, const char* data, int32_t size, int32_t p1, int32_t p2, int32_t p3, int64_t p4, int64_t tid) override;
+    void notify(const char* data, int32_t size) override;
+    void handle(NofifyType type, const char* data, int32_t size, const char* params) override;
 
 public:
     Notify* N;

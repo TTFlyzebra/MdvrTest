@@ -40,8 +40,8 @@ RtspServer::~RtspServer()
     }
     {
         std::lock_guard<std::mutex> lock (mlock_client);
-        for (std::list<RtspClient*>::iterator it = rtsp_clients.begin(); it != rtsp_clients.end(); ++it) {
-            delete ((RtspClient*)*it);
+        for (auto & rtsp_client : rtsp_clients) {
+            delete ((RtspClient*)rtsp_client);
         }
         rtsp_clients.clear();
     }
@@ -62,7 +62,7 @@ void RtspServer::serverSocket()
             usleep(1000000);
             continue;
         }
-        struct sockaddr_in t_sockaddr;
+        struct sockaddr_in t_sockaddr{};
         memset(&t_sockaddr, 0, sizeof(t_sockaddr));
         t_sockaddr.sin_family = AF_INET;
         t_sockaddr.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -100,7 +100,7 @@ void RtspServer::serverSocket()
                 continue;
             }
             if(is_stop) break;
-            RtspClient *client = new RtspClient(this, N, client_socket);
+            auto *client = new RtspClient(this, N, client_socket);
             std::lock_guard<std::mutex> lock (mlock_client);
             rtsp_clients.push_back(client);
         }
@@ -113,17 +113,17 @@ void RtspServer::serverSocket()
 void RtspServer::removeClient()
 {
     while(!is_stop){
-        std::unique_lock<std::mutex> lock (mlock_remove);
+        std::unique_lock<std::mutex> lock_remove (mlock_remove);
         while (!is_stop && remove_clients.empty()) {
-            mcond_remove.wait(lock);
+            mcond_remove.wait(lock_remove);
         }
         if(is_stop) break;
-        for (std::vector<RtspClient*>::iterator it = remove_clients.begin(); it != remove_clients.end(); ++it) {
+        for (auto & remove_client : remove_clients) {
             {
-                std::lock_guard<std::mutex> lock (mlock_client);
-                rtsp_clients.remove(((RtspClient*)*it));
+                std::lock_guard<std::mutex> lock_client (mlock_client);
+                rtsp_clients.remove(((RtspClient*)remove_client));
             }
-            delete ((RtspClient*)*it);
+            delete ((RtspClient*)remove_client);
         }
         remove_clients.clear();
         FLOGD("RtspServer::removeClient rtsp_clients.size=%zu", rtsp_clients.size());

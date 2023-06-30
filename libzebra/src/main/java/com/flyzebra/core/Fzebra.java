@@ -2,6 +2,7 @@ package com.flyzebra.core;
 
 import com.flyzebra.core.notify.INotify;
 import com.flyzebra.core.notify.Notify;
+import com.flyzebra.utils.FlyLog;
 
 public class Fzebra implements INotify {
     static {
@@ -44,6 +45,14 @@ public class Fzebra implements INotify {
     public void handle(int type, byte[] data, int size, byte[] params) {
         if (_ptr_obj < 0) return;
         _handle(_ptr_obj, type, data, size, params);
+    }
+
+    private void javaNotifydata(byte[] data, int size) {
+        FlyLog.e("javaNotifydata xxxxxxx");
+    }
+
+    private void javaHandleData(int type, byte[] data, int size, byte[] params) {
+        FlyLog.e("javaHandleData xxxxxxx");
     }
 
     private native long _init();

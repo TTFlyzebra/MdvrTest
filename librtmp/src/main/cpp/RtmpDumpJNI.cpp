@@ -9,10 +9,10 @@ extern "C" {
 #include "utils/FlyLog.h"
 #include "RtmpDump.h"
 
-JavaVM *javaVM = nullptr;
+JavaVM *jvm = nullptr;
 
 extern "C" jint JNI_OnLoad(JavaVM *vm, void *reserved) {
-    javaVM = vm;
+    jvm = vm;
     JNIEnv *env = nullptr;
     jint result = -1;
     if (vm->GetEnv((void **) &env, JNI_VERSION_1_6) != JNI_OK) {
@@ -26,7 +26,7 @@ extern "C"
 JNIEXPORT jlong JNICALL
 Java_com_flyzebra_rtmp_RtmpDump__1open(JNIEnv *env, jobject thiz, jint channel, jstring jurl) {
     const char *url = env->GetStringUTFChars(jurl, JNI_FALSE);
-    auto *rtmpDump = new RtmpDump(javaVM, env, thiz);
+    auto *rtmpDump = new RtmpDump(jvm, env, thiz);
     bool ret = rtmpDump->open(channel, url);
     env->ReleaseStringUTFChars(jurl, url);
     return ret ? reinterpret_cast<jlong>(rtmpDump) : -1;

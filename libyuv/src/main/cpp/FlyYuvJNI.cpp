@@ -7,10 +7,10 @@
 #include <cstring>
 #include "FlyYuv.h"
 
-JavaVM *javaVM = nullptr;
+JavaVM *jvm = nullptr;
 
 extern "C" jint JNI_OnLoad(JavaVM *vm, void *reserved) {
-    javaVM = vm;
+    jvm = vm;
     JNIEnv *env = nullptr;
     jint result = -1;
     if (vm->GetEnv((void **) &env, JNI_VERSION_1_4) != JNI_OK) {

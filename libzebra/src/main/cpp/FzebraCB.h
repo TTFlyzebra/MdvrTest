@@ -7,21 +7,21 @@
 
 #include <jni.h>
 
-class FzebrCB {
+class FzebraCB {
 public:
-    FzebrCB(JavaVM* jvm, JNIEnv *env, jobject thiz);
-    ~FzebrCB();
+    FzebraCB(JavaVM* jvm, JNIEnv *env, jobject thiz);
+    ~FzebraCB();
 
-    void javaNotify(const char* data, int32_t size);
-    void javaHandle(int32_t type, const char* data, int32_t size, const char* parmas);
+    void javaNotifydata(const char* data, int32_t size);
+    void javaHandledata(int32_t type, const char* data, int32_t size, const char* parmas);
 
 private:
     JavaVM* javeVM ;
     JNIEnv *jniEnv ;
     jobject jObject;
 
-    jmethodID notify;
-    jmethodID handle;
+    jmethodID notifydata;
+    jmethodID handledata;
 };
 
 

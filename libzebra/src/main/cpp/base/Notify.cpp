@@ -54,16 +54,16 @@ void Notify::unregisterListener(INotify* notify)
 void Notify::notifydata(const char* data, int32_t size)
 {
     std::lock_guard<std::mutex> lock(mlock_list);
-    for (std::list<INotify*>::iterator it = notifyList.begin(); it != notifyList.end(); ++it) {
-        ((INotify*)*it)->notify(data, size);
+    for (auto & it : notifyList) {
+        ((INotify*)it)->notify(data, size);
     }
 }
 
-void Notify::handledata(NofifyType type, const char* data, int32_t size, int32_t p1, int32_t p2, int32_t p3, int64_t p4, int64_t tid)
+void Notify::handledata(NofifyType type, const char* data, int32_t size, const char* params)
 {
     std::lock_guard<std::mutex> lock(mlock_list);
-    for (std::list<INotify*>::iterator it = notifyList.begin(); it != notifyList.end(); ++it) {
-        ((INotify*)*it)->handle(type, data, size, p1, p2, p3, p4, tid);
+    for (auto & it : notifyList) {
+        ((INotify*)it)->handle(type, data, size, params);
     }
 }
 

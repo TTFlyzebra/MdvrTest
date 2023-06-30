@@ -100,23 +100,22 @@ RtspClient::~RtspClient() {
 }
 
 void
-RtspClient::handle(int32_t type, const char *data, int32_t size, int32_t p1, int32_t p2, int32_t p3,
-                   int64_t p4, int64_t tid) {
+RtspClient::handle(NofifyType type, const char *data, int32_t size, const char *params) {
     switch (type) {
         case NOTI_SCREEN_AVC: {
-            if (mSiteLink == SCREEN) sendVFrame(data, size, p4);
+            if (mSiteLink == SCREEN) sendVFrame(data, size, 0);
             break;
         }
         case NOTI_SNDOUT_AAC: {
-            if (mSiteLink == SCREEN) sendAFrame(data, size, p4);
+            if (mSiteLink == SCREEN) sendAFrame(data, size, 0);
             break;
         }
         case NOTI_CAMOUT_AVC: {
-            if (mSiteLink == CAMERA) sendVFrame(data, size, p4);
+            if (mSiteLink == CAMERA) sendVFrame(data, size, 0);
             break;
         }
         case NOTI_MICOUT_AAC: {
-            if (mSiteLink == CAMERA) sendAFrame(data, size, p4);
+            if (mSiteLink == CAMERA) sendAFrame(data, size, 0);
             break;
         }
     }

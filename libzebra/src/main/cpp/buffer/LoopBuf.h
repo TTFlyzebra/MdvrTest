@@ -30,6 +30,7 @@ private:
     size_t _itemsize;
     const char* _tag;
     char* _data;
+
     std::atomic<size_t> _spos;
     std::atomic<size_t> _epos;
     std::atomic<size_t> _size;

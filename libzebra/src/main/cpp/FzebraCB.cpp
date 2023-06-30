@@ -5,7 +5,7 @@
 #include "FzebraCB.h"
 #include "utils/FlyLog.h"
 
-FzebrCB::FzebrCB(JavaVM *jvm, JNIEnv *env, jobject thiz) {
+FzebraCB::FzebraCB(JavaVM *jvm, JNIEnv *env, jobject thiz) {
 //    FLOGI("%s()", __func__);
     javeVM = jvm;
     jniEnv = env;
@@ -15,12 +15,12 @@ FzebrCB::FzebrCB(JavaVM *jvm, JNIEnv *env, jobject thiz) {
         FLOGE("find jclass faild");
         return;
     }
-    notify = jniEnv->GetMethodID(cls, "notify", "([BI])V");
-    handle = jniEnv->GetMethodID(cls, "handle", "(I[BI[B)V");
+    notifydata = jniEnv->GetMethodID(cls, "javaNotifydata", "([BI])V");
+    handledata = jniEnv->GetMethodID(cls, "javaHandleData", "(I[BI[B)V");
     jniEnv->DeleteLocalRef(cls);
 }
 
-FzebrCB::~FzebrCB() {
+FzebraCB::~FzebraCB() {
     int status = javeVM->GetEnv((void **) &jniEnv, JNI_VERSION_1_6);
     bool isAttacked = false;
     if (status < 0) {
@@ -38,7 +38,7 @@ FzebrCB::~FzebrCB() {
 //    FLOGI("%s()", __func__);
 }
 
-void FzebrCB::javaNotify(const char *data, int32_t size) {
+void FzebraCB::javaNotifydata(const char *data, int32_t size) {
     int status = javeVM->GetEnv((void **) &jniEnv, JNI_VERSION_1_6);
     bool isAttacked = false;
     if (status < 0) {
@@ -49,13 +49,13 @@ void FzebrCB::javaNotify(const char *data, int32_t size) {
         }
         isAttacked = true;
     }
-    jniEnv->CallVoidMethod(jObject, notify, data, size);
+    jniEnv->CallVoidMethod(jObject, notifydata, data, size);
     if (isAttacked) {
         (javeVM)->DetachCurrentThread();
     }
 }
 
-void FzebrCB::javaHandle(int32_t type, const char *data, int32_t size, const char *parmas) {
+void FzebraCB::javaHandledata(int32_t type, const char *data, int32_t size, const char *parmas) {
     int status = javeVM->GetEnv((void **) &jniEnv, JNI_VERSION_1_6);
     bool isAttacked = false;
     if (status < 0) {
@@ -66,7 +66,7 @@ void FzebrCB::javaHandle(int32_t type, const char *data, int32_t size, const cha
         }
         isAttacked = true;
     }
-    jniEnv->CallVoidMethod(jObject, handle, type, data, size, parmas);
+    jniEnv->CallVoidMethod(jObject, handledata, type, data, size, parmas);
     if (isAttacked) {
         (javeVM)->DetachCurrentThread();
     }
