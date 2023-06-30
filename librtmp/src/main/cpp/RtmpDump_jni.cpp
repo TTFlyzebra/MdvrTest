@@ -15,11 +15,11 @@ extern "C" jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     javaVM = vm;
     JNIEnv *env = nullptr;
     jint result = -1;
-    if (vm->GetEnv((void **) &env, JNI_VERSION_1_4) != JNI_OK) {
+    if (vm->GetEnv((void **) &env, JNI_VERSION_1_6) != JNI_OK) {
         FLOGE("JNI OnLoad failed\n");
         return result;
     }
-    return JNI_VERSION_1_4;
+    return JNI_VERSION_1_6;
 }
 
 extern "C"

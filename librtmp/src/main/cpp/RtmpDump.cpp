@@ -12,11 +12,11 @@
 
 RtmpDump::RtmpDump(JavaVM *jvm, JNIEnv *env, jobject thiz)
         : rtmp(nullptr) {
-    callBack = new CallBack(jvm, env, thiz);
+    cb = new RtmpDumpCB(jvm, env, thiz);
 }
 
 RtmpDump::~RtmpDump() {
-    delete callBack;
+    delete cb;
 }
 
 bool RtmpDump::open(int channel, const char *url) {
@@ -76,7 +76,7 @@ bool RtmpDump::sendAacHead(const char *head, int headLen) {
     int bodySize = 2 + headLen;
     int ret = RTMPPacket_Alloc(packet, bodySize);
     if (!ret) {
-        callBack->javaOnError(-2);
+        cb->javaOnError(-2);
         return FALSE;
     }
     // SoundFormat(4bits):10=AAC；
@@ -111,7 +111,7 @@ bool RtmpDump::sendAacData(const char *data, int size, long pts) {
     int bodySize = 2 + size;
     int ret = RTMPPacket_Alloc(packet, bodySize);
     if (!ret) {
-        callBack->javaOnError(-2);
+        cb->javaOnError(-2);
         return FALSE;
     }
     // SoundFormat(4bits):10=AAC；
@@ -167,7 +167,7 @@ bool RtmpDump::sendAvcHead(const char *data, int size) {
     RTMPPacket_Reset(packet);
     int ret = RTMPPacket_Alloc(packet, 2 + 3 + 5 + 1 + 2 + sps_len + 1 + 2 + pps_len);
     if (!ret) {
-        callBack->javaOnError(-1);
+        cb->javaOnError(-1);
         return FALSE;
     }
     packet->m_packetType = RTMP_PACKET_TYPE_VIDEO;
@@ -215,7 +215,7 @@ bool RtmpDump::sendAvcData(const char *data, int size, long pts) {
     RTMPPacket_Reset(packet);
     int ret = RTMPPacket_Alloc(packet, 9 + size);
     if (!ret) {
-        callBack->javaOnError(-2);
+        cb->javaOnError(-2);
         return FALSE;
     }
     packet->m_packetType = RTMP_PACKET_TYPE_VIDEO;
@@ -272,7 +272,7 @@ bool RtmpDump::sendHevcHead(const char *data, int size) {
     RTMPPacket_Reset(packet);
     int ret = RTMPPacket_Alloc(packet, 43 + vps_len + sps_len + pps_len);
     if (!ret) {
-        callBack->javaOnError(-1);
+        cb->javaOnError(-1);
         return FALSE;
     }
     //packet->m_nInfoField2 = rtmp->m_stream_id;
@@ -356,7 +356,7 @@ bool RtmpDump::sendHevcData(const char *data, int size, long pts) {
     RTMPPacket_Reset(packet);
     int ret = RTMPPacket_Alloc(packet, 9 + size);
     if (!ret) {
-        callBack->javaOnError(-2);
+        cb->javaOnError(-2);
         return FALSE;
     }
     int i = 0;

@@ -13,7 +13,7 @@ add_library(
         SHARED
         RtmpDump_jni.cpp
         RtmpDump.cpp
-        CallBack.cpp
+        RtmpDumpCB.cpp
         buffer/BufferManager.cpp
         buffer/LoopBuf.cpp
         librtmp/amf.c

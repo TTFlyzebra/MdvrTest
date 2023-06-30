@@ -2,10 +2,10 @@
 // Created by Administrator on 2023/6/23.
 //
 
-#include "CallBack.h"
+#include "RtmpDumpCB.h"
 #include "utils/FlyLog.h"
 
-CallBack::CallBack(JavaVM *jvm, JNIEnv *env, jobject thiz) {
+RtmpDumpCB::RtmpDumpCB(JavaVM *jvm, JNIEnv *env, jobject thiz) {
 //    FLOGI("%s()", __func__);
     javeVM = jvm;
     jniEnv = env;
@@ -19,8 +19,8 @@ CallBack::CallBack(JavaVM *jvm, JNIEnv *env, jobject thiz) {
     jniEnv->DeleteLocalRef(cls);
 }
 
-CallBack::~CallBack() {
-    int status = javeVM->GetEnv((void **) &jniEnv, JNI_VERSION_1_4);
+RtmpDumpCB::~RtmpDumpCB() {
+    int status = javeVM->GetEnv((void **) &jniEnv, JNI_VERSION_1_6);
     bool isAttacked = false;
     if (status < 0) {
         status = javeVM->AttachCurrentThread(&jniEnv, nullptr);
@@ -37,8 +37,8 @@ CallBack::~CallBack() {
 //    FLOGI("%s()", __func__);
 }
 
-void CallBack::javaOnError(int error) {
-    int status = javeVM->GetEnv((void **) &jniEnv, JNI_VERSION_1_4);
+void RtmpDumpCB::javaOnError(int error) {
+    int status = javeVM->GetEnv((void **) &jniEnv, JNI_VERSION_1_6);
     bool isAttacked = false;
     if (status < 0) {
         status = javeVM->AttachCurrentThread(&jniEnv, nullptr);

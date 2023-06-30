@@ -7,10 +7,10 @@
 
 #include <jni.h>
 
-class CallBack {
+class RtmpDumpCB {
 public:
-    CallBack(JavaVM* jvm, JNIEnv *env, jobject thiz);
-    ~CallBack();
+    RtmpDumpCB(JavaVM* jvm, JNIEnv *env, jobject thiz);
+    ~RtmpDumpCB();
     void javaOnError(int error);
 
 private:

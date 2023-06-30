@@ -6,6 +6,7 @@
 #define F_ZEBRA_FLYLOG_H
 
 #include <android/Log.h>
+#include <stdio.h>
 
 #define TAG "ZEBRA-MCTL"
 

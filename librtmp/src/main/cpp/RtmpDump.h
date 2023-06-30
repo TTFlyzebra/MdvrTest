@@ -10,7 +10,7 @@
 #include <mutex>
 #include <thread>
 #include <condition_variable>
-#include "CallBack.h"
+#include "RtmpDumpCB.h"
 
 class RTMP;
 
@@ -39,7 +39,7 @@ public:
     bool sendHevcData(const char *data, int size, long pts);
 
 private:
-    CallBack *callBack;
+    RtmpDumpCB *cb;
     int mChannel;
     char rtmp_url[1024];
     RTMP *rtmp;
