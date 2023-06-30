@@ -1,4 +1,4 @@
-package com.flyzebra.mdvr.opengl;
+package com.flyzebra.mdvr.view;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView;

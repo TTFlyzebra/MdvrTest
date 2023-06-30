@@ -5,10 +5,10 @@
  * Date: 2023/6/23 11:07
  * Description:
  */
-package com.flyzebra.mdvr.audio;
+package com.flyzebra.mdvr.sound;
 
-import com.flyzebra.core.media.AudioEncoder;
-import com.flyzebra.core.media.AudioEncoderCB;
+import com.flyzebra.core.media.AudioCodec;
+import com.flyzebra.core.media.AudioCodecCB;
 import com.flyzebra.core.notify.INotify;
 import com.flyzebra.core.notify.Notify;
 import com.flyzebra.core.notify.NotifyType;
@@ -19,30 +19,28 @@ import com.flyzebra.utils.FlyLog;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class AacService implements AudioEncoderCB, INotify {
+public class SoundEncoder implements AudioCodecCB, INotify {
     private final int mChannel;
-
     int pcmSize = (int) (Config.MIC_SAMPLE * 1.0f * 16 / 8 * 2 / 25.0f);
     int pcmBufSize = pcmSize + 8;
     private final ByteBuffer pcmBuf = ByteBuffer.wrap(new byte[pcmBufSize * 15]);
     private Thread pcmThread;
     private final Object pcmLock = new Object();
+    private final AtomicBoolean is_stop = new AtomicBoolean(true);
 
-    private AtomicBoolean is_stop = new AtomicBoolean(true);
-
-    public AacService(int channel) {
+    public SoundEncoder(int channel) {
         mChannel = channel;
     }
 
     public void onCreate() {
-        FlyLog.d("AacService[%d] start!", mChannel);
+        FlyLog.d("SoundEncoder[%d] start!", mChannel);
         Notify.get().registerListener(this);
         is_stop.set(false);
         pcmThread = new Thread(() -> {
             long ptsUsec = 0;
             byte[] pcm = new byte[pcmSize];
-            AudioEncoder audioEncoder = new AudioEncoder(mChannel, this);
-            audioEncoder.initCodec(Config.MIC_MIME_TYPE, Config.MIC_SAMPLE, Config.MIC_CHANNELS, Config.MIC_BIT_RATE);
+            AudioCodec audioCodec = new AudioCodec(mChannel, this);
+            audioCodec.initCodec(Config.MIC_MIME_TYPE, Config.MIC_SAMPLE, Config.MIC_CHANNELS, Config.MIC_BIT_RATE);
             while (!is_stop.get()) {
                 synchronized (pcmLock) {
                     if (!is_stop.get() && pcmBuf.position() < pcmBufSize) {
@@ -58,9 +56,9 @@ public class AacService implements AudioEncoderCB, INotify {
                     pcmBuf.get(pcm);
                     pcmBuf.compact();
                 }
-                audioEncoder.inPumData(pcm, pcmSize, ptsUsec);
+                audioCodec.inPumData(pcm, pcmSize, ptsUsec);
             }
-            audioEncoder.releaseCodec();
+            audioCodec.releaseCodec();
         }, "audio-aac" + mChannel);
         pcmThread.start();
     }
@@ -76,7 +74,7 @@ public class AacService implements AudioEncoderCB, INotify {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        FlyLog.d("AacService[%d] exit!", mChannel);
+        FlyLog.d("SoundEncoder[%d] exit!", mChannel);
     }
 
     @Override

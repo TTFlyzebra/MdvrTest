@@ -1,6 +1,6 @@
 package com.flyzebra.core.media;
 
-public interface VideoEncoderCB {
+public interface VideoCodecCB {
     /**
      * H264 sps-pps
      *

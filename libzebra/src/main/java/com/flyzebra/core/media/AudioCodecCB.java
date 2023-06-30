@@ -1,6 +1,6 @@
 package com.flyzebra.core.media;
 
-public interface AudioEncoderCB {
+public interface AudioCodecCB {
 
     void notifyAacHead(int channel, byte[] head, int size);
 

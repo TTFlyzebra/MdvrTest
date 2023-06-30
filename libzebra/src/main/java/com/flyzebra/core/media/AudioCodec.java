@@ -16,14 +16,14 @@ import com.flyzebra.utils.FlyLog;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class AudioEncoder implements Runnable {
+public class AudioCodec implements Runnable {
     private final int mChannel;
     private MediaCodec codec = null;
     private final AtomicBoolean is_codec_init = new AtomicBoolean(false);
     private Thread mOutThread = null;
-    private final AudioEncoderCB mCallBack;
+    private final AudioCodecCB mCallBack;
 
-    public AudioEncoder(int channel, AudioEncoderCB cb) {
+    public AudioCodec(int channel, AudioCodecCB cb) {
         mChannel = channel;
         mCallBack = cb;
     }

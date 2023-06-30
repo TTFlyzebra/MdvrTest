@@ -16,14 +16,14 @@ import com.flyzebra.utils.FlyLog;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class VideoEncoder implements Runnable {
+public class VideoCodec implements Runnable {
     private final int mChannel;
     private MediaCodec codec = null;
     private final AtomicBoolean is_codec_init = new AtomicBoolean(false);
     private Thread mOutThread = null;
-    private final VideoEncoderCB mCallBack;
+    private final VideoCodecCB mCallBack;
 
-    public VideoEncoder(int channel, VideoEncoderCB cb) {
+    public VideoCodec(int channel, VideoCodecCB cb) {
         mChannel = channel;
         mCallBack = cb;
     }

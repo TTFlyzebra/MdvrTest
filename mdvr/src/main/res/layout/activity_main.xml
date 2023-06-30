@@ -16,14 +16,14 @@
         android:orientation="horizontal"
         android:weightSum="2">
 
-        <com.flyzebra.mdvr.opengl.GlVideoView
+        <com.flyzebra.mdvr.view.GlVideoView
             android:id="@+id/sv01"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_margin="1dp"
             android:layout_weight="1"/>
 
-        <com.flyzebra.mdvr.opengl.GlVideoView
+        <com.flyzebra.mdvr.view.GlVideoView
             android:id="@+id/sv02"
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -38,14 +38,14 @@
         android:orientation="horizontal"
         android:weightSum="2">
 
-        <com.flyzebra.mdvr.opengl.GlVideoView
+        <com.flyzebra.mdvr.view.GlVideoView
             android:id="@+id/sv03"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_margin="1dp"
             android:layout_weight="1"/>
 
-        <com.flyzebra.mdvr.opengl.GlVideoView
+        <com.flyzebra.mdvr.view.GlVideoView
             android:id="@+id/sv04"
             android:layout_width="0dp"
             android:layout_height="match_parent"

@@ -1,4 +1,6 @@
-package com.flyzebra.mdvr.audio;
+package com.flyzebra.mdvr.sound;
+
+import static com.flyzebra.mdvr.Config.MAX_CAM;
 
 import android.Manifest;
 import android.content.Context;
@@ -20,29 +22,35 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * rn9175音频，四路麦克风使用一路48k2channels16bit录入，每路为48k1channel8bit
  * 实际每路转为48k1channel16bit
  */
-public class PcmService {
+public class SoundService {
     private final Context mContext;
-    private int sampleRate;
     private AudioRecord mAudioRecord;
     private final AtomicBoolean is_stop = new AtomicBoolean(true);
     int pcmSize = (int) (Config.MIC_SAMPLE * 1.0f * 16 / 8 * 2 / 25.0f);
     private final byte[] pcm = new byte[pcmSize];
     private Thread mRecordThread = null;
+    private final SoundEncoder[] soundEncoders = new SoundEncoder[MAX_CAM];
 
-    public PcmService(Context context) {
+    public SoundService(Context context) {
         this.mContext = context;
+        for (int i = 0; i < MAX_CAM; i++) {
+            soundEncoders[i] = new SoundEncoder(i);
+        }
     }
 
-    public void onCreate(int sample, int channel, int format) {
-        FlyLog.d("PcmService start!");
-        this.sampleRate = sample;
-        int bufferSize = AudioRecord.getMinBufferSize(sample, channel, format);
+    public void onCreate() {
+        FlyLog.d("SoundService start!");
+        is_stop.set(false);
+        for (int i = 0; i < MAX_CAM; i++) {
+            soundEncoders[i].onCreate();
+        }
+        int bufferSize = AudioRecord.getMinBufferSize(Config.MIC_SAMPLE, Config.MIC_CHANNEL, Config.MIC_FORMAT);
         if (ActivityCompat.checkSelfPermission(mContext,
                 Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             FlyLog.e("check audio record permission failed!");
             return;
         }
-        mAudioRecord = new AudioRecord(MediaRecorder.AudioSource.CAMCORDER, sample, channel, format, bufferSize);
+        mAudioRecord = new AudioRecord(MediaRecorder.AudioSource.CAMCORDER, Config.MIC_SAMPLE, Config.MIC_CHANNEL, Config.MIC_FORMAT, bufferSize);
         mRecordThread = new Thread(() -> {
             mAudioRecord.startRecording();
             int cPcmSize = pcmSize;
@@ -66,7 +74,7 @@ public class PcmService {
                 }
 
                 byte[] params = new byte[20];
-                ByteUtil.intToBytes(sampleRate, params, 2, true);
+                ByteUtil.intToBytes(Config.MIC_SAMPLE, params, 2, true);
                 ByteUtil.shortToBytes((short) Config.MIC_CHANNELS, params, 6, true);
                 ByteUtil.intToBytes(Config.MIC_BIT_RATE, params, 8, true);
                 ByteUtil.longToBytes(System.nanoTime() / 1000, params, 12, true);
@@ -82,8 +90,6 @@ public class PcmService {
             }
             mAudioRecord.stop();
         }, "audio-pcm");
-
-        is_stop.set(false);
         mRecordThread.start();
     }
 
@@ -94,6 +100,9 @@ public class PcmService {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        FlyLog.d("PcmService exit!");
+        for (int i = 0; i < MAX_CAM; i++) {
+            soundEncoders[i].onDistory();
+        }
+        FlyLog.d("SoundService exit!");
     }
 }

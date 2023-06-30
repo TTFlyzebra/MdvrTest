@@ -11,7 +11,7 @@ import com.flyzebra.core.notify.INotify;
 import com.flyzebra.core.notify.Notify;
 import com.flyzebra.core.notify.NotifyType;
 import com.flyzebra.mdvr.Config;
-import com.flyzebra.mdvr.camera.AvcService;
+import com.flyzebra.mdvr.camera.CameraEncoder;
 import com.flyzebra.rtmp.RtmpDump;
 import com.flyzebra.utils.ByteUtil;
 import com.flyzebra.utils.FlyLog;
@@ -19,7 +19,7 @@ import com.flyzebra.utils.FlyLog;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class PusherService implements INotify {
+public class RtmpPusher implements INotify {
     private final int mChannel;
     private final AtomicBoolean is_stop = new AtomicBoolean(true);
     private final AtomicBoolean is_rtmp = new AtomicBoolean(false);
@@ -29,12 +29,12 @@ public class PusherService implements INotify {
     private byte[] videoHead = null;
     private byte[] audioHead = null;
 
-    public PusherService(int channel) {
+    public RtmpPusher(int channel) {
         mChannel = channel;
     }
 
-    public void onCreate(String rtmp_url) {
-        FlyLog.d("PusherService[%d][%s] start !", mChannel, rtmp_url);
+    public void start(String rtmp_url) {
+        FlyLog.d("PusherService[%d] start !", mChannel);
         Notify.get().registerListener(this);
         is_stop.set(false);
         sendThread = new Thread(() -> {
@@ -86,7 +86,7 @@ public class PusherService implements INotify {
                     long pts = ByteUtil.bytes2Long(params, 2, true);
                     short format = ByteUtil.bytes2Short(params, 10, true);
                     if (!is_send_video_head && videoHead != null) {
-                        if (format == AvcService.AVC) {
+                        if (format == CameraEncoder.AVC) {
                             flag = sendAvcHead(rtmp, videoHead, videoHead.length);
                             if (flag) is_send_video_head = true;
                         } else {
@@ -95,7 +95,7 @@ public class PusherService implements INotify {
                         }
                     }
                     if (is_send_video_head) {
-                        if (format == AvcService.AVC) {
+                        if (format == CameraEncoder.AVC) {
                             flag = sendAvcData(rtmp, data, size, pts);
                         } else {
                             flag = sendHevcData(rtmp, data, size, pts);
@@ -118,11 +118,11 @@ public class PusherService implements INotify {
                 rtmp.close();
                 is_rtmp.set(false);
             }
-        }, "send-" + mChannel);
+        }, "rtmp-push" + mChannel);
         sendThread.start();
     }
 
-    public void onDestory() {
+    public void stop() {
         is_stop.set(true);
         Notify.get().unregisterListener(this);
         synchronized (sendLock) {

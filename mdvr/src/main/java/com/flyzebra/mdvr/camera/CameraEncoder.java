@@ -7,8 +7,8 @@
  */
 package com.flyzebra.mdvr.camera;
 
-import com.flyzebra.core.media.VideoEncoder;
-import com.flyzebra.core.media.VideoEncoderCB;
+import com.flyzebra.core.media.VideoCodec;
+import com.flyzebra.core.media.VideoCodecCB;
 import com.flyzebra.core.notify.INotify;
 import com.flyzebra.core.notify.Notify;
 import com.flyzebra.core.notify.NotifyType;
@@ -19,32 +19,30 @@ import com.flyzebra.utils.FlyLog;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class AvcService implements VideoEncoderCB, INotify {
+public class CameraEncoder implements VideoCodecCB, INotify {
     public static int AVC = 1;
     public static int HEVC = 2;
     private final int mChannel;
-
     int yuvSize = Config.CAM_WIDTH * Config.CAM_HEIGHT * 3 / 2;
     int yuvBufSize = yuvSize + 8;
     private final ByteBuffer yuvBuf = ByteBuffer.wrap(new byte[yuvBufSize * 15]);
     private Thread yuvThread;
     private final Object yuvLock = new Object();
+    private final AtomicBoolean is_stop = new AtomicBoolean(true);
 
-    private AtomicBoolean is_stop = new AtomicBoolean(true);
-
-    public AvcService(int channel) {
+    public CameraEncoder(int channel) {
         mChannel = channel;
     }
 
     public void onCreate() {
-        FlyLog.d("AvcService[%d] start!", mChannel);
+        FlyLog.d("CameraEncoder[%d] start!", mChannel);
         Notify.get().registerListener(this);
         is_stop.set(false);
         yuvThread = new Thread(() -> {
             long ptsUsec = 0;
             byte[] yuv = new byte[yuvSize];
-            VideoEncoder videoEncoder = new VideoEncoder(mChannel, this);
-            videoEncoder.initCodec(Config.CAM_MIME_TYPE, Config.CAM_WIDTH, Config.CAM_HEIGHT, Config.CAM_BIT_RATE);
+            VideoCodec videoCodec = new VideoCodec(mChannel, this);
+            videoCodec.initCodec(Config.CAM_MIME_TYPE, Config.CAM_WIDTH, Config.CAM_HEIGHT, Config.CAM_BIT_RATE);
             while (!is_stop.get()) {
                 synchronized (yuvLock) {
                     if (!is_stop.get() && yuvBuf.position() < yuvBufSize) {
@@ -60,9 +58,9 @@ public class AvcService implements VideoEncoderCB, INotify {
                     yuvBuf.get(yuv);
                     yuvBuf.compact();
                 }
-                videoEncoder.inYuvData(yuv, yuvSize, ptsUsec);
+                videoCodec.inYuvData(yuv, yuvSize, ptsUsec);
             }
-            videoEncoder.releaseCodec();
+            videoCodec.releaseCodec();
         }, "camera-avc" + mChannel);
         yuvThread.start();
     }
@@ -78,7 +76,7 @@ public class AvcService implements VideoEncoderCB, INotify {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        FlyLog.d("AvcService[%d] exit!", mChannel);
+        FlyLog.d("CameraEncoder[%d] exit!", mChannel);
     }
 
     @Override

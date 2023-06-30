@@ -8,6 +8,7 @@ import android.os.Looper;
 
 import com.flyzebra.core.notify.Notify;
 import com.flyzebra.core.notify.NotifyType;
+import com.flyzebra.mdvr.Config;
 import com.flyzebra.utils.ByteUtil;
 import com.flyzebra.utils.FlyLog;
 import com.quectel.qcarapi.stream.QCarCamera;
@@ -15,27 +16,33 @@ import com.quectel.qcarapi.stream.QCarCamera;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class YuvService implements Runnable {
+public class CameraService implements Runnable {
     private Context mContext;
     private int width;
     private int height;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private QCarCamera qCarCamera = null;
     private int camer_open_ret = -1;
-
     private final AtomicBoolean is_stop = new AtomicBoolean(true);
     private final VideoYuvThread[] yuvThreads = new VideoYuvThread[4];
     private final ByteBuffer[] videoBuffer = new ByteBuffer[MAX_CAM];
+    private final CameraEncoder[] cameraEncoders = new CameraEncoder[MAX_CAM];
 
-    public YuvService(Context context) {
+    public CameraService(Context context) {
         mContext = context;
+        for (int i = 0; i < MAX_CAM; i++) {
+            cameraEncoders[i] = new CameraEncoder(i);
+        }
     }
 
-    public void onCreate(int width, int height) {
+    public void onCreate() {
         FlyLog.d("YuvService start!");
-        this.width = width;
-        this.height = height;
+        this.width = Config.CAM_WIDTH;
+        this.height = Config.CAM_HEIGHT;
         is_stop.set(false);
+        for (int i = 0; i < MAX_CAM; i++) {
+            cameraEncoders[i].onCreate();
+        }
         mHandler.post(this);
     }
 
@@ -57,6 +64,9 @@ public class YuvService implements Runnable {
             qCarCamera.cameraClose();
             qCarCamera.release();
         }
+        for (int i = 0; i < MAX_CAM; i++) {
+            cameraEncoders[i].onDistory();
+        }
         FlyLog.d("YuvService exit!");
     }
 
@@ -68,7 +78,7 @@ public class YuvService implements Runnable {
         camer_open_ret = qCarCamera.cameraOpen(4, 1);
         if (camer_open_ret != 0) {
             FlyLog.e("QCarCamera open failed, ret=%d", camer_open_ret);
-            mHandler.postDelayed(YuvService.this, 1000);
+            mHandler.postDelayed(CameraService.this, 1000);
             return;
         }
         FlyLog.d("QCarCamera open success!");

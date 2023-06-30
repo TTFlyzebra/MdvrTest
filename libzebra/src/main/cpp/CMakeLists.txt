@@ -11,6 +11,7 @@ add_library(
         zebra
         SHARED
         Fzebra_jni.cpp
+        Fzebra.cpp
         FzebraCB.cpp
         base/Notify.cpp
         base/BaseNotify.cpp
