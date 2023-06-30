@@ -27,7 +27,6 @@ public:
 
     static void setThreadName(std::thread* pThread, const char *name);
 
-    static void getDisplayInfo(uint16_t* width, uint16_t* height, uint8_t* orientation);
 };
 
 

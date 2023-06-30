@@ -8,10 +8,6 @@
 #include <string.h>
 #include <regex.h>
 #include <pthread.h>
-#include <gui/SurfaceComposerClient.h>
-#include <ui/DisplayInfo.h>
-
-using namespace android;
 
 int32_t SysUtil::exec(const char *cmd, char *buffer, int32_t maxLen){
     FILE *pfile;
@@ -75,15 +71,4 @@ void SysUtil::setThreadName(std::thread* p_thread, const char *thread_name)
     int32_t len = strlen(thread_name);
     memcpy(name, thread_name, len<15 ? len : 15);
     pthread_setname_np(p_thread->native_handle(), name);
-}
-
-void SysUtil::getDisplayInfo(uint16_t* width, uint16_t* height, uint8_t* orientation)
-{
-    const sp<IBinder> mainDpy = SurfaceComposerClient::getInternalDisplayToken();
-    DisplayInfo mainDpyInfo;
-    if(mainDpy && SurfaceComposerClient::getDisplayInfo(mainDpy, &mainDpyInfo) == NO_ERROR){
-        *width = (uint16_t)mainDpyInfo.w;
-        *height = (uint16_t)mainDpyInfo.h;
-        *orientation = (uint8_t)mainDpyInfo.orientation;
-    }
 }
