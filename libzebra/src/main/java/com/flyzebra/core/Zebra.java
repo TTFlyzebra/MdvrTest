@@ -2,7 +2,7 @@ package com.flyzebra.core;
 
 import com.flyzebra.utils.FlyLog;
 
-public class ZebraNative {
+public class Zebra {
     static {
         System.loadLibrary("zebra");
     }
@@ -11,11 +11,11 @@ public class ZebraNative {
 
 
     private static class ZebraNativeHolder {
-        public static final ZebraNative sInstance = new ZebraNative();
+        public static final Zebra sInstance = new Zebra();
     }
 
-    public static ZebraNative get() {
-        return ZebraNative.ZebraNativeHolder.sInstance;
+    public static Zebra get() {
+        return Zebra.ZebraNativeHolder.sInstance;
     }
 
     public void init() {

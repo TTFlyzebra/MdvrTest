@@ -7,11 +7,11 @@
  */
 package com.flyzebra.mdvr.rtmp;
 
+import com.flyzebra.core.notify.INotify;
+import com.flyzebra.core.notify.Notify;
+import com.flyzebra.core.notify.NotifyType;
 import com.flyzebra.mdvr.Config;
 import com.flyzebra.mdvr.camera.AvcService;
-import com.flyzebra.notify.INotify;
-import com.flyzebra.notify.Notify;
-import com.flyzebra.notify.NotifyType;
 import com.flyzebra.rtmp.RtmpDump;
 import com.flyzebra.utils.ByteUtil;
 import com.flyzebra.utils.FlyLog;

@@ -1,4 +1,4 @@
-package com.flyzebra.notify;
+package com.flyzebra.core.notify;
 
 public class NotifyType {
 

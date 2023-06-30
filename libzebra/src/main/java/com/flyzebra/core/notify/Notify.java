@@ -5,7 +5,7 @@
  * Date: 2023/6/23 10:31
  * Description:
  */
-package com.flyzebra.notify;
+package com.flyzebra.core.notify;
 
 import android.os.Handler;
 import android.os.HandlerThread;

@@ -7,12 +7,12 @@
  */
 package com.flyzebra.mdvr.camera;
 
+import com.flyzebra.core.media.VideoEncoder;
+import com.flyzebra.core.media.VideoEncoderCB;
+import com.flyzebra.core.notify.INotify;
+import com.flyzebra.core.notify.Notify;
+import com.flyzebra.core.notify.NotifyType;
 import com.flyzebra.mdvr.Config;
-import com.flyzebra.media.VideoEncoder;
-import com.flyzebra.media.VideoEncoderCB;
-import com.flyzebra.notify.INotify;
-import com.flyzebra.notify.Notify;
-import com.flyzebra.notify.NotifyType;
 import com.flyzebra.utils.ByteUtil;
 import com.flyzebra.utils.FlyLog;
 

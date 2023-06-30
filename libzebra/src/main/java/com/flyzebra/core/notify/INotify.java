@@ -5,7 +5,7 @@
  * Date: 2023/6/23 10:23
  * Description:
  */
-package com.flyzebra.notify;
+package com.flyzebra.core.notify;
 
 public interface INotify {
 

@@ -1,4 +1,4 @@
-package com.flyzebra.notify;
+package com.flyzebra.core.notify;
 
 /**
  * @hide ClassName: Protocol

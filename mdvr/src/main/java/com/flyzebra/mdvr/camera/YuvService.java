@@ -6,8 +6,8 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 
-import com.flyzebra.notify.Notify;
-import com.flyzebra.notify.NotifyType;
+import com.flyzebra.core.notify.Notify;
+import com.flyzebra.core.notify.NotifyType;
 import com.flyzebra.utils.ByteUtil;
 import com.flyzebra.utils.FlyLog;
 import com.quectel.qcarapi.stream.QCarCamera;

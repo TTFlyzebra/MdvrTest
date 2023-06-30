@@ -1,4 +1,4 @@
-package com.flyzebra.media;
+package com.flyzebra.core.media;
 
 public interface VideoEncoderCB {
     /**

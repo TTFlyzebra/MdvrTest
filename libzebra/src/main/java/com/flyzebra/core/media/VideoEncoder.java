@@ -5,7 +5,7 @@
  * Date: 2023/6/23 15:06
  * Description:
  */
-package com.flyzebra.media;
+package com.flyzebra.core.media;
 
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;

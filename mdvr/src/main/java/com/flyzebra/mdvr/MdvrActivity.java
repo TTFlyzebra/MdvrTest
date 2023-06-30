@@ -9,10 +9,10 @@ import android.view.WindowManager;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.flyzebra.core.notify.INotify;
+import com.flyzebra.core.notify.Notify;
+import com.flyzebra.core.notify.NotifyType;
 import com.flyzebra.mdvr.opengl.GlVideoView;
-import com.flyzebra.notify.INotify;
-import com.flyzebra.notify.Notify;
-import com.flyzebra.notify.NotifyType;
 import com.flyzebra.utils.ByteUtil;
 import com.flyzebra.utils.FlyLog;
 

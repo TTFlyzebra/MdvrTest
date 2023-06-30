@@ -9,12 +9,12 @@ import android.os.IBinder;
 
 import androidx.annotation.Nullable;
 
+import com.flyzebra.core.notify.INotify;
 import com.flyzebra.mdvr.audio.AacService;
 import com.flyzebra.mdvr.audio.PcmService;
 import com.flyzebra.mdvr.camera.AvcService;
 import com.flyzebra.mdvr.camera.YuvService;
 import com.flyzebra.mdvr.rtmp.PusherService;
-import com.flyzebra.notify.INotify;
 import com.flyzebra.utils.FlyLog;
 
 public class MdvrService extends Service implements INotify {
