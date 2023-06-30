@@ -10,7 +10,7 @@ add_library(
         fyuv
         SHARED
         FlyYuv.cpp
-        FlyYuv_jni.cpp)
+        FlyYuvJNI.cpp)
 
 add_library(
         yuv

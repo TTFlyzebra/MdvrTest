@@ -11,7 +11,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DNO_CRYPTO")
 add_library(
         rtmpdump
         SHARED
-        RtmpDump_jni.cpp
+        RtmpDumpJNI.cpp
         RtmpDump.cpp
         RtmpDumpCB.cpp
         buffer/BufferManager.cpp

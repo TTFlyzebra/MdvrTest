@@ -10,7 +10,7 @@ include_directories(
 add_library(
         zebra
         SHARED
-        Fzebra_jni.cpp
+        FzebraJNI.cpp
         Fzebra.cpp
         FzebraCB.cpp
         base/Notify.cpp
