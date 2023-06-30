@@ -358,7 +358,6 @@ void RtspClient::onOptionsRequest(const char *data, int32_t cseq) {
     } else if (strstr((const char *) data, ":8554/camera4") != nullptr) {
         mChannel = 3;
     }
-    FLOGE("onOptionsRequest [%d]%s", mChannel, data);
     std::string response = "RTSP/1.0 200 OK\r\n";
     appendCommonResponse(&response, cseq);
     response.append(
