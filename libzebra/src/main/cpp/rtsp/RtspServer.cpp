@@ -70,7 +70,7 @@ void RtspServer::handle(NofifyType type, const char *data, int32_t size, const c
                 }
             }
             if (sps_ptr == -1 || pps_ptr == -1) {
-                FLOGE("Get sps pps error!");
+                FLOGE("RtspServer Get sps pps error!");
                 return;
             }
             int sps_len = pps_ptr - 4;
@@ -94,7 +94,7 @@ void RtspServer::serverSocket() {
     while (!is_stop) {
         server_socket = socket(AF_INET, SOCK_STREAM, 0);
         if (server_socket <= 0) {
-            FLOGE("serverSocket socket error. socket[%d][%s(%d)]", server_socket, strerror(errno),
+            FLOGE("RtspServer serverSocket socket error. socket[%d][%s(%d)]", server_socket, strerror(errno),
                   errno);
             server_socket = -1;
             usleep(1000000);
@@ -109,11 +109,11 @@ void RtspServer::serverSocket() {
         int32_t ret = setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, (const void *) &opt,
                                  sizeof(opt));
         if (ret < 0) {
-            FLOGE("setsockopt SO_REUSEADDR error.");
+            FLOGE("RtspServer setsockopt SO_REUSEADDR error.");
         }
         ret = bind(server_socket, (struct sockaddr *) &t_sockaddr, sizeof(t_sockaddr));
         if (ret < 0) {
-            FLOGE("serverSocket bind %d socket error. [%s(%d)]", RTSP_SERVER_TCP_PORT,
+            FLOGE("RtspServer serverSocket bind %d socket error. [%s(%d)]", RTSP_SERVER_TCP_PORT,
                   strerror(errno), errno);
             shutdown(server_socket, SHUT_RDWR);
             close(server_socket);
@@ -126,7 +126,7 @@ void RtspServer::serverSocket() {
         }
         ret = listen(server_socket, 5);
         if (ret < 0) {
-            FLOGE("serverSocket listen error. [%s(%d)]", strerror(errno), errno);
+            FLOGE("RtspServer serverSocket listen error. [%s(%d)]", strerror(errno), errno);
             shutdown(server_socket, SHUT_RDWR);
             close(server_socket);
             server_socket = -1;
@@ -136,7 +136,7 @@ void RtspServer::serverSocket() {
         while (!is_stop) {
             int32_t client_socket = accept(server_socket, (struct sockaddr *) nullptr, nullptr);
             if (client_socket <= 0) {
-                FLOGE("accpet socket error. [%s(%d)]", strerror(errno), errno);
+                FLOGE("RtspServer accpet socket error. [%s(%d)]", strerror(errno), errno);
                 continue;
             }
             if (is_stop) break;

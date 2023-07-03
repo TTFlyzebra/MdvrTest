@@ -11,13 +11,14 @@ import android.os.Handler;
 import android.os.HandlerThread;
 
 import com.flyzebra.utils.ByteUtil;
+import com.flyzebra.utils.FlyLog;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Notify {
-    private static final List<INotify> notifys = new ArrayList<>();
+    private static final List<INotify> notifys = new CopyOnWriteArrayList<>();
     private final Object listLock = new Object();
     private final AtomicInteger listCount = new AtomicInteger(0);
     private static final HandlerThread mDataThread = new HandlerThread("Notify_data");
@@ -41,27 +42,29 @@ public class Notify {
     }
 
     public void registerListener(INotify notify) {
-        synchronized (listLock) {
-            while (listCount.get() > 0) {
-                try {
-                    listLock.wait();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+        while (listCount.get() > 0) {
+            FlyLog.d("handled did not end ...");
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
+        }
+        synchronized (listLock) {
             notifys.add(notify);
         }
     }
 
     public void unregisterListener(INotify notify) {
-        synchronized (listLock) {
-            while (listCount.get() > 0) {
-                try {
-                    listLock.wait();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+        while (listCount.get() > 0) {
+            FlyLog.d("handled did not end ...");
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
+        }
+        synchronized (listLock) {
             notifys.remove(notify);
         }
     }

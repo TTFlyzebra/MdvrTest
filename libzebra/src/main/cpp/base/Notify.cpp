@@ -2,6 +2,7 @@
 // Created by FlyZebra on 2021/9/15 0015.
 //
 
+#include <unistd.h>
 #include "Notify.h"
 
 #include "Config.h"
@@ -12,7 +13,8 @@
 #include "utils/SysUtil.h"
 
 Notify::Notify()
-    :is_stop(false)
+    : is_stop(false)
+    , mlist_count(0)
 {
     FLOGD("%s()", __func__);
     dataBuf = BufferManager::get()->createBuffer(1024*1024*10, 1024, "Notify");
@@ -37,34 +39,42 @@ Notify::~Notify()
     FLOGD("%s()", __func__);
 }
 
-void Notify::registerListener(INotify* notify)
+void Notify::registerListener(INotify *notify)
 {
     if (is_stop) return;
+    while (mlist_count > 0) {
+        usleep(100000);
+    }
     std::lock_guard<std::mutex> lock(mlock_list);
     notifyList.push_back(notify);
 }
 
-void Notify::unregisterListener(INotify* notify)
+void Notify::unregisterListener(INotify *notify)
 {
     if (is_stop) return;
+    while (mlist_count > 0) {
+        usleep(100000);
+    }
     std::lock_guard<std::mutex> lock(mlock_list);
     notifyList.remove(notify);
 }
 
-void Notify::notifydata(const char* data, int32_t size)
+void Notify::notifydata(const char *data, int32_t size)
 {
-    std::lock_guard<std::mutex> lock(mlock_list);
-    for (auto & it : notifyList) {
+    mlist_count++;
+    for (auto &it: notifyList) {
         ((INotify*)it)->notify(data, size);
     }
+    mlist_count--;
 }
 
 void Notify::handledata(NofifyType type, const char* data, int32_t size, const char* params)
 {
-    std::lock_guard<std::mutex> lock(mlock_list);
-    for (auto & it : notifyList) {
+    mlist_count++;
+    for (auto &it: notifyList) {
         ((INotify*)it)->handle(type, data, size, params);
     }
+    mlist_count--;
 }
 
 void Notify::miniNotify(const char* command, int32_t size, int64_t tid, int64_t uid, const char* data)

@@ -9,17 +9,19 @@
 #include "rtsp/RtspServer.h"
 
 Fzebra::Fzebra(JavaVM *jvm, JNIEnv *env, jobject thiz) {
+    cb = new FzebraCB(jvm, env, thiz);
     BufferManager::get()->init();
     N = new Notify();
     N->registerListener(this);
-    cb = new FzebraCB(jvm, env, thiz);
 }
 
 Fzebra::~Fzebra() {
     N->unregisterListener(this);
-    delete N;
-    BufferManager::get()->release();
     delete cb;
+
+    delete N;
+    //Notify使用了BufferMangaer,所以要在Notify后面释放
+    BufferManager::get()->release();
 }
 
 void Fzebra::notify(const char *data, int32_t size) {

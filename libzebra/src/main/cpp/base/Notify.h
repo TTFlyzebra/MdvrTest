@@ -10,6 +10,7 @@
 #include <vector>
 #include <mutex>
 #include <thread>
+#include <atomic>
 #include <condition_variable>
 
 class LoopBuf;
@@ -87,6 +88,7 @@ private:
     volatile bool is_stop;
 
     std::mutex mlock_list;
+    std::atomic<int32_t> mlist_count;
     std::list<INotify *> notifyList;
 
     std::thread *data_t;

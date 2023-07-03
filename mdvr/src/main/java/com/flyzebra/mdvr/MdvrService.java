@@ -37,11 +37,11 @@ public class MdvrService extends Service implements INotify {
 
     @Override
     public void onDestroy() {
-        Fzebra.get().release();
-        Fzebra.get().disableRtspServer();
         rtmpService.onDestory();
         cameraService.onDerstory();
         soundService.onDistory();
+        Fzebra.get().disableRtspServer();
+        Fzebra.get().release();
         FlyLog.d("MdvrService exit!");
     }
 
