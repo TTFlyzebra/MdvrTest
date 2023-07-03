@@ -24,7 +24,7 @@ RtspClient::RtspClient(RtspServer *server, Notify *notify, int32_t socket)
         : BaseNotify(notify), mServer(server), mChannel(0), mSocket(socket), is_disconnect(false),
           is_use_tcp(true), v_rtp_socket(-1), vrtp_t(nullptr), v_rtcp_socket(-1), vrtcp_t(nullptr),
           a_rtp_socket(-1), artp_t(nullptr), a_rtcp_socket(-1), artcp_t(nullptr),
-          sequencenumber1(1234), sequencenumber2(4321) {
+          sequencenumber1(1234), sequencenumber2(4321), is_send_audiohead(false) {
     FLOGD("%s()", __func__);
     recv_t = new std::thread(&RtspClient::recvThread, this);
     SysUtil::setThreadName(recv_t, "RtspClient-recv");
@@ -100,12 +100,23 @@ void RtspClient::handle(NofifyType type, const char *data, int32_t size, const c
     switch (type) {
         case NOTI_CAMOUT_AVC: {
             int16_t channel = ByteUtil::byte2int16(params, 0, true);
-            if (mChannel == channel) sendVFrame(data, size, 0);
+            if (mChannel == channel) {
+                int64_t pts = ByteUtil::byte2int64(params, 2, true);
+                sendVFrame(data, size, pts);
+            }
             break;
         }
         case NOTI_MICOUT_AAC: {
             int16_t channel = ByteUtil::byte2int16(params, 0, true);
-            if (mChannel == channel) sendAFrame(data, size, 0);
+            if (mChannel == channel) {
+                if (!is_send_audiohead) {
+                    char aacHead[64];
+                    int32_t aacHeadLen = mServer->get_aacHead(mChannel, aacHead, 64);
+                    sendAFrame(aacHead, aacHeadLen, 0);
+                }
+                int64_t pts = ByteUtil::byte2int64(params, 2, true);
+                sendAFrame(data, size, pts);
+            }
             break;
         }
     }
@@ -375,22 +386,22 @@ void RtspClient::onDescribeRequest(const char *data, int32_t cseq) {
     getsockname(mSocket, (struct sockaddr *) &addr, &addrlen);
     std::string response = "RTSP/1.0 200 OK\r\n";
     appendCommonResponse(&response, cseq);
-    std::string spd;
-    spd.append("v=0\r\n");
+    std::string sdp;
+    sdp.append("v=0\r\n");
     sprintf(temp, "o=- 1627453750119587 1 in IP4 %s\r\n", inet_ntoa(addr.sin_addr));
-    spd.append(temp);
-    spd.append("t=0 0\r\n");
-    spd.append("a=contol:*\r\n");
+    sdp.append(temp);
+    sdp.append("t=0 0\r\n");
+    sdp.append("a=contol:*\r\n");
 
-    spd.append("m=video 0 RTP/AVP 96\r\n");
-    spd.append("a=rtpmap:96 H264/90000\r\n");
+    sdp.append("m=video 0 RTP/AVP 96\r\n");
+    sdp.append("a=rtpmap:96 H264/90000\r\n");
 
     char sps[256] = {0};
-    char pps[256] = {0};
+    char pps[128] = {0};
     int32_t spsLen = mServer->get_sps(mChannel, sps, 256);
-    int32_t ppsLen = mServer->get_pps(mChannel, pps, 256);
+    int32_t ppsLen = mServer->get_pps(mChannel, pps, 128);
     uint8_t outsps[256] = {0};
-    uint8_t outpps[256] = {0};
+    uint8_t outpps[128] = {0};
     int32_t outLen = 0;
 
     Base64::encode(reinterpret_cast<const uint8_t *>(sps), spsLen, outsps, &outLen);
@@ -398,36 +409,37 @@ void RtspClient::onDescribeRequest(const char *data, int32_t cseq) {
 
     memset(temp, 0, strlen(temp));
     sprintf(temp,
-            "a=fmtp:96 profile-level-id=1;packetization-mode=1;sprop-parameter-sets=%s,%s\r\n", outsps,
+            "a=fmtp:96 profile-level-id=1;packetization-mode=1;sprop-parameter-sets=%s,%s\r\n",
+            outsps,
             outpps);
-    spd.append(temp);
+    sdp.append(temp);
 
-    spd.append("a=control:track1\r\n");
-    spd.append("m=audio 0 RTP/AVP 97\r\n");
+    sdp.append("a=control:track1\r\n");
+    sdp.append("m=audio 0 RTP/AVP 97\r\n");
     switch (AUDIO_SAMPLE) {
         case 48000:
-            spd.append("a=rtpmap:97 mpeg4-generic/48000/2\r\n");
-            spd.append("a=fmtp:97 streamtype=5;profile-level-id=15;mode=AAC-hbr;");
-            spd.append("sizelength=13;indexlength=3;indexdeltalength=3;config=1190;Profile=1;\r\n");
+            sdp.append("a=rtpmap:97 mpeg4-generic/48000/2\r\n");
+            sdp.append("a=fmtp:97 streamtype=5;profile-level-id=15;mode=AAC-hbr;");
+            sdp.append("sizelength=13;indexlength=3;indexdeltalength=3;config=1190;Profile=1;\r\n");
             break;
         case 44100:
-            spd.append("a=rtpmap:97 mpeg4-generic/44100/2\r\n");
-            spd.append("a=fmtp:97 streamtype=5;profile-level-id=15;mode=AAC-hbr;");
-            spd.append("sizelength=13;indexlength=3;indexdeltalength=3;config=1210;Profile=1;\r\n");
+            sdp.append("a=rtpmap:97 mpeg4-generic/44100/2\r\n");
+            sdp.append("a=fmtp:97 streamtype=5;profile-level-id=15;mode=AAC-hbr;");
+            sdp.append("sizelength=13;indexlength=3;indexdeltalength=3;config=1210;Profile=1;\r\n");
             break;
         default:
-            spd.append("a=rtpmap:97 mpeg4-generic/16000/2\r\n");
-            spd.append("a=fmtp:97 streamtype=5;profile-level-id=15;mode=AAC-hbr;");
-            spd.append("sizelength=13;indexlength=3;indexdeltalength=3;config=1410;Profile=1;\r\n");
+            sdp.append("a=rtpmap:97 mpeg4-generic/16000/2\r\n");
+            sdp.append("a=fmtp:97 streamtype=5;profile-level-id=15;mode=AAC-hbr;");
+            sdp.append("sizelength=13;indexlength=3;indexdeltalength=3;config=1410;Profile=1;\r\n");
             break;
     }
-    spd.append("a=control:track2\r\n\r\n");
+    sdp.append("a=control:track2\r\n\r\n");
     memset(temp, 0, strlen(temp));
-    sprintf(temp, "Content-Length: %d\r\n", (int32_t) spd.size());
+    sprintf(temp, "Content-Length: %d\r\n", (int32_t) sdp.size());
     response.append(temp);
     response.append("Content-Type: application/sdp\r\n");
     response.append("\r\n");
-    response.append(spd.c_str());
+    response.append(sdp.c_str());
     int32_t ret = send(mSocket, response.c_str(), response.size(), 0);
     FLOGD("RtspClient send:len[%d], errno[%d]\n%s", ret, errno, response.c_str());
     if (ret <= 0) disconnect();

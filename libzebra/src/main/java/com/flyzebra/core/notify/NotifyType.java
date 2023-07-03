@@ -34,4 +34,6 @@ public class NotifyType {
 
     public static int NOTI_CAMOUT_SPS = 0x0F;
 
+    public static int NOTI_MICOUT_SPS = 0x10;
+
 }

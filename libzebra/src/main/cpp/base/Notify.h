@@ -40,6 +40,7 @@ enum NofifyType {
     NOTI_SCREEN_SPS,
     NOTI_SNDOUT_SPS,
     NOTI_CAMOUT_SPS,
+    NOTI_MICOUT_SPS,
 };
 
 class INotify {

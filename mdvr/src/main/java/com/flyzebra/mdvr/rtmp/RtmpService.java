@@ -46,7 +46,7 @@ public class RtmpService implements INotify {
 
     @Override
     public void handle(int type, byte[] data, int size, byte[] params) {
-        if (NotifyType.NOTI_SNDOUT_SPS == type) {
+        if (NotifyType.NOTI_MICOUT_SPS == type) {
             short channel = ByteUtil.bytes2Short(params, 0, true);
             byte[] audioHead = new byte[size];
             System.arraycopy(data, 0, audioHead, 0, size);

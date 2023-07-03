@@ -101,7 +101,7 @@ public class RtmpPusher implements INotify {
                             flag = sendHevcData(rtmp, data, size, pts);
                         }
                     }
-                } else if (NotifyType.NOTI_SNDOUT_AAC == type) {
+                } else if (NotifyType.NOTI_MICOUT_AAC == type) {
                     if (!is_send_audio_head && audioHead != null) {
                         if (sendAacHead(rtmp, audioHead, audioHead.length))
                             is_send_audio_head = true;
@@ -167,7 +167,7 @@ public class RtmpPusher implements INotify {
 
     @Override
     public void handle(int type, byte[] data, int size, byte[] params) {
-        if (NotifyType.NOTI_SNDOUT_SPS == type) {
+        if (NotifyType.NOTI_MICOUT_SPS == type) {
             short channel = ByteUtil.bytes2Short(params, 0, true);
             if (mChannel != channel) return;
             audioHead = new byte[size];
@@ -177,7 +177,7 @@ public class RtmpPusher implements INotify {
             if (mChannel != channel) return;
             videoHead = new byte[size];
             System.arraycopy(data, 0, videoHead, 0, size);
-        } else if (NotifyType.NOTI_SNDOUT_AAC == type || NotifyType.NOTI_CAMOUT_AVC == type) {
+        } else if (NotifyType.NOTI_MICOUT_AAC == type || NotifyType.NOTI_CAMOUT_AVC == type) {
             short channel = ByteUtil.bytes2Short(params, 0, true);
             if (mChannel != channel) return;
             if (!is_rtmp.get()) return;

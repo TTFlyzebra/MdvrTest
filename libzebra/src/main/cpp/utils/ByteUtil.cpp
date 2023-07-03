@@ -5,41 +5,6 @@
 #include "ByteUtil.h"
 #include <string.h>
 
-int16_t ByteUtil::getInt16(const char *data) {
-    return (int16_t) (data[0] & 0xFF) << 8 | (data[1] & 0xFF);
-}
-
-int32_t ByteUtil::getInt32(const char *data) {
-    return (int32_t) (data[0] & 0xFF) << 24 | (data[1] & 0xFF) << 16 | (data[2] & 0xFF) << 8 |
-           (data[3] & 0xFF);
-}
-
-void ByteUtil::int16ToData(char *data, int16_t i1, int16_t i2, int16_t i3, int16_t i4) {
-    data[0] = i1 >> 8 & 0xFF;
-    data[1] = i1 & 0xFF;
-    if (i2 == 0) return;
-    data[2] = i2 >> 8 & 0xFF;
-    data[3] = i2 & 0xFF;
-    if (i3 == 0) return;
-    data[4] = i3 >> 8 & 0xFF;
-    data[5] = i3 & 0xFF;
-    if (i4 == 0) return;
-    data[6] = i4 >> 8 & 0xFF;
-    data[7] = i4 & 0xFF;
-}
-
-void ByteUtil::int32ToData(char *data, int32_t i1, int32_t i2) {
-    data[0] = i1 >> 24 & 0xFF;
-    data[1] = i1 >> 16 & 0xFF;
-    data[2] = i1 >> 8 & 0xFF;
-    data[3] = i1 & 0xFF;
-    if (i2 == 0) return;
-    data[4] = i2 >> 24 & 0xFF;
-    data[5] = i2 >> 16 & 0xFF;
-    data[6] = i2 >> 8 & 0xFF;
-    data[7] = i2 & 0xFF;
-}
-
 int64_t ByteUtil::sysIdToInt64(char *data) {
     int64_t tid = 0;
     for (int i = 0; i < 9; i++) {
@@ -77,6 +42,41 @@ void ByteUtil::int64ToSysId(char *data, int64_t tid) {
     }
 }
 
+int16_t ByteUtil::getInt16(const char *data) {
+    return (int16_t) (data[0] & 0xFF) << 8 | (data[1] & 0xFF);
+}
+
+void ByteUtil::int16ToData(char *data, int16_t i1, int16_t i2, int16_t i3, int16_t i4) {
+    data[0] = i1 >> 8 & 0xFF;
+    data[1] = i1 & 0xFF;
+    if (i2 == 0) return;
+    data[2] = i2 >> 8 & 0xFF;
+    data[3] = i2 & 0xFF;
+    if (i3 == 0) return;
+    data[4] = i3 >> 8 & 0xFF;
+    data[5] = i3 & 0xFF;
+    if (i4 == 0) return;
+    data[6] = i4 >> 8 & 0xFF;
+    data[7] = i4 & 0xFF;
+}
+
+int32_t ByteUtil::getInt32(const char *data) {
+    return (int32_t) (data[0] & 0xFF) << 24 | (data[1] & 0xFF) << 16 | (data[2] & 0xFF) << 8 |
+           (data[3] & 0xFF);
+}
+
+void ByteUtil::int32ToData(char *data, int32_t i1, int32_t i2) {
+    data[0] = i1 >> 24 & 0xFF;
+    data[1] = i1 >> 16 & 0xFF;
+    data[2] = i1 >> 8 & 0xFF;
+    data[3] = i1 & 0xFF;
+    if (i2 == 0) return;
+    data[4] = i2 >> 24 & 0xFF;
+    data[5] = i2 >> 16 & 0xFF;
+    data[6] = i2 >> 8 & 0xFF;
+    data[7] = i2 & 0xFF;
+}
+
 int16_t ByteUtil::byte2int16(const char *data, int32_t offset, bool littleEndian) {
     int16_t value = 0;
     for (int count = 0; count < 2; ++count) {
@@ -89,6 +89,22 @@ int16_t ByteUtil::byte2int16(const char *data, int32_t offset, bool littleEndian
 void ByteUtil::int16ToBytes(int16_t value, char *data, int offset, bool littleEndian) {
     for (int count = 0; count < 2; ++count) {
         int shift = (littleEndian ? count : (1 - count)) << 3;
+        data[count + offset] = (char) (value >> shift & 0xFF);
+    }
+}
+
+int64_t ByteUtil::byte2int64(const char *data, int32_t offset, bool littleEndian) {
+    int64_t value = 0;
+    for (int count = 0; count < 8; ++count) {
+        int shift = (littleEndian ? count : (7 - count)) << 3;
+        value |= ((long) 0xff << shift) & ((long) data[offset + count] << shift);
+    }
+    return value;
+}
+
+void ByteUtil::int64ToBytes(int64_t value, char *data, int offset, bool littleEndian) {
+    for (int count = 0; count < 8; ++count) {
+        int shift = (littleEndian ? count : (7 - count)) << 3;
         data[count + offset] = (char) (value >> shift & 0xFF);
     }
 }

@@ -88,6 +88,8 @@ private:
 
     fd_set set;
     struct timeval tv;
+
+    bool is_send_audiohead;
 };
 
 #endif //F_ZEBRA_RRSPCLIENT_H

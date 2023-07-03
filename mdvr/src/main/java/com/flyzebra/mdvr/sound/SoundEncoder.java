@@ -81,7 +81,7 @@ public class SoundEncoder implements AudioCodecCB, INotify {
     public void notifyAacHead(int channel, byte[] head, int headLen) {
         byte[] params = new byte[2];
         ByteUtil.shortToBytes((short) channel, params, 0, true);
-        Notify.get().handledata(NotifyType.NOTI_SNDOUT_SPS, head, headLen, params);
+        Notify.get().handledata(NotifyType.NOTI_MICOUT_SPS, head, headLen, params);
     }
 
     @Override
@@ -89,7 +89,7 @@ public class SoundEncoder implements AudioCodecCB, INotify {
         byte[] params = new byte[10];
         ByteUtil.shortToBytes((short) channel, params, 0, true);
         ByteUtil.longToBytes(pts, params, 2, true);
-        Notify.get().handledata(NotifyType.NOTI_SNDOUT_AAC, data, size, params);
+        Notify.get().handledata(NotifyType.NOTI_MICOUT_AAC, data, size, params);
     }
 
     @Override

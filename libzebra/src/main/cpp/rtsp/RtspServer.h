@@ -24,6 +24,8 @@ public:
 
     int32_t get_pps(int channel, char *pps, int32_t maxLen);
 
+    int32_t get_aacHead(int channel, char *aacHead, int32_t maxLen);
+
 private:
     void serverSocket();
 
@@ -39,10 +41,12 @@ private:
     std::vector<RtspClient *> remove_clients;
     std::condition_variable mcond_remove;
 
-    char *spsArr[MAX_CAM];
+    char spss[256 * 4];
     int32_t spsLens[MAX_CAM];
-    char *ppsArr[MAX_CAM];
+    char ppss[128 * 4];
     int32_t ppsLens[MAX_CAM];
+    char aacHeads[64 * 4];
+    int32_t aacHeadLens[MAX_CAM];
 };
 
 #endif //F_ZEBRA_RTSPSERVER_H

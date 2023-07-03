@@ -23,13 +23,6 @@ RtspServer::RtspServer(Notify *notify)
     SysUtil::setThreadName(server_t, "RtspServer-server");
     remove_t = new std::thread(&RtspServer::removeClient, this);
     SysUtil::setThreadName(remove_t, "RtspServer-remove");
-
-    for (int i = 0; i < MAX_CAM; i++) {
-        spsLens[i] = 0;
-        spsArr[i] = static_cast<char *>(malloc(256 * sizeof(char)));
-        ppsLens[i] = 0;
-        ppsArr[i] = static_cast<char *>(malloc(256 * sizeof(char)));
-    }
 }
 
 RtspServer::~RtspServer() {
@@ -54,12 +47,6 @@ RtspServer::~RtspServer() {
     remove_t->join();
     delete server_t;
     delete remove_t;
-
-    for (int i = 0; i < MAX_CAM; i++) {
-        free(spsArr[i]);
-        free(ppsArr[i]);
-    }
-
     FLOGD("%s()", __func__);
 }
 
@@ -91,11 +78,15 @@ void RtspServer::handle(NofifyType type, const char *data, int32_t size, const c
             int pps_len = size - pps_ptr - 4;
             const char *pps = data + pps_ptr + 4;
 
-            memcpy(spsArr[channel], sps, sps_len);
+            memcpy(spss + 256 * channel, sps, sps_len);
             spsLens[channel] = sps_len;
-            memcpy(ppsArr[channel], pps, pps_len);
+            memcpy(ppss + 128 * channel, pps, pps_len);
             ppsLens[channel] = pps_len;
         }
+    } else if (type == NOTI_MICOUT_SPS) {
+        int16_t channel = ByteUtil::byte2int16(params, 0, true);
+        aacHeadLens[channel] = size;
+        memcpy(aacHeads + 64 * channel, data, size);
     }
 }
 
@@ -187,13 +178,20 @@ void RtspServer::disconnectClient(RtspClient *client) {
 int32_t RtspServer::get_sps(int channel, char *sps, int32_t maxLen) {
     if (channel >= MAX_CAM) return 0;
     if (maxLen < spsLens[channel]) return 0;
-    memcpy(sps, spsArr[channel], spsLens[channel]);
+    memcpy(sps, spss + 256 * channel, spsLens[channel]);
     return spsLens[channel];
 }
 
 int32_t RtspServer::get_pps(int channel, char *pps, int32_t maxLen) {
     if (channel >= MAX_CAM) return 0;
     if (maxLen < ppsLens[channel]) return 0;
-    memcpy(pps, ppsArr[channel], ppsLens[channel]);
+    memcpy(pps, ppss + 128 * channel, ppsLens[channel]);
+    return ppsLens[channel];
+}
+
+int32_t RtspServer::get_aacHead(int channel, char *aacHead, int32_t maxLen){
+    if (channel >= MAX_CAM) return 0;
+    if (maxLen < ppsLens[channel]) return 0;
+    memcpy(aacHead, aacHeads + 64 * channel, aacHeadLens[channel]);
     return ppsLens[channel];
 }
