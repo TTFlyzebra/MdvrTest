@@ -11,7 +11,7 @@
 #include <netinet/in.h>
 #include <unistd.h>
 #include "utils/FlyLog.h"
-#include "base/Config.h"
+#include "Config.h"
 #include "rfc/Protocol.h"
 #include "utils/SysUtil.h"
 #include "utils/ByteUtil.h"
@@ -23,6 +23,13 @@ RtspServer::RtspServer(Notify *notify)
     SysUtil::setThreadName(server_t, "RtspServer-server");
     remove_t = new std::thread(&RtspServer::removeClient, this);
     SysUtil::setThreadName(remove_t, "RtspServer-remove");
+
+    for (int i = 0; i < MAX_CAM; i++) {
+        spsLens[i] = 0;
+        spsArr[i] = static_cast<char *>(malloc(256 * sizeof(char)));
+        ppsLens[i] = 0;
+        ppsArr[i] = static_cast<char *>(malloc(256 * sizeof(char)));
+    }
 }
 
 RtspServer::~RtspServer() {
@@ -47,6 +54,12 @@ RtspServer::~RtspServer() {
     remove_t->join();
     delete server_t;
     delete remove_t;
+
+    for (int i = 0; i < MAX_CAM; i++) {
+        free(spsArr[i]);
+        free(ppsArr[i]);
+    }
+
     FLOGD("%s()", __func__);
 }
 
@@ -77,27 +90,11 @@ void RtspServer::handle(NofifyType type, const char *data, int32_t size, const c
             const char *sps = data + sps_ptr + 4;
             int pps_len = size - pps_ptr - 4;
             const char *pps = data + pps_ptr + 4;
-            if (channel == 0) {
-                vec_sps0.clear();
-                vec_sps0.insert(vec_sps0.end(), sps, sps + sps_len);
-                vec_pps0.clear();
-                vec_pps0.insert(vec_pps0.end(), pps, pps + pps_len);
-            } else if (channel == 1) {
-                vec_sps1.clear();
-                vec_sps1.insert(vec_sps1.end(), sps, sps + sps_len);
-                vec_pps1.clear();
-                vec_pps1.insert(vec_pps1.end(), pps, pps + pps_len);
-            } else if (channel == 2) {
-                vec_sps2.insert(vec_sps2.end(), sps, sps + sps_len);
-                vec_sps2.clear();
-                vec_pps2.insert(vec_pps2.end(), pps, pps + pps_len);
-                vec_pps2.clear();
-            } else if (channel == 3) {
-                vec_sps3.clear();
-                vec_sps3.insert(vec_sps3.end(), sps, sps + sps_len);
-                vec_pps3.clear();
-                vec_pps3.insert(vec_pps3.end(), pps, pps + pps_len);
-            }
+
+            memcpy(spsArr[channel], sps, sps_len);
+            spsLens[channel] = sps_len;
+            memcpy(ppsArr[channel], pps, pps_len);
+            ppsLens[channel] = pps_len;
         }
     }
 }
@@ -187,28 +184,16 @@ void RtspServer::disconnectClient(RtspClient *client) {
     mcond_remove.notify_one();
 }
 
-std::vector<char> RtspServer::get_sps(int channel) {
-    if (channel == 0) {
-        return vec_sps0;
-    } else if (channel == 1) {
-        return vec_sps1;
-    } else if (channel == 2) {
-        return vec_sps2;
-    } else if (channel == 3) {
-        return vec_sps3;
-    }
-    return vec_sps0;
+int32_t RtspServer::get_sps(int channel, char *sps, int32_t maxLen) {
+    if (channel >= MAX_CAM) return 0;
+    if (maxLen < spsLens[channel]) return 0;
+    memcpy(sps, spsArr[channel], spsLens[channel]);
+    return spsLens[channel];
 }
 
-std::vector<char> RtspServer::get_pps(int channel) {
-    if (channel == 0) {
-        return vec_pps0;
-    } else if (channel == 1) {
-        return vec_pps1;
-    } else if (channel == 2) {
-        return vec_pps2;
-    } else if (channel == 3) {
-        return vec_pps3;
-    }
-    return vec_pps0;
+int32_t RtspServer::get_pps(int channel, char *pps, int32_t maxLen) {
+    if (channel >= MAX_CAM) return 0;
+    if (maxLen < ppsLens[channel]) return 0;
+    memcpy(pps, ppsArr[channel], ppsLens[channel]);
+    return ppsLens[channel];
 }

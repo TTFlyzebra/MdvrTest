@@ -11,7 +11,6 @@ import android.os.Handler;
 import android.os.HandlerThread;
 
 import com.flyzebra.utils.ByteUtil;
-import com.flyzebra.utils.FlyLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,29 +41,27 @@ public class Notify {
     }
 
     public void registerListener(INotify notify) {
-        while (listCount.get() > 0) {
-            FlyLog.d("handled did not end ...");
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
         synchronized (listLock) {
+            while (listCount.get() > 0) {
+                try {
+                    listLock.wait();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
             notifys.add(notify);
         }
     }
 
     public void unregisterListener(INotify notify) {
-        while (listCount.get() > 0) {
-            FlyLog.d("handled did not end ...");
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
         synchronized (listLock) {
+            while (listCount.get() > 0) {
+                try {
+                    listLock.wait();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
             notifys.remove(notify);
         }
     }
@@ -75,6 +72,9 @@ public class Notify {
             notify.notify(data, size);
         }
         listCount.decrementAndGet();
+        synchronized (listLock) {
+            listLock.notifyAll();
+        }
     }
 
     public void handledata(int type, byte[] data, int size, byte[] params) {
@@ -83,6 +83,9 @@ public class Notify {
             notify.handle(type, data, size, params);
         }
         listCount.decrementAndGet();
+        synchronized (listLock) {
+            listLock.notifyAll();
+        }
     }
 
     public void miniNotify(byte[] command, int size, long tid, long uid, byte[] params) {

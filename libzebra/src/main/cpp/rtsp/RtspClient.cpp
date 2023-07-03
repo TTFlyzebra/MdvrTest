@@ -12,7 +12,7 @@
 #include <netinet/in.h>
 #include <string>
 #include <sys/syscall.h>
-#include "base/Config.h"
+#include "Config.h"
 #include "rfc/Protocol.h"
 #include "utils/FlyLog.h"
 #include "utils/Base64.h"
@@ -21,7 +21,7 @@
 #include "utils/SysUtil.h"
 
 RtspClient::RtspClient(RtspServer *server, Notify *notify, int32_t socket)
-        : BaseNotify(notify), mServer(server), mSocket(socket), is_disconnect(false),
+        : BaseNotify(notify), mServer(server), mChannel(0), mSocket(socket), is_disconnect(false),
           is_use_tcp(true), v_rtp_socket(-1), vrtp_t(nullptr), v_rtcp_socket(-1), vrtcp_t(nullptr),
           a_rtp_socket(-1), artp_t(nullptr), a_rtcp_socket(-1), artcp_t(nullptr),
           sequencenumber1(1234), sequencenumber2(4321) {
@@ -385,19 +385,21 @@ void RtspClient::onDescribeRequest(const char *data, int32_t cseq) {
     spd.append("m=video 0 RTP/AVP 96\r\n");
     spd.append("a=rtpmap:96 H264/90000\r\n");
 
-    uint8_t sps[128] = {0};
-    uint8_t pps[128] = {0};
+    char sps[256] = {0};
+    char pps[256] = {0};
+    int32_t spsLen = mServer->get_sps(mChannel, sps, 256);
+    int32_t ppsLen = mServer->get_pps(mChannel, pps, 256);
+    uint8_t outsps[256] = {0};
+    uint8_t outpps[256] = {0};
     int32_t outLen = 0;
 
-    auto vec_sps = mServer->get_sps(mChannel);
-    auto vec_pps = mServer->get_pps(mChannel);
-    Base64::encode((const uint8_t *) &vec_sps[0], vec_sps.size(), sps, &outLen);
-    Base64::encode((const uint8_t *) &vec_pps[0], vec_pps.size(), pps, &outLen);
+    Base64::encode(reinterpret_cast<const uint8_t *>(sps), spsLen, outsps, &outLen);
+    Base64::encode(reinterpret_cast<const uint8_t *>(pps), ppsLen, outpps, &outLen);
 
     memset(temp, 0, strlen(temp));
     sprintf(temp,
-            "a=fmtp:96 profile-level-id=1;packetization-mode=1;sprop-parameter-sets=%s,%s\r\n", sps,
-            pps);
+            "a=fmtp:96 profile-level-id=1;packetization-mode=1;sprop-parameter-sets=%s,%s\r\n", outsps,
+            outpps);
     spd.append(temp);
 
     spd.append("a=control:track1\r\n");
@@ -433,7 +435,7 @@ void RtspClient::onDescribeRequest(const char *data, int32_t cseq) {
 
 int32_t RtspClient::createUdpSocket(int32_t *port) {
     int32_t sock_fd = -1;
-    struct sockaddr_in addr_in;
+    struct sockaddr_in addr_in{};
     sock_fd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sock_fd < 0) {
         FLOGE("socket udp socket error. [%s(%d)]", strerror(errno), errno);

@@ -7,38 +7,42 @@
 
 #include "base/BaseNotify.h"
 #include "RtspClient.h"
+#include "Config.h"
+#include <map>
 
 class RtspServer : public BaseNotify {
 public:
-    RtspServer(Notify* notify);
+    RtspServer(Notify *notify);
+
     ~RtspServer();
-    void handle(NofifyType type, const char* data, int32_t size, const char* params) override;
+
+    void handle(NofifyType type, const char *data, int32_t size, const char *params) override;
+
     void disconnectClient(RtspClient *client);
-    std::vector<char> get_sps(int channel);
-    std::vector<char> get_pps(int channel);
+
+    int32_t get_sps(int channel, char *sps, int32_t maxLen);
+
+    int32_t get_pps(int channel, char *pps, int32_t maxLen);
 
 private:
     void serverSocket();
+
     void removeClient();
 
 private:
     int32_t server_socket;
     std::thread *server_t;
     std::mutex mlock_client;
-    std::list<RtspClient*> rtsp_clients;
+    std::list<RtspClient *> rtsp_clients;
     std::thread *remove_t;
     std::mutex mlock_remove;
-    std::vector<RtspClient*> remove_clients;
+    std::vector<RtspClient *> remove_clients;
     std::condition_variable mcond_remove;
 
-    std::vector<char> vec_sps0;
-    std::vector<char> vec_pps0;
-    std::vector<char> vec_sps1;
-    std::vector<char> vec_pps1;
-    std::vector<char> vec_sps2;
-    std::vector<char> vec_pps2;
-    std::vector<char> vec_sps3;
-    std::vector<char> vec_pps3;
+    char *spsArr[MAX_CAM];
+    int32_t spsLens[MAX_CAM];
+    char *ppsArr[MAX_CAM];
+    int32_t ppsLens[MAX_CAM];
 };
 
 #endif //F_ZEBRA_RTSPSERVER_H

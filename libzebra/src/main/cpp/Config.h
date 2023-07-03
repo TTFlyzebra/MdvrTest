@@ -5,6 +5,7 @@
 #ifndef F_ZEBRA_CONFIG_H
 #define F_ZEBRA_CONFIG_H
 
+#define MAX_CAM                             4
 #define AUDIO_MIMETYPE                      "audio/mp4a-latm"
 #define AUDIO_SAMPLE                        48000
 #define AUDIO_FORMAT                        AUDIO_FORMAT_PCM_32_BIT
@@ -19,12 +20,11 @@
 #define INPUT_SERVER_TCP_PORT               9008
 
 #define VIDEO_MIMETYPE                      "video/avc"
-#define DEFAULT_DPI                         640
+#define DEFAULT_DPI                         720
 #define MEMORY_KILL_TIME                    60
 
 #define WAIT_TIME                           5000000LL
 
 #define TERMINAL_MAX_BUFFER                 8388608
-#define LOCAL_SOCKET_NAME                   "mctl_socket"
 
 #endif //F_ZEBRA_CONFIG_H

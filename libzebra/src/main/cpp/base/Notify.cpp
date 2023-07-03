@@ -4,7 +4,7 @@
 
 #include "Notify.h"
 
-#include "base/Config.h"
+#include "Config.h"
 #include "buffer/BufferManager.h"
 #include "buffer/LoopBuf.h"
 #include "utils/FlyLog.h"
