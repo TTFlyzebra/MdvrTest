@@ -113,6 +113,7 @@ void RtspClient::handle(NofifyType type, const char *data, int32_t size, const c
                     char aacHead[64];
                     int32_t aacHeadLen = mServer->get_aacHead(mChannel, aacHead, 64);
                     sendAFrame(aacHead, aacHeadLen, 0);
+                    is_send_audiohead = true;
                 }
                 int64_t pts = ByteUtil::byte2int64(params, 2, true);
                 sendAFrame(data, size, pts);
