@@ -5,7 +5,6 @@
 #ifndef F_ZEBRA_CONFIG_H
 #define F_ZEBRA_CONFIG_H
 
-#define MAX_CAM                             4
 #define AUDIO_MIMETYPE                      "audio/mp4a-latm"
 #define AUDIO_SAMPLE                        48000
 #define AUDIO_FORMAT                        AUDIO_FORMAT_PCM_32_BIT
@@ -26,5 +25,9 @@
 #define WAIT_TIME                           5000000LL
 
 #define TERMINAL_MAX_BUFFER                 8388608
+
+#define MAX_CAM                             4
+#define VIDEO_HEAD_MAX_SIZE                 256
+#define AUDIO_HEAD_MAX_SIZE                 64
 
 #endif //F_ZEBRA_CONFIG_H

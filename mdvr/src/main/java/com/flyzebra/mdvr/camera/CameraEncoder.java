@@ -20,8 +20,6 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CameraEncoder implements VideoCodecCB, INotify {
-    public static int AVC = 1;
-    public static int HEVC = 2;
     private final int mChannel;
     int yuvSize = Config.CAM_WIDTH * Config.CAM_HEIGHT * 3 / 2;
     int yuvBufSize = yuvSize + 8;
@@ -83,7 +81,6 @@ public class CameraEncoder implements VideoCodecCB, INotify {
     public void notifySpsPps(int channel, byte[] data, int size) {
         byte[] params = new byte[4];
         ByteUtil.shortToBytes((short) channel, params, 0, true);
-        ByteUtil.shortToBytes((short) AVC, params, 2, true);//Format AVC
         Notify.get().handledata(NotifyType.NOTI_CAMOUT_SPS, data, size, params);
     }
 
@@ -91,7 +88,6 @@ public class CameraEncoder implements VideoCodecCB, INotify {
     public void notifyVpsSpsPps(int channel, byte[] data, int size) {
         byte[] params = new byte[4];
         ByteUtil.shortToBytes((short) channel, params, 0, true);
-        ByteUtil.shortToBytes((short) HEVC, params, 2, true);//Format HEVC
         Notify.get().handledata(NotifyType.NOTI_CAMOUT_SPS, data, size, params);
     }
 
@@ -100,7 +96,6 @@ public class CameraEncoder implements VideoCodecCB, INotify {
         byte[] params = new byte[12];
         ByteUtil.shortToBytes((short) channel, params, 0, true);
         ByteUtil.longToBytes(pts, params, 2, true);
-        ByteUtil.shortToBytes((short) AVC, params, 10, true);//Format AVC
         Notify.get().handledata(NotifyType.NOTI_CAMOUT_AVC, data, size, params);
     }
 
@@ -109,7 +104,6 @@ public class CameraEncoder implements VideoCodecCB, INotify {
         byte[] params = new byte[12];
         ByteUtil.shortToBytes((short) channel, params, 0, true);
         ByteUtil.longToBytes(pts, params, 2, true);
-        ByteUtil.shortToBytes((short) HEVC, params, 10, true);//Format HEVC
         Notify.get().handledata(NotifyType.NOTI_CAMOUT_AVC, data, size, params);
     }
 

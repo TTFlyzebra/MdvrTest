@@ -1,4 +1,4 @@
-package com.flyzebra.mdvr.sound;
+package com.flyzebra.mdvr.mic;
 
 import static com.flyzebra.mdvr.Config.MAX_CAM;
 
@@ -22,27 +22,27 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * rn9175音频，四路麦克风使用一路48k2channels16bit录入，每路为48k1channel8bit
  * 实际每路转为48k1channel16bit
  */
-public class SoundService {
+public class MicService {
     private final Context mContext;
     private AudioRecord mAudioRecord;
     private final AtomicBoolean is_stop = new AtomicBoolean(true);
     int pcmSize = (int) (Config.MIC_SAMPLE * 1.0f * 16 / 8 * 2 / 25.0f);
     private final byte[] pcm = new byte[pcmSize];
     private Thread mRecordThread = null;
-    private final SoundEncoder[] soundEncoders = new SoundEncoder[MAX_CAM];
+    private final MicEncoder[] micEncoders = new MicEncoder[MAX_CAM];
 
-    public SoundService(Context context) {
+    public MicService(Context context) {
         this.mContext = context;
         for (int i = 0; i < MAX_CAM; i++) {
-            soundEncoders[i] = new SoundEncoder(i);
+            micEncoders[i] = new MicEncoder(i);
         }
     }
 
     public void onCreate() {
-        FlyLog.d("SoundService start!");
+        FlyLog.d("MicService start!");
         is_stop.set(false);
         for (int i = 0; i < MAX_CAM; i++) {
-            soundEncoders[i].onCreate();
+            micEncoders[i].onCreate();
         }
         int bufferSize = AudioRecord.getMinBufferSize(Config.MIC_SAMPLE, Config.MIC_CHANNEL, Config.MIC_FORMAT);
         if (ActivityCompat.checkSelfPermission(mContext,
@@ -93,7 +93,7 @@ public class SoundService {
                 Notify.get().handledata(NotifyType.NOTI_MICOUT_PCM, pcm_3, cPcmSize, params);
             }
             mAudioRecord.stop();
-        }, "audio-pcm");
+        }, "mic-pcm");
         mRecordThread.start();
     }
 
@@ -105,8 +105,8 @@ public class SoundService {
             e.printStackTrace();
         }
         for (int i = 0; i < MAX_CAM; i++) {
-            soundEncoders[i].onDistory();
+            micEncoders[i].onDistory();
         }
-        FlyLog.d("SoundService exit!");
+        FlyLog.d("MicService exit!");
     }
 }

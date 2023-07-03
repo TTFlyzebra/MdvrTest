@@ -4,7 +4,8 @@ import android.media.AudioFormat;
 import android.media.MediaFormat;
 
 public class Config {
-    public static final String CAM_MIME_TYPE = MediaFormat.MIMETYPE_VIDEO_AVC;
+    public static final String CAM_MIME_TYPE = MediaFormat.MIMETYPE_VIDEO_HEVC;
+    public static final int MAX_FRAME_SIZE = 1024 * 768 * 3 / 2;
     public static final int CAM_WIDTH = 1280;
     public static final int CAM_HEIGHT = 720;
     public static final int CAM_BIT_RATE = 2000000;

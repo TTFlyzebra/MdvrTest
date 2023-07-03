@@ -11,7 +11,6 @@ import com.flyzebra.core.notify.INotify;
 import com.flyzebra.core.notify.Notify;
 import com.flyzebra.core.notify.NotifyType;
 import com.flyzebra.mdvr.Config;
-import com.flyzebra.mdvr.camera.CameraEncoder;
 import com.flyzebra.rtmp.RtmpDump;
 import com.flyzebra.utils.ByteUtil;
 import com.flyzebra.utils.FlyLog;
@@ -84,9 +83,8 @@ public class RtmpPusher implements INotify {
                 boolean flag = true;
                 if (NotifyType.NOTI_CAMOUT_AVC == type) {
                     long pts = ByteUtil.bytes2Long(params, 2, true);
-                    short format = ByteUtil.bytes2Short(params, 10, true);
                     if (!is_send_video_head && videoHead != null) {
-                        if (format == CameraEncoder.AVC) {
+                        if (Config.CAM_MIME_TYPE.equals("video/avc")) {
                             flag = sendAvcHead(rtmp, videoHead, videoHead.length);
                             if (flag) is_send_video_head = true;
                         } else {
@@ -95,7 +93,7 @@ public class RtmpPusher implements INotify {
                         }
                     }
                     if (is_send_video_head) {
-                        if (format == CameraEncoder.AVC) {
+                        if (Config.CAM_MIME_TYPE.equals("video/avc")) {
                             flag = sendAvcData(rtmp, data, size, pts);
                         } else {
                             flag = sendHevcData(rtmp, data, size, pts);

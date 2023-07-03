@@ -90,6 +90,7 @@ private:
     struct timeval tv;
 
     bool is_send_audiohead;
+    bool is_hevc;
 };
 
 #endif //F_ZEBRA_RRSPCLIENT_H

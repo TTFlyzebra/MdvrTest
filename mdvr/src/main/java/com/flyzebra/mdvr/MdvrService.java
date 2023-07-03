@@ -9,14 +9,14 @@ import androidx.annotation.Nullable;
 import com.flyzebra.core.Fzebra;
 import com.flyzebra.core.notify.INotify;
 import com.flyzebra.mdvr.camera.CameraService;
+import com.flyzebra.mdvr.mic.MicService;
 import com.flyzebra.mdvr.rtmp.RtmpService;
-import com.flyzebra.mdvr.sound.SoundService;
 import com.flyzebra.utils.FlyLog;
 
 public class MdvrService extends Service implements INotify {
     private final RtmpService rtmpService = new RtmpService(this);
     private final CameraService cameraService = new CameraService(this);
-    private final SoundService soundService = new SoundService(this);
+    private final MicService micService = new MicService(this);
 
     @Nullable
     @Override
@@ -32,14 +32,14 @@ public class MdvrService extends Service implements INotify {
         //start object
         rtmpService.onCreate();
         cameraService.onCreate();
-        soundService.onCreate();
+        micService.onCreate();
     }
 
     @Override
     public void onDestroy() {
         rtmpService.onDestory();
         cameraService.onDerstory();
-        soundService.onDistory();
+        micService.onDistory();
         Fzebra.get().disableRtspServer();
         Fzebra.get().release();
         FlyLog.d("MdvrService exit!");

@@ -53,40 +53,12 @@ RtspServer::~RtspServer() {
 void RtspServer::handle(NofifyType type, const char *data, int32_t size, const char *params) {
     if (type == NOTI_CAMOUT_SPS) {
         int16_t channel = ByteUtil::byte2int16(params, 0, true);
-        int16_t format = ByteUtil::byte2int16(params + 2, 0, true);
-        if (format == 1) {
-            int sps_ptr = -1;
-            int pps_ptr = -1;
-            for (int i = 0; i < size - 4; i++) {
-                if (data[i] == 0x00 && data[i + 1] == 0x00 && data[i + 2] == 0x00 &&
-                    data[i + 3] == 0x01) {
-                    if (sps_ptr == -1) {
-                        sps_ptr = i;
-                        i += 3;
-                    } else {
-                        pps_ptr = i;
-                        break;
-                    }
-                }
-            }
-            if (sps_ptr == -1 || pps_ptr == -1) {
-                FLOGE("RtspServer Get sps pps error!");
-                return;
-            }
-            int sps_len = pps_ptr - 4;
-            const char *sps = data + sps_ptr + 4;
-            int pps_len = size - pps_ptr - 4;
-            const char *pps = data + pps_ptr + 4;
-
-            memcpy(spss + 256 * channel, sps, sps_len);
-            spsLens[channel] = sps_len;
-            memcpy(ppss + 128 * channel, pps, pps_len);
-            ppsLens[channel] = pps_len;
-        }
+        videoHeadLens[channel] = size;
+        memcpy(videoHeads + VIDEO_HEAD_MAX_SIZE * channel, data, size);
     } else if (type == NOTI_MICOUT_SPS) {
         int16_t channel = ByteUtil::byte2int16(params, 0, true);
-        aacHeadLens[channel] = size;
-        memcpy(aacHeads + 64 * channel, data, size);
+        audioHeadLens[channel] = size;
+        memcpy(audioHeads + AUDIO_HEAD_MAX_SIZE * channel, data, size);
     }
 }
 
@@ -94,8 +66,8 @@ void RtspServer::serverSocket() {
     while (!is_stop) {
         server_socket = socket(AF_INET, SOCK_STREAM, 0);
         if (server_socket <= 0) {
-            FLOGE("RtspServer serverSocket socket error. socket[%d][%s(%d)]", server_socket, strerror(errno),
-                  errno);
+            FLOGE("RtspServer serverSocket socket error. socket[%d][%s(%d)]", server_socket,
+                  strerror(errno), errno);
             server_socket = -1;
             usleep(1000000);
             continue;
@@ -175,23 +147,14 @@ void RtspServer::disconnectClient(RtspClient *client) {
     mcond_remove.notify_one();
 }
 
-int32_t RtspServer::get_sps(int channel, char *sps, int32_t maxLen) {
+int32_t RtspServer::getVideoHead(int channel, char *videoHead) {
     if (channel >= MAX_CAM) return 0;
-    if (maxLen < spsLens[channel]) return 0;
-    memcpy(sps, spss + 256 * channel, spsLens[channel]);
-    return spsLens[channel];
+    memcpy(videoHead, videoHeads + VIDEO_HEAD_MAX_SIZE * channel, videoHeadLens[channel]);
+    return videoHeadLens[channel];
 }
 
-int32_t RtspServer::get_pps(int channel, char *pps, int32_t maxLen) {
+int32_t RtspServer::getAudioHead(int channel, char *audioHead) {
     if (channel >= MAX_CAM) return 0;
-    if (maxLen < ppsLens[channel]) return 0;
-    memcpy(pps, ppss + 128 * channel, ppsLens[channel]);
-    return ppsLens[channel];
-}
-
-int32_t RtspServer::get_aacHead(int channel, char *aacHead, int32_t maxLen){
-    if (channel >= MAX_CAM) return 0;
-    if (maxLen < ppsLens[channel]) return 0;
-    memcpy(aacHead, aacHeads + 64 * channel, aacHeadLens[channel]);
-    return ppsLens[channel];
+    memcpy(audioHead, audioHeads + AUDIO_HEAD_MAX_SIZE * channel, audioHeadLens[channel]);
+    return audioHeadLens[channel];
 }

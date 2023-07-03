@@ -24,7 +24,7 @@ RtspClient::RtspClient(RtspServer *server, Notify *notify, int32_t socket)
         : BaseNotify(notify), mServer(server), mChannel(0), mSocket(socket), is_disconnect(false),
           is_use_tcp(true), v_rtp_socket(-1), vrtp_t(nullptr), v_rtcp_socket(-1), vrtcp_t(nullptr),
           a_rtp_socket(-1), artp_t(nullptr), a_rtcp_socket(-1), artcp_t(nullptr),
-          sequencenumber1(1234), sequencenumber2(4321), is_send_audiohead(false) {
+          sequencenumber1(1234), sequencenumber2(4321), is_send_audiohead(false), is_hevc(false) {
     FLOGD("%s()", __func__);
     recv_t = new std::thread(&RtspClient::recvThread, this);
     SysUtil::setThreadName(recv_t, "RtspClient-recv");
@@ -110,9 +110,9 @@ void RtspClient::handle(NofifyType type, const char *data, int32_t size, const c
             int16_t channel = ByteUtil::byte2int16(params, 0, true);
             if (mChannel == channel) {
                 if (!is_send_audiohead) {
-                    char aacHead[64];
-                    int32_t aacHeadLen = mServer->get_aacHead(mChannel, aacHead, 64);
-                    sendAFrame(aacHead, aacHeadLen, 0);
+                    char audioHead[AUDIO_HEAD_MAX_SIZE];
+                    int32_t audioHeadLen = mServer->getAudioHead(mChannel, audioHead);
+                    sendAFrame(audioHead, audioHeadLen, 0);
                     is_send_audiohead = true;
                 }
                 int64_t pts = ByteUtil::byte2int64(params, 2, true);
@@ -381,7 +381,7 @@ void RtspClient::onOptionsRequest(const char *data, int32_t cseq) {
 }
 
 void RtspClient::onDescribeRequest(const char *data, int32_t cseq) {
-    char temp[128];
+    char temp[1024];
     struct sockaddr_in addr{};
     socklen_t addrlen = sizeof(addr);
     getsockname(mSocket, (struct sockaddr *) &addr, &addrlen);
@@ -394,26 +394,80 @@ void RtspClient::onDescribeRequest(const char *data, int32_t cseq) {
     sdp.append("t=0 0\r\n");
     sdp.append("a=contol:*\r\n");
 
-    sdp.append("m=video 0 RTP/AVP 96\r\n");
-    sdp.append("a=rtpmap:96 H264/90000\r\n");
+    char videoHead[VIDEO_HEAD_MAX_SIZE] = {0};
+    int32_t videoHeadLen = mServer->getVideoHead(mChannel, videoHead);
 
-    char sps[256] = {0};
-    char pps[128] = {0};
-    int32_t spsLen = mServer->get_sps(mChannel, sps, 256);
-    int32_t ppsLen = mServer->get_pps(mChannel, pps, 128);
-    uint8_t outsps[256] = {0};
-    uint8_t outpps[128] = {0};
-    int32_t outLen = 0;
+    int ptr_0 = -1;
+    int ptr_1 = -1;
+    int ptr_2 = -1;
+    for (int i = 0; i < videoHeadLen - 4; i++) {
+        if (videoHead[i] == 0x00 && videoHead[i + 1] == 0x00 &&
+            videoHead[i + 2] == 0x00 && videoHead[i + 3] == 0x01) {
+            if (ptr_0 == -1) {
+                ptr_0 = i;
+                i += 3;
+            } else if (ptr_1 == -1) {
+                ptr_1 = i;
+                i += 3;
+            } else {
+                ptr_2 = i;
+                break;
+            }
+        }
+    }
+    if (ptr_0 == -1 || ptr_1 == -1) {
+        FLOGE("RtspServer Get sps pps error!");
+        return;
+    }
 
-    Base64::encode(reinterpret_cast<const uint8_t *>(sps), spsLen, outsps, &outLen);
-    Base64::encode(reinterpret_cast<const uint8_t *>(pps), ppsLen, outpps, &outLen);
+    is_hevc = (ptr_2 != -1);
+    //avc
+    if (!is_hevc) {
+        int spsLen = ptr_1 - 4;
+        const uint8_t *sps = reinterpret_cast<const uint8_t *>(videoHead + ptr_0 + 4);
+        int ppsLen = videoHeadLen - ptr_1 - 4;
+        const uint8_t *pps = reinterpret_cast<const uint8_t *>(videoHead + ptr_1 + 4);
 
-    memset(temp, 0, strlen(temp));
-    sprintf(temp,
-            "a=fmtp:96 profile-level-id=1;packetization-mode=1;sprop-parameter-sets=%s,%s\r\n",
-            outsps,
-            outpps);
-    sdp.append(temp);
+        int outspsLen;
+        int outppsLen;
+        uint8_t outsps[1024]{0};
+        uint8_t outpps[1024]{0};
+        Base64::encode(sps, spsLen, outsps, &outspsLen);
+        Base64::encode(pps, ppsLen, outpps, &outppsLen);
+
+        memset(temp, 0, strlen(temp));
+        sdp.append("m=video 0 RTP/AVP 96\r\n");
+        sdp.append("a=rtpmap:96 H264/90000\r\n");
+        sdp.append("a=fmtp:96 profile-level-id=42001f;packetization-mode=1;");
+        sprintf(temp, "sprop-parameter-sets=%s,%s\r\n", outsps, outpps);
+        sdp.append(temp);
+    }
+        //hevc
+    else {
+        int vpsLen = ptr_1 - 4;
+        const uint8_t *vps = reinterpret_cast<const uint8_t *>(videoHead + ptr_0 + 4);
+        int spsLen = ptr_2 - ptr_1 - 4;
+        const uint8_t *sps = reinterpret_cast<const uint8_t *>(videoHead + ptr_1 + 4);
+        int ppsLen = videoHeadLen - ptr_2 - 4;
+        const uint8_t *pps = reinterpret_cast<const uint8_t *>(videoHead + ptr_2 + 4);
+
+        int outvpsLen;
+        int outspsLen;
+        int outppsLen;
+        uint8_t outvps[1024]{0};
+        uint8_t outsps[1024]{0};
+        uint8_t outpps[1024]{0};
+        Base64::encode(vps, vpsLen, outvps, &outvpsLen);
+        Base64::encode(sps, spsLen, outsps, &outspsLen);
+        Base64::encode(pps, ppsLen, outpps, &outppsLen);
+
+        memset(temp, 0, strlen(temp));
+        sdp.append("m=video 0 RTP/AVP 96\r\n");
+        sdp.append("a=rtpmap:96 H265/90000\r\n");
+        sdp.append("a=fmtp:96 profile-level-id=42001f;");
+        sprintf(temp, "sprop-vps=%s;sprop-sps=%s;sprop-pps=%s\r\n", outvps, outsps, outpps);
+        sdp.append(temp);
+    }
 
     sdp.append("a=control:track1\r\n");
     sdp.append("m=audio 0 RTP/AVP 97\r\n");
@@ -580,7 +634,8 @@ void RtspClient::sendVFrame(const char *avc, int32_t size, int64_t ptsUsec) {
     //TODO::时间戮设置不对
     int32_t pts = ptsUsec * 90 / 1000;
     unsigned char nalu = avc[0];
-    int32_t fau_num = 1280 - 18;
+    //hevc don't support splite data
+    int32_t fau_num = is_hevc ? 1280 * 720 * 3 / 2 : 1280 - 18;
     if (size <= fau_num) {
         sequencenumber1++;
         char rtp_pack[16];
