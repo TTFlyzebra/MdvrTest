@@ -128,7 +128,7 @@ public class CameraEncoder implements VideoCodecCB, INotify {
             synchronized (yuvLock) {
                 try {
                     if (yuvBuf.remaining() < yuvBufSize) {
-                        FlyLog.e("Yuv Buffer is full, clean all buffer!");
+                        FlyLog.w("yuv buffer is full, lost one frame %d!", ptsUsec);
                         yuvBuf.clear();
                     }
                     yuvBuf.putLong(ptsUsec);

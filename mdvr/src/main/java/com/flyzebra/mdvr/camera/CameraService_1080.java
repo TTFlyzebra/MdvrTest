@@ -22,7 +22,7 @@ public class CameraService_1080 implements Runnable {
     private int height;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private QCarCamera qCarCamera1 = null;
-    private QCarCamera qCarCamera2 = null;
+//    private QCarCamera qCarCamera2 = null;
     private int camer_open_ret = -1;
     private final AtomicBoolean is_stop = new AtomicBoolean(true);
     private final VideoYuvThread[] yuvThreads = new VideoYuvThread[MAX_CAM];
@@ -66,16 +66,16 @@ public class CameraService_1080 implements Runnable {
         if (camer_open_ret == 0) {
             for (int i = 0; i < MAX_CAM; i++) {
                 if(qCarCamera1!=null)qCarCamera1.stopVideoStream(i);
-                if(qCarCamera2!=null)qCarCamera2.stopVideoStream(i);
+//                if(qCarCamera2!=null)qCarCamera2.stopVideoStream(i);
             }
             if(qCarCamera1!=null){
                 qCarCamera1.cameraClose();
                 qCarCamera1.release();
             }
-            if(qCarCamera2!=null) {
-                qCarCamera2.cameraClose();
-                qCarCamera2.release();
-            }
+//            if(qCarCamera2!=null) {
+//                qCarCamera2.cameraClose();
+//                qCarCamera2.release();
+//            }
 
         }
         FlyLog.d("YuvService exit!");
@@ -86,21 +86,21 @@ public class CameraService_1080 implements Runnable {
         if (qCarCamera1 == null) {
             qCarCamera1 = new QCarCamera(1);
         }
-        if(qCarCamera2 == null){
-            qCarCamera2 = new QCarCamera(2);
-        }
-        camer_open_ret = qCarCamera1.cameraOpen(2, 3);
+//        if(qCarCamera2 == null){
+//            qCarCamera2 = new QCarCamera(2);
+//        }
+        camer_open_ret = qCarCamera1.cameraOpen(4, 3);
         if (camer_open_ret != 0) {
             FlyLog.e("QCarCamera open failed, ret=%d", camer_open_ret);
             mHandler.postDelayed(CameraService_1080.this, 1000);
             return;
         }
-        camer_open_ret = qCarCamera2.cameraOpen(2, 4);
-        if (camer_open_ret != 0) {
-            FlyLog.e("QCarCamera2 open failed, ret=%d", camer_open_ret);
-            mHandler.postDelayed(CameraService_1080.this, 1000);
-            return;
-        }
+//        camer_open_ret = qCarCamera2.cameraOpen(4, 4);
+//        if (camer_open_ret != 0) {
+//            FlyLog.e("QCarCamera2 open failed, ret=%d", camer_open_ret);
+//            mHandler.postDelayed(CameraService_1080.this, 1000);
+//            return;
+//        }
         FlyLog.d("QCarCamera open success!");
         for (int i = 0; i < MAX_CAM; i++) {
             yuvThreads[i] = new VideoYuvThread(i);
@@ -125,17 +125,17 @@ public class CameraService_1080 implements Runnable {
             qCarCamera1.setVideoColorFormat(channel, QCarCamera.YUV420_NV12);
             qCarCamera1.startVideoStream(channel);
             //}else {
-            qCarCamera2.setVideoSize(channel, width, height);
-            videoBuffer[channel] = ByteBuffer.wrap(new byte[size]);
-            qCarCamera2.setVideoColorFormat(channel, QCarCamera.YUV420_NV12);
-            qCarCamera2.startVideoStream(channel);
+//            qCarCamera2.setVideoSize(channel, width, height);
+//            videoBuffer[channel] = ByteBuffer.wrap(new byte[size]);
+//            qCarCamera2.setVideoColorFormat(channel, QCarCamera.YUV420_NV12);
+//            qCarCamera2.startVideoStream(channel);
             //}
             while (!is_stop.get()) {
                 QCarCamera.FrameInfo info = qCarCamera1.getVideoFrameInfo(channel, videoBuffer[channel]);
-                if (info == null){
-                    //FlyLog.e("qCarCamera1 getVideoFrameInfo %d = null", channel);
-                    info = qCarCamera2.getVideoFrameInfo(channel, videoBuffer[channel]);
-                }
+//                if (info == null){
+//                    //FlyLog.e("qCarCamera1 getVideoFrameInfo %d = null", channel);
+//                    info = qCarCamera2.getVideoFrameInfo(channel, videoBuffer[channel]);
+//                }
                 if (info == null) {
                     //FlyLog.e("qCarCamera2 getVideoFrameInfo %d = null", channel);
                     continue;
