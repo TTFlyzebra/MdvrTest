@@ -22,7 +22,7 @@ public class RtmpPusher implements INotify {
     private final int mChannel;
     private final AtomicBoolean is_stop = new AtomicBoolean(true);
     private final AtomicBoolean is_rtmp = new AtomicBoolean(false);
-    private final ByteBuffer sendBuf = ByteBuffer.wrap(new byte[Config.CAM_WIDTH * Config.CAM_HEIGHT * 10]);
+    private final ByteBuffer sendBuf = ByteBuffer.wrap(new byte[1920 * 1080 * 5]);
     private Thread sendThread;
     private final Object sendLock = new Object();
     private byte[] videoHead = null;
@@ -42,7 +42,7 @@ public class RtmpPusher implements INotify {
             int type = 0;
             int size = 0;
             int paramsLen;
-            byte[] data = new byte[Config.CAM_WIDTH * Config.CAM_HEIGHT * 3 / 2];
+            byte[] data = new byte[1920 * 1080 * 3 / 2];
             byte[] params = new byte[1024];
             RtmpDump rtmp = new RtmpDump();
             while (!is_stop.get()) {

@@ -5,8 +5,6 @@ import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
 import android.view.SurfaceHolder;
 
-import com.flyzebra.mdvr.Config;
-
 /**
  * Author: FlyZebra
  * Time: 18-5-14 下午9:00.
@@ -27,7 +25,6 @@ public class GlVideoView extends GLSurfaceView implements SurfaceHolder.Callback
     private void init(Context context) {
         setEGLContextClientVersion(2);
         glRender = new GlRender(context);
-        glRender.setSize(Config.CAM_WIDTH, Config.CAM_HEIGHT);
         setRenderer(glRender);
         setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
         getHolder().addCallback(this);

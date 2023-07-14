@@ -52,8 +52,8 @@ public class GlRender implements GLSurfaceView.Renderer {
     private int sampler_y;
     private int sampler_uv;
     private final int[] textureIds = new int[2];
-    private int width;
-    private int height;
+    private int width = 0;
+    private int height = 0;
     private ByteBuffer y;
     private ByteBuffer uv;
 
@@ -83,6 +83,9 @@ public class GlRender implements GLSurfaceView.Renderer {
     }
 
     public void pushNv12data(byte[] nv12, int size, int width, int height) {
+        if (this.width != width || this.height != height) {
+            setSize(width, height);
+        }
         synchronized (objectLock) {
             y.put(nv12, 0, width * height);
             uv.put(nv12, width * height, width * height / 2);

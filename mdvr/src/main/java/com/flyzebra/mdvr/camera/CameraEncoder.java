@@ -21,15 +21,22 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CameraEncoder implements VideoCodecCB, INotify {
     private final int mChannel;
-    int yuvSize = Config.CAM_WIDTH * Config.CAM_HEIGHT * 3 / 2;
-    int yuvBufSize = yuvSize + 8;
-    private final ByteBuffer yuvBuf = ByteBuffer.wrap(new byte[yuvBufSize * 5]);
+    private int width;
+    private int height;
+    private final int yuvSize;
+    private final int yuvBufSize;
+    private ByteBuffer yuvBuf = null;
     private Thread yuvThread;
     private final Object yuvLock = new Object();
     private final AtomicBoolean is_stop = new AtomicBoolean(true);
 
-    public CameraEncoder(int channel) {
-        mChannel = channel;
+    public CameraEncoder(int channel, int width, int height) {
+        this.mChannel = channel;
+        this.width = width;
+        this.height = height;
+        yuvSize = width * height * 3 / 2;
+        yuvBufSize = yuvSize + 8;
+        yuvBuf = ByteBuffer.wrap(new byte[yuvBufSize * 2]);
     }
 
     public void onCreate() {
@@ -40,7 +47,7 @@ public class CameraEncoder implements VideoCodecCB, INotify {
             long ptsUsec = 0;
             byte[] yuv = new byte[yuvSize];
             VideoCodec videoCodec = new VideoCodec(mChannel, this);
-            videoCodec.initCodec(Config.CAM_MIME_TYPE, Config.CAM_WIDTH, Config.CAM_HEIGHT, Config.CAM_BIT_RATE);
+            videoCodec.initCodec(Config.CAM_MIME_TYPE, width, height, Config.CAM_BIT_RATE);
             while (!is_stop.get()) {
                 synchronized (yuvLock) {
                     if (!is_stop.get() && yuvBuf.position() < yuvBufSize) {
@@ -114,7 +121,7 @@ public class CameraEncoder implements VideoCodecCB, INotify {
 
     @Override
     public void handle(int type, byte[] data, int size, byte[] params) {
-        if (NotifyType.NOTI_CAMOUT_YUV == type) {
+        if (NotifyType.NOTI_CAMOUT_YUV == type && yuvBuf != null) {
             int channel = ByteUtil.bytes2Short(params, 0, true);
             if (this.mChannel != channel) return;
             long ptsUsec = ByteUtil.bytes2Long(params, 6, true);

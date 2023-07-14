@@ -1,14 +1,11 @@
 package com.flyzebra.mdvr.camera;
 
-import static com.flyzebra.mdvr.Config.MAX_CAM;
-
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 
 import com.flyzebra.core.notify.Notify;
 import com.flyzebra.core.notify.NotifyType;
-import com.flyzebra.mdvr.Config;
 import com.flyzebra.utils.ByteUtil;
 import com.flyzebra.utils.FlyLog;
 import com.quectel.qcarapi.stream.QCarCamera;
@@ -17,6 +14,9 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CameraService_1080 implements Runnable {
+    public static final int CAM_WIDTH = 1920;
+    public static final int CAM_HEIGHT = 1080;
+    public static final int MAX_CAM = 4;
     private Context mContext;
     private int width;
     private int height;
@@ -32,14 +32,14 @@ public class CameraService_1080 implements Runnable {
     public CameraService_1080(Context context) {
         mContext = context;
         for (int i = 0; i < MAX_CAM; i++) {
-            cameraEncoders[i] = new CameraEncoder(i);
+            cameraEncoders[i] = new CameraEncoder(i, CAM_WIDTH, CAM_HEIGHT);
         }
     }
 
     public void onCreate() {
         FlyLog.d("YuvService start!");
-        this.width = Config.CAM_WIDTH;
-        this.height = Config.CAM_HEIGHT;
+        this.width = CAM_WIDTH;
+        this.height = CAM_HEIGHT;
         is_stop.set(false);
         for (int i = 0; i < MAX_CAM; i++) {
             cameraEncoders[i].onCreate();
@@ -89,13 +89,13 @@ public class CameraService_1080 implements Runnable {
         if(qCarCamera2 == null){
             qCarCamera2 = new QCarCamera(2);
         }
-        camer_open_ret = qCarCamera1.cameraOpen(2, 5);
+        camer_open_ret = qCarCamera1.cameraOpen(2, 3);
         if (camer_open_ret != 0) {
             FlyLog.e("QCarCamera open failed, ret=%d", camer_open_ret);
             mHandler.postDelayed(CameraService_1080.this, 1000);
             return;
         }
-        camer_open_ret = qCarCamera2.cameraOpen(4, 6);
+        camer_open_ret = qCarCamera2.cameraOpen(2, 4);
         if (camer_open_ret != 0) {
             FlyLog.e("QCarCamera2 open failed, ret=%d", camer_open_ret);
             mHandler.postDelayed(CameraService_1080.this, 1000);

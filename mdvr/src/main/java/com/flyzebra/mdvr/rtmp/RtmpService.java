@@ -1,7 +1,5 @@
 package com.flyzebra.mdvr.rtmp;
 
-import static com.flyzebra.mdvr.Config.MAX_CAM;
-
 import android.content.Context;
 
 import com.flyzebra.core.notify.INotify;
@@ -24,7 +22,7 @@ public class RtmpService implements INotify {
 
     public void onCreate() {
         Notify.get().registerListener(this);
-        for (int i = 0; i < MAX_CAM; i++) {
+        for (int i = 0; i < 4; i++) {
             RtmpPusher rtmpPusher = new RtmpPusher(i);
             rtmpPusher.start(Config.RTMP_URL + "/camera" + i);
             pusherMap.put(i, rtmpPusher);
