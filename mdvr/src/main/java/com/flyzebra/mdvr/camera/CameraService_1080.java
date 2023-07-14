@@ -16,19 +16,20 @@ import com.quectel.qcarapi.stream.QCarCamera;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class CameraService implements Runnable {
+public class CameraService_1080 implements Runnable {
     private Context mContext;
     private int width;
     private int height;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
-    private QCarCamera qCarCamera = null;
+    private QCarCamera qCarCamera1 = null;
+    private QCarCamera qCarCamera2 = null;
     private int camer_open_ret = -1;
     private final AtomicBoolean is_stop = new AtomicBoolean(true);
-    private final VideoYuvThread[] yuvThreads = new VideoYuvThread[4];
+    private final VideoYuvThread[] yuvThreads = new VideoYuvThread[MAX_CAM];
     private final ByteBuffer[] videoBuffer = new ByteBuffer[MAX_CAM];
     private final CameraEncoder[] cameraEncoders = new CameraEncoder[MAX_CAM];
 
-    public CameraService(Context context) {
+    public CameraService_1080(Context context) {
         mContext = context;
         for (int i = 0; i < MAX_CAM; i++) {
             cameraEncoders[i] = new CameraEncoder(i);
@@ -49,6 +50,11 @@ public class CameraService implements Runnable {
     public void onDerstory() {
         is_stop.set(true);
         mHandler.removeCallbacksAndMessages(null);
+
+        for (int i = 0; i < MAX_CAM; i++) {
+            cameraEncoders[i].onDistory();
+        }
+
         for (int i = 0; i < MAX_CAM; i++) {
             try {
                 if (yuvThreads[i] != null) yuvThreads[i].join();
@@ -57,28 +63,42 @@ public class CameraService implements Runnable {
             }
         }
 
-        if (camer_open_ret == 0 && qCarCamera != null) {
+        if (camer_open_ret == 0) {
             for (int i = 0; i < MAX_CAM; i++) {
-                qCarCamera.stopVideoStream(i);
+                if(qCarCamera1!=null)qCarCamera1.stopVideoStream(i);
+                if(qCarCamera2!=null)qCarCamera2.stopVideoStream(i);
             }
-            qCarCamera.cameraClose();
-            qCarCamera.release();
-        }
-        for (int i = 0; i < MAX_CAM; i++) {
-            cameraEncoders[i].onDistory();
+            if(qCarCamera1!=null){
+                qCarCamera1.cameraClose();
+                qCarCamera1.release();
+            }
+            if(qCarCamera2!=null) {
+                qCarCamera2.cameraClose();
+                qCarCamera2.release();
+            }
+
         }
         FlyLog.d("YuvService exit!");
     }
 
     @Override
     public void run() {
-        if (qCarCamera == null) {
-            qCarCamera = new QCarCamera(1);
+        if (qCarCamera1 == null) {
+            qCarCamera1 = new QCarCamera(1);
         }
-        camer_open_ret = qCarCamera.cameraOpen(MAX_CAM, 1);
+        if(qCarCamera2 == null){
+            qCarCamera2 = new QCarCamera(2);
+        }
+        camer_open_ret = qCarCamera1.cameraOpen(2, 5);
         if (camer_open_ret != 0) {
             FlyLog.e("QCarCamera open failed, ret=%d", camer_open_ret);
-            mHandler.postDelayed(CameraService.this, 1000);
+            mHandler.postDelayed(CameraService_1080.this, 1000);
+            return;
+        }
+        camer_open_ret = qCarCamera2.cameraOpen(4, 6);
+        if (camer_open_ret != 0) {
+            FlyLog.e("QCarCamera2 open failed, ret=%d", camer_open_ret);
+            mHandler.postDelayed(CameraService_1080.this, 1000);
             return;
         }
         FlyLog.d("QCarCamera open success!");
@@ -98,14 +118,29 @@ public class CameraService implements Runnable {
 
         @Override
         public void run() {
-            qCarCamera.setVideoSize(channel, width, height);
             final int size = width * height * 3 / 2;
+            //if(channel<2) {
+            qCarCamera1.setVideoSize(channel, width, height);
             videoBuffer[channel] = ByteBuffer.wrap(new byte[size]);
-            qCarCamera.setVideoColorFormat(channel, QCarCamera.YUV420_NV12);
-            qCarCamera.startVideoStream(channel);
+            qCarCamera1.setVideoColorFormat(channel, QCarCamera.YUV420_NV12);
+            qCarCamera1.startVideoStream(channel);
+            //}else {
+            qCarCamera2.setVideoSize(channel, width, height);
+            videoBuffer[channel] = ByteBuffer.wrap(new byte[size]);
+            qCarCamera2.setVideoColorFormat(channel, QCarCamera.YUV420_NV12);
+            qCarCamera2.startVideoStream(channel);
+            //}
             while (!is_stop.get()) {
-                QCarCamera.FrameInfo info = qCarCamera.getVideoFrameInfo(channel, videoBuffer[channel]);
-                //FlyLog.e("camera=%d ptsSec=%d,ptsUsec=%d,frameID=%d", number, info.ptsSec, info.ptsUsec, info.frameID);
+                QCarCamera.FrameInfo info = qCarCamera1.getVideoFrameInfo(channel, videoBuffer[channel]);
+                if (info == null){
+                    //FlyLog.e("qCarCamera1 getVideoFrameInfo %d = null", channel);
+                    info = qCarCamera2.getVideoFrameInfo(channel, videoBuffer[channel]);
+                }
+                if (info == null) {
+                    //FlyLog.e("qCarCamera2 getVideoFrameInfo %d = null", channel);
+                    continue;
+                }
+                //FlyLog.e("camera=%d ptsSec=%d,ptsUsec=%d,frameID=%d", channel, info.ptsSec, info.ptsUsec, info.frameID);
                 long ptsUsec = info.ptsSec * 1000000 + info.ptsUsec;
                 //long ptsUsec = System.nanoTime() / 1000;
                 byte[] params = new byte[14];

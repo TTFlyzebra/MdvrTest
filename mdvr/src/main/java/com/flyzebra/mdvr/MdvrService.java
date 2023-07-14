@@ -30,14 +30,14 @@ public class MdvrService extends Service implements INotify {
         Fzebra.get().init();
         Fzebra.get().enableRtspServer();
         //start object
-        rtmpService.onCreate();
+        //rtmpService.onCreate();
         cameraService.onCreate();
         micService.onCreate();
     }
 
     @Override
     public void onDestroy() {
-        rtmpService.onDestory();
+        //rtmpService.onDestory();
         cameraService.onDerstory();
         micService.onDistory();
         Fzebra.get().disableRtspServer();

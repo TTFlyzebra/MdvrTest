@@ -23,7 +23,7 @@ public class CameraEncoder implements VideoCodecCB, INotify {
     private final int mChannel;
     int yuvSize = Config.CAM_WIDTH * Config.CAM_HEIGHT * 3 / 2;
     int yuvBufSize = yuvSize + 8;
-    private final ByteBuffer yuvBuf = ByteBuffer.wrap(new byte[yuvBufSize * 15]);
+    private final ByteBuffer yuvBuf = ByteBuffer.wrap(new byte[yuvBufSize * 5]);
     private Thread yuvThread;
     private final Object yuvLock = new Object();
     private final AtomicBoolean is_stop = new AtomicBoolean(true);

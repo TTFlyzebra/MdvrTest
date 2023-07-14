@@ -2,8 +2,12 @@ package com.flyzebra.mdvr;
 
 import static com.flyzebra.mdvr.Config.MAX_CAM;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -25,6 +29,7 @@ public class MdvrActivity extends AppCompatActivity implements INotify {
     private final GlVideoView[] mGlVideoViews = new GlVideoView[MAX_CAM];
     private final int[] mGlVideoViewIds = new int[]{R.id.sv01, R.id.sv02, R.id.sv03, R.id.sv04};
 
+    private MyRecevier recevier = new MyRecevier();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,11 +45,16 @@ public class MdvrActivity extends AppCompatActivity implements INotify {
         for (int i = 0; i < MAX_CAM; i++) {
             mGlVideoViews[i] = findViewById(mGlVideoViewIds[i]);
         }
+
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction("android.hardware.usb.action.USB_STATE");
+        registerReceiver(recevier, intentFilter);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        unregisterReceiver(recevier);
         Notify.get().unregisterListener(this);
         stopService(new Intent(this, MdvrService.class));
         FlyLog.d("MdvrActiviy exit!");
@@ -63,6 +73,19 @@ public class MdvrActivity extends AppCompatActivity implements INotify {
             int height = ByteUtil.bytes2Short(params, 4, true);
 //            long ptsUsec = ByteUtil.bytes2Long(params, 6, true);
             mGlVideoViews[channel].pushNv12data(data, size, width, height);
+        }
+    }
+
+    private class MyRecevier extends BroadcastReceiver{
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(intent.getAction().equals("android.hardware.usb.action.USB_STATE")){
+                FlyLog.e("[%d]USB_STATE: "+ intent.toString(), SystemClock.uptimeMillis());
+                Bundle bundle = intent.getExtras();
+                for (String key: bundle.keySet()) {
+                    FlyLog.e("[%d]USB_STATE: Key=" + key + ", content=" +bundle.get(key), SystemClock.uptimeMillis());
+                }
+            }
         }
     }
 }
