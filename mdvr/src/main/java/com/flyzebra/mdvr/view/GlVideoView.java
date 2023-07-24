@@ -11,7 +11,7 @@ import android.view.SurfaceHolder;
  * Discription: This is GlVideoView
  */
 public class GlVideoView extends GLSurfaceView implements SurfaceHolder.Callback {
-    private GlRender glRender;
+    private GlRenderNv12 glRender;
 
     public GlVideoView(Context context) {
         this(context, null);
@@ -24,7 +24,7 @@ public class GlVideoView extends GLSurfaceView implements SurfaceHolder.Callback
 
     private void init(Context context) {
         setEGLContextClientVersion(2);
-        glRender = new GlRender(context);
+        glRender = new GlRenderNv12(context);
         setRenderer(glRender);
         setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
         getHolder().addCallback(this);
@@ -45,8 +45,8 @@ public class GlVideoView extends GLSurfaceView implements SurfaceHolder.Callback
         super.surfaceDestroyed(surfaceHolder);
     }
 
-    public void pushNv12data(byte[] nv21, int size, int width, int height) {
-        glRender.pushNv12data(nv21, size, width, height);
+    public void upFrame(byte[] data, int size, int width, int height) {
+        glRender.upFrame(data, size, width, height);
         requestRender();
     }
 }

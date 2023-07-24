@@ -19,7 +19,7 @@ import javax.microedition.khronos.opengles.GL10;
  * Time: 18-5-14 下午9:00.
  * Discription: This is GlRender
  */
-public class GlRender implements GLSurfaceView.Renderer {
+public class GlRenderYuv implements GLSurfaceView.Renderer {
     private final Context context;
     private final FloatBuffer vertexBuffer;
     private final FloatBuffer textureBuffer;
@@ -50,16 +50,18 @@ public class GlRender implements GLSurfaceView.Renderer {
     protected int fPosition;
     protected int vMatrix;
     private int sampler_y;
-    private int sampler_uv;
+    private int sampler_u;
+    private int sampler_v;
     private final int[] textureIds = new int[2];
     private int width = 0;
     private int height = 0;
     private ByteBuffer y;
-    private ByteBuffer uv;
+    private ByteBuffer u;
+    private ByteBuffer v;
 
     private final Object objectLock = new Object();
 
-    public GlRender(Context context) {
+    public GlRenderYuv(Context context) {
         this.context = context;
 
         vertexBuffer = ByteBuffer.allocateDirect(vertexData.length * 4)
@@ -79,7 +81,8 @@ public class GlRender implements GLSurfaceView.Renderer {
         this.width = width;
         this.height = height;
         y = ByteBuffer.wrap(new byte[this.width * this.height]);
-        uv = ByteBuffer.wrap(new byte[this.width * this.height / 2]);
+        u = ByteBuffer.wrap(new byte[this.width * this.height / 4]);
+        v = ByteBuffer.wrap(new byte[this.width * this.height / 4]);
     }
 
     public void pushNv12data(byte[] nv12, int size, int width, int height) {
@@ -88,22 +91,25 @@ public class GlRender implements GLSurfaceView.Renderer {
         }
         synchronized (objectLock) {
             y.put(nv12, 0, width * height);
-            uv.put(nv12, width * height, width * height / 2);
+            u.put(nv12, width * height, width * height / 4);
+            v.put(nv12, width * height, width * height / 4);
             y.flip();
-            uv.flip();
+            u.flip();
+            v.flip();
         }
     }
 
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-        String vertexShader = GlShaderUtil.readRawTextFile(context, R.raw.vertex_nv12);
-        String fragmentShader = GlShaderUtil.readRawTextFile(context, R.raw.fragment_nv12);
+        String vertexShader = GlShaderUtil.readRawTextFile(context, R.raw.glsl_nv12_vertex);
+        String fragmentShader = GlShaderUtil.readRawTextFile(context, R.raw.glsl_nv12_fragment);
         glprogram = GlShaderUtil.createProgram(vertexShader, fragmentShader);
         vPosition = GLES20.glGetAttribLocation(glprogram, "vPosition");
         fPosition = GLES20.glGetAttribLocation(glprogram, "fPosition");
         vMatrix = GLES20.glGetUniformLocation(glprogram, "vMatrix");
         sampler_y = GLES20.glGetUniformLocation(glprogram, "sampler_y");
-        sampler_uv = GLES20.glGetUniformLocation(glprogram, "sampler_uv");
+        sampler_u = GLES20.glGetUniformLocation(glprogram, "sampler_u");
+        sampler_v = GLES20.glGetUniformLocation(glprogram, "sampler_v");
         GLES20.glGenTextures(textureIds.length, textureIds, 0);
         for (int textureId : textureIds) {
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId);
@@ -118,7 +124,7 @@ public class GlRender implements GLSurfaceView.Renderer {
         GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
-        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        GLES20.glClearColor(0.0f, 0.7f, 0.0f, 1.0f);
     }
 
     @Override
@@ -129,7 +135,7 @@ public class GlRender implements GLSurfaceView.Renderer {
     @Override
     public void onDrawFrame(GL10 gl) {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
-        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        GLES20.glClearColor(0.0f, 0.70f, 0.0f, 1.0f);
         if (width <= 0 || height <= 0) return;
         synchronized (objectLock) {
             GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
@@ -137,13 +143,15 @@ public class GlRender implements GLSurfaceView.Renderer {
             GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_LUMINANCE, width, height, 0, GLES20.GL_LUMINANCE, GLES20.GL_UNSIGNED_BYTE, y);//
             GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureIds[1]);
-            GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_LUMINANCE_ALPHA, width / 2, height / 2, 0, GLES20.GL_LUMINANCE_ALPHA, GLES20.GL_UNSIGNED_BYTE, uv);
+            GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_LUMINANCE_ALPHA, width / 2, height / 2, 0, GLES20.GL_LUMINANCE_ALPHA, GLES20.GL_UNSIGNED_BYTE, u);
+            GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_LUMINANCE_ALPHA, width / 2, height / 2, 0, GLES20.GL_LUMINANCE_ALPHA, GLES20.GL_UNSIGNED_BYTE, v);
         }
 
         GLES20.glUseProgram(glprogram);
         GLES20.glUniformMatrix4fv(vMatrix, 1, false, vMatrixData, 0);
         GLES20.glUniform1i(sampler_y, 0);
-        GLES20.glUniform1i(sampler_uv, 1);
+        GLES20.glUniform1i(sampler_u, 1);
+        GLES20.glUniform1i(sampler_v, 2);
 
         GLES20.glEnableVertexAttribArray(vPosition);
         GLES20.glEnableVertexAttribArray(fPosition);
