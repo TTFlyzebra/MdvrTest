@@ -3,6 +3,7 @@ package com.flyzebra.mdvr;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -11,12 +12,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.flyzebra.core.notify.INotify;
 import com.flyzebra.core.notify.Notify;
 import com.flyzebra.core.notify.NotifyType;
-import com.flyzebra.mdvr.camera.CameraService_1080;
+import com.flyzebra.mdvr.camera.CameraService_720;
 import com.flyzebra.mdvr.mic.MicService;
 import com.flyzebra.mdvr.rtmp.RtmpService;
 import com.flyzebra.mdvr.view.GlVideoView;
 import com.flyzebra.utils.ByteUtil;
 import com.flyzebra.utils.FlyLog;
+import com.flyzebra.utils.PropUtil;
+import com.flyzebra.utils.ShellUtil;
 
 public class MdvrActivity extends AppCompatActivity implements INotify {
     static {
@@ -25,11 +28,11 @@ public class MdvrActivity extends AppCompatActivity implements INotify {
 
     private final GlVideoView[] mGlVideoViews = new GlVideoView[Config.MAX_CAM];
     private final int[] mGlVideoViewIds = new int[]{R.id.sv01, R.id.sv02, R.id.sv03, R.id.sv04};
-    private MyRecevier recevier = new MyRecevier();
+    //private MyRecevier recevier = new MyRecevier();
 
     private final RtmpService rtmpService = new RtmpService(this);
-    private final CameraService_1080 cameraService = new CameraService_1080(this);
-    //private final CameraService_720 cameraService = new CameraService_720(this);
+    //private final CameraService_1080 cameraService = new CameraService_1080(this);
+    private final CameraService_720 cameraService = new CameraService_720(this);
     private final MicService micService = new MicService(this);
 
     @Override
@@ -41,6 +44,9 @@ public class MdvrActivity extends AppCompatActivity implements INotify {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_main);
 
+        PropUtil.set("ctl.stop", "MonitorHobotApk");
+        ShellUtil.exec("am force-stop com.hobot.sample.app");
+
         startService(new Intent(this, MdvrService.class));
         Notify.get().registerListener(this);
 
@@ -50,13 +56,26 @@ public class MdvrActivity extends AppCompatActivity implements INotify {
 
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction("android.hardware.usb.action.USB_STATE");
-        registerReceiver(recevier, intentFilter);
+        //registerReceiver(recevier, intentFilter);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        View decorView = getWindow().getDecorView();
+        int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+                View.SYSTEM_UI_FLAG_FULLSCREEN |
+                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
+                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY |
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
+                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+        decorView.setSystemUiVisibility(uiOptions);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unregisterReceiver(recevier);
+        //unregisterReceiver(recevier);
         Notify.get().unregisterListener(this);
         stopService(new Intent(this, MdvrService.class));
         FlyLog.d("MdvrActiviy exit!");

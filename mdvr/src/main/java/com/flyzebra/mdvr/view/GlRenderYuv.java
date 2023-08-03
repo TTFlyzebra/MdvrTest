@@ -52,7 +52,7 @@ public class GlRenderYuv implements GLSurfaceView.Renderer {
     private int sampler_y;
     private int sampler_u;
     private int sampler_v;
-    private final int[] textureIds = new int[2];
+    private final int[] textureIds = new int[3];
     private int width = 0;
     private int height = 0;
     private ByteBuffer y;
@@ -85,14 +85,14 @@ public class GlRenderYuv implements GLSurfaceView.Renderer {
         v = ByteBuffer.wrap(new byte[this.width * this.height / 4]);
     }
 
-    public void pushNv12data(byte[] nv12, int size, int width, int height) {
+    public void upFrame(byte[] data, int size, int width, int height) {
         if (this.width != width || this.height != height) {
             setSize(width, height);
         }
         synchronized (objectLock) {
-            y.put(nv12, 0, width * height);
-            u.put(nv12, width * height, width * height / 4);
-            v.put(nv12, width * height, width * height / 4);
+            y.put(data, 0, width * height);
+            u.put(data, width * height, width * height / 4);
+            v.put(data, width * height + width * height / 4, width * height / 4);
             y.flip();
             u.flip();
             v.flip();
@@ -101,8 +101,8 @@ public class GlRenderYuv implements GLSurfaceView.Renderer {
 
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-        String vertexShader = GlShaderUtil.readRawTextFile(context, R.raw.glsl_nv12_vertex);
-        String fragmentShader = GlShaderUtil.readRawTextFile(context, R.raw.glsl_nv12_fragment);
+        String vertexShader = GlShaderUtil.readRawTextFile(context, R.raw.glsl_yuv_vertex);
+        String fragmentShader = GlShaderUtil.readRawTextFile(context, R.raw.glsl_yuv_fragment);
         glprogram = GlShaderUtil.createProgram(vertexShader, fragmentShader);
         vPosition = GLES20.glGetAttribLocation(glprogram, "vPosition");
         fPosition = GLES20.glGetAttribLocation(glprogram, "fPosition");
@@ -140,11 +140,13 @@ public class GlRenderYuv implements GLSurfaceView.Renderer {
         synchronized (objectLock) {
             GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureIds[0]);
-            GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_LUMINANCE, width, height, 0, GLES20.GL_LUMINANCE, GLES20.GL_UNSIGNED_BYTE, y);//
+            GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_LUMINANCE, width, height, 0, GLES20.GL_LUMINANCE, GLES20.GL_UNSIGNED_BYTE, y);
             GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureIds[1]);
-            GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_LUMINANCE_ALPHA, width / 2, height / 2, 0, GLES20.GL_LUMINANCE_ALPHA, GLES20.GL_UNSIGNED_BYTE, u);
-            GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_LUMINANCE_ALPHA, width / 2, height / 2, 0, GLES20.GL_LUMINANCE_ALPHA, GLES20.GL_UNSIGNED_BYTE, v);
+            GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_LUMINANCE, width / 2, height / 2, 0, GLES20.GL_LUMINANCE, GLES20.GL_UNSIGNED_BYTE, u);
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE2);
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureIds[2]);
+            GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_LUMINANCE, width / 2, height / 2, 0, GLES20.GL_LUMINANCE, GLES20.GL_UNSIGNED_BYTE, v);
         }
 
         GLES20.glUseProgram(glprogram);

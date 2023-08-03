@@ -50,6 +50,10 @@ public class MicService {
             FlyLog.e("check audio record permission failed!");
             return;
         }
+        if (bufferSize <= 0) {
+            FlyLog.e("AudioRecord.getMinBufferSize failed!");
+            return;
+        }
         mAudioRecord = new AudioRecord(MediaRecorder.AudioSource.CAMCORDER, Config.MIC_SAMPLE, Config.MIC_CHANNEL, Config.MIC_FORMAT, bufferSize);
         mRecordThread = new Thread(() -> {
             mAudioRecord.startRecording();
@@ -100,7 +104,10 @@ public class MicService {
     public void onDistory() {
         is_stop.set(true);
         try {
-            mRecordThread.join();
+            if (mRecordThread != null) {
+                mRecordThread.join();
+                mRecordThread = null;
+            }
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

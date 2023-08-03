@@ -108,7 +108,7 @@ public class CameraService_720 implements Runnable {
             qCarCamera.startVideoStream(channel);
             while (!is_stop.get()) {
                 QCarCamera.FrameInfo info = qCarCamera.getVideoFrameInfo(channel, videoBuffer[channel]);
-                if(info!=null) {
+                if (info != null) {
                     //FlyLog.e("camera=%d ptsSec=%d,ptsUsec=%d,frameID=%d", channel, info.ptsSec, info.ptsUsec, info.frameID);
                     long ptsUsec = info.ptsSec * 1000000 + info.ptsUsec;
                     //long ptsUsec = System.nanoTime() / 1000;
@@ -118,7 +118,7 @@ public class CameraService_720 implements Runnable {
                     ByteUtil.shortToBytes((short) height, params, 4, true);
                     ByteUtil.longToBytes(ptsUsec, params, 6, true);
                     Notify.get().handledata(NotifyType.NOTI_CAMOUT_YUV, videoBuffer[channel].array(), size, params);
-                }else {
+                } else {
                     FlyLog.e("Camera getVideoFrameInfo return null!");
                 }
             }

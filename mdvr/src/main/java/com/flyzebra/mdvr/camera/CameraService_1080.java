@@ -89,7 +89,7 @@ public class CameraService_1080 implements Runnable {
 //        if(qCarCamera2 == null){
 //            qCarCamera2 = new QCarCamera(2);
 //        }
-        camer_open_ret = qCarCamera1.cameraOpen(4, 3);
+        camer_open_ret = qCarCamera1.cameraOpen(4, 5);
         if (camer_open_ret != 0) {
             FlyLog.e("QCarCamera open failed, ret=%d", camer_open_ret);
             mHandler.postDelayed(CameraService_1080.this, 1000);
