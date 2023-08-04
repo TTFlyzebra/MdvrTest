@@ -37,7 +37,7 @@ public class StorageTasker implements INotify {
             String savePath = tFcard.getPath() + File.separator + "MD201" + File.separator + "CHANNEL-" + mChannel;
             File file = new File(savePath);
             if (!file.exists()) {
-                if (file.mkdirs()) {
+                if (!file.mkdirs()) {
                     FlyLog.e("create save file path %s failed!", savePath);
                     return;
                 }
@@ -70,7 +70,7 @@ public class StorageTasker implements INotify {
                 }
                 boolean is_newfile = false;
                 long count = System.currentTimeMillis() / (1000 * 300);
-                if (type == 0x01 && count > lastCount) {
+                if (type == 0x01 && count > lastCount && (data[0] & 0x1f) != 1) {
                     lastCount = count;
                     is_newfile = true;
                 }
@@ -90,6 +90,7 @@ public class StorageTasker implements INotify {
                     try {
                         randomAccessFile.write(head);
                         randomAccessFile.write(videoHead);
+                        randomAccessFile.write(head);
                         randomAccessFile.write(audioHead);
                         FlyLog.e("videoHead len=%d, audioHead len=%d");
                     } catch (IOException e) {
@@ -98,10 +99,8 @@ public class StorageTasker implements INotify {
                 }
                 if (randomAccessFile != null) {
                     try {
-                        if (type == 1) {
-                            randomAccessFile.write(head);
-                            randomAccessFile.write(data);
-                        }
+                        randomAccessFile.write(head);
+                        randomAccessFile.write(data);
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
