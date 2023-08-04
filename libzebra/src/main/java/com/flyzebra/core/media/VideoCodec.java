@@ -34,13 +34,13 @@ public class VideoCodec implements Runnable {
             format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar);
             format.setInteger(MediaFormat.KEY_BIT_RATE, bitrate);
             format.setInteger(MediaFormat.KEY_FRAME_RATE, 25);
-            format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 3);
+            format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1);
             format.setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CBR);
             codec = MediaCodec.createEncoderByType(mimeType);
             codec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
             codec.start();
             is_codec_init.set(true);
-            mOutThread = new Thread(this, "v-encoder"+mChannel);
+            mOutThread = new Thread(this, "v-encoder" + mChannel);
             mOutThread.start();
         } catch (Exception e) {
             FlyLog.e(e.toString());

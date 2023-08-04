@@ -7,6 +7,8 @@
  */
 package com.flyzebra.mdvr.rtmp;
 
+import android.media.MediaFormat;
+
 import com.flyzebra.core.notify.INotify;
 import com.flyzebra.core.notify.Notify;
 import com.flyzebra.core.notify.NotifyType;
@@ -22,7 +24,7 @@ public class RtmpPusher implements INotify {
     private final int mChannel;
     private final AtomicBoolean is_stop = new AtomicBoolean(true);
     private final AtomicBoolean is_rtmp = new AtomicBoolean(false);
-    private final ByteBuffer sendBuf = ByteBuffer.wrap(new byte[1920 * 1080 * 5]);
+    private final ByteBuffer sendBuf = ByteBuffer.wrap(new byte[1920 * 1080 * 2]);
     private Thread sendThread;
     private final Object sendLock = new Object();
     private byte[] videoHead = null;
@@ -32,8 +34,8 @@ public class RtmpPusher implements INotify {
         mChannel = channel;
     }
 
-    public void start(String rtmp_url) {
-        FlyLog.d("PusherService[%d] start !", mChannel);
+    public void onCreate(String rtmp_url) {
+        FlyLog.d("RtmpPusher[%d] start !", mChannel);
         Notify.get().registerListener(this);
         is_stop.set(false);
         sendThread = new Thread(() -> {
@@ -84,7 +86,7 @@ public class RtmpPusher implements INotify {
                 if (NotifyType.NOTI_CAMOUT_AVC == type) {
                     long pts = ByteUtil.bytes2Long(params, 2, true);
                     if (!is_send_video_head && videoHead != null) {
-                        if (Config.CAM_MIME_TYPE.equals("video/avc")) {
+                        if (Config.CAM_MIME_TYPE.equals(MediaFormat.MIMETYPE_VIDEO_AVC)) {
                             flag = sendAvcHead(rtmp, videoHead, videoHead.length);
                             if (flag) is_send_video_head = true;
                         } else {
@@ -93,7 +95,7 @@ public class RtmpPusher implements INotify {
                         }
                     }
                     if (is_send_video_head) {
-                        if (Config.CAM_MIME_TYPE.equals("video/avc")) {
+                        if (Config.CAM_MIME_TYPE.equals(MediaFormat.MIMETYPE_VIDEO_AVC)) {
                             flag = sendAvcData(rtmp, data, size, pts);
                         } else {
                             flag = sendHevcData(rtmp, data, size, pts);
@@ -120,7 +122,7 @@ public class RtmpPusher implements INotify {
         sendThread.start();
     }
 
-    public void stop() {
+    public void onDestory() {
         is_stop.set(true);
         Notify.get().unregisterListener(this);
         synchronized (sendLock) {
@@ -131,7 +133,7 @@ public class RtmpPusher implements INotify {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        FlyLog.d("PusherService[%d] exit !", mChannel);
+        FlyLog.d("RtmpPusher[%d] exit !", mChannel);
     }
 
     private boolean sendAacHead(RtmpDump rtmp, byte[] head, int headLen) {

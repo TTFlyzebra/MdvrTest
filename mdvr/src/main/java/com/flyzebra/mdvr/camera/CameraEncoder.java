@@ -16,16 +16,14 @@ import com.flyzebra.mdvr.Config;
 import com.flyzebra.utils.ByteUtil;
 import com.flyzebra.utils.FlyLog;
 
-import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CameraEncoder implements VideoCodecCB, INotify {
     private final int mChannel;
     private int width;
     private int height;
-    private final int yuvSize;
-    private final int yuvBufSize;
-    private ByteBuffer yuvBuf = null;
+    private byte[] yuvBuf = null;
+    private long ptsUsec = 0;
     private Thread yuvThread;
     private final Object yuvLock = new Object();
     private final AtomicBoolean is_stop = new AtomicBoolean(true);
@@ -34,9 +32,6 @@ public class CameraEncoder implements VideoCodecCB, INotify {
         this.mChannel = channel;
         this.width = width;
         this.height = height;
-        yuvSize = width * height * 3 / 2;
-        yuvBufSize = yuvSize + 8;
-        yuvBuf = ByteBuffer.wrap(new byte[yuvBufSize * 2]);
     }
 
     public void onCreate() {
@@ -44,13 +39,12 @@ public class CameraEncoder implements VideoCodecCB, INotify {
         Notify.get().registerListener(this);
         is_stop.set(false);
         yuvThread = new Thread(() -> {
-            long ptsUsec = 0;
-            byte[] yuv = new byte[yuvSize];
             VideoCodec videoCodec = new VideoCodec(mChannel, this);
             videoCodec.initCodec(Config.CAM_MIME_TYPE, width, height, Config.CAM_BIT_RATE);
             while (!is_stop.get()) {
+                //long stime = SystemClock.uptimeMillis();
                 synchronized (yuvLock) {
-                    if (!is_stop.get() && yuvBuf.position() < yuvBufSize) {
+                    if (!is_stop.get() && yuvBuf == null) {
                         try {
                             yuvLock.wait();
                         } catch (InterruptedException e) {
@@ -58,12 +52,10 @@ public class CameraEncoder implements VideoCodecCB, INotify {
                         }
                     }
                     if (is_stop.get()) break;
-                    yuvBuf.flip();
-                    ptsUsec = yuvBuf.getLong();
-                    yuvBuf.get(yuv);
-                    yuvBuf.compact();
+                    videoCodec.inYuvData(yuvBuf,  width * height * 3 / 2, ptsUsec);
+                    yuvBuf = null;
                 }
-                videoCodec.inYuvData(yuv, yuvSize, ptsUsec);
+                //FlyLog.e("encoder one yuv frame use %s millis.", SystemClock.uptimeMillis() - stime);
             }
             videoCodec.releaseCodec();
         }, "camera-avc" + mChannel);
@@ -121,18 +113,13 @@ public class CameraEncoder implements VideoCodecCB, INotify {
 
     @Override
     public void handle(int type, byte[] data, int size, byte[] params) {
-        if (NotifyType.NOTI_CAMOUT_YUV == type && yuvBuf != null) {
+        if (NotifyType.NOTI_CAMOUT_YUV == type) {
             int channel = ByteUtil.bytes2Short(params, 0, true);
             if (this.mChannel != channel) return;
-            long ptsUsec = ByteUtil.bytes2Long(params, 6, true);
             synchronized (yuvLock) {
                 try {
-                    if (yuvBuf.remaining() < yuvBufSize) {
-                        FlyLog.w("yuv buffer is full, lost one frame %d!", ptsUsec);
-                        yuvBuf.clear();
-                    }
-                    yuvBuf.putLong(ptsUsec);
-                    yuvBuf.put(data);
+                    yuvBuf = data;
+                    ptsUsec = ByteUtil.bytes2Long(params, 6, true);
                     yuvLock.notify();
                 } catch (Exception e) {
                     FlyLog.e(e.toString());
