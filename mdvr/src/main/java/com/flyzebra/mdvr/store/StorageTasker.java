@@ -21,6 +21,7 @@ public class StorageTasker implements INotify {
     private Thread saveThread;
     private byte[] videoHead = null;
     private byte[] audioHead = null;
+    private byte[] head = new byte[]{0x00, 0x00, 0x00, 0x01};
 
     public StorageTasker(int channel) {
         mChannel = channel;
@@ -86,13 +87,31 @@ public class StorageTasker implements INotify {
                     } catch (FileNotFoundException e) {
                         throw new RuntimeException(e);
                     }
-                }
-                if (randomAccessFile != null) {
                     try {
-                        randomAccessFile.write(data);
+                        randomAccessFile.write(head);
+                        randomAccessFile.write(videoHead);
+                        randomAccessFile.write(audioHead);
+                        FlyLog.e("videoHead len=%d, audioHead len=%d");
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
+                }
+                if (randomAccessFile != null) {
+                    try {
+                        if (type == 1) {
+                            randomAccessFile.write(head);
+                            randomAccessFile.write(data);
+                        }
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+            if (randomAccessFile != null) {
+                try {
+                    randomAccessFile.close();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
                 }
             }
         }, "save_task" + mChannel);
