@@ -71,6 +71,8 @@ public class StorageTasker implements INotify {
                     if (TextUtils.isEmpty(fileName)) {
                         FlyLog.e("get recored filename failed！");
                         return;
+                    }else{
+                        FlyLog.d("create new recored file %s", fileName);
                     }
                     zebraMuxer = new ZebraMuxer(fileName);
                     byte[] videoHead = Global.videoHeadMap.get(mChannel);

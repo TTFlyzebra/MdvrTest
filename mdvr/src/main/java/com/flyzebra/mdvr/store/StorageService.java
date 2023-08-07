@@ -11,7 +11,6 @@ import android.os.storage.StorageVolume;
 import android.text.TextUtils;
 
 import com.flyzebra.mdvr.Config;
-import com.flyzebra.utils.DateUtil;
 import com.flyzebra.utils.FlyLog;
 
 import java.io.File;
@@ -53,17 +52,24 @@ public class StorageService {
         if (is_recored) return;
 
         //没有TF卡不录像
-        StorageTFcard storageTFcard = getStorageTFcard();
-        if (storageTFcard == null) return;
+        StorageTFcard tfCard = getStorageTFcard();
+        if (tfCard == null) {
+            FlyLog.e("TF card not found!");
+            return;
+        }
 
         //空间不足4G不录像
-        if (storageTFcard.freeBytes() < 4L * 1024 * 1024 * 1024) return;
+        if (tfCard.freeBytes() < Config.MIN_STORE) {
+            FlyLog.e("TF card free bytes is too small %d", tfCard.freeBytes());
+            return;
+        }
 
         //创建目录失败不录像
-        rootPath = storageTFcard.getPath() + File.separator + "MD201";
+        rootPath = tfCard.getPath() + File.separator + "MD201";
         File file = new File(rootPath);
         if (!file.exists()) {
             if (!file.mkdirs()) {
+                FlyLog.e("recored service mkdir %s failed!");
                 return;
             }
         }
@@ -92,14 +98,14 @@ public class StorageService {
             if (volume == null || !volume.isRemovable()) continue;
             try {
                 Class<?> myclass = Class.forName(volume.getClass().getName());
-                Method getPath = myclass.getDeclaredMethod("getPath", (Class<?>) null);
+                Method getPath = myclass.getDeclaredMethod("getPath", null);
                 getPath.setAccessible(true);
                 String tfPath = (String) getPath.invoke(volume);
                 if (!TextUtils.isEmpty(tfPath)) {
                     return new StorageTFcard(tfPath);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+               FlyLog.e(e.toString());
             }
         }
         return null;
@@ -168,7 +174,7 @@ public class StorageService {
             FlyLog.e("TF card free bytes is too small %d", storageTFcard.freeBytes());
             return null;
         }
-        String fileName = "CHANNEL_" + channel + "_" + DateUtil.getCurrentDate() + ".mp4";
+        String fileName = "CHANNEL_" + channel + "_" + System.currentTimeMillis() + ".mp4";
         return rootPath + File.separator + fileName;
     }
 

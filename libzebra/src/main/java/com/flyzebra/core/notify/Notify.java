@@ -59,7 +59,7 @@ public class Notify {
         while (listCount.get() > 0) {
             FlyLog.d("handled did not end ...");
             try {
-                Thread.sleep(100);
+                Thread.sleep(500);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
