@@ -92,7 +92,7 @@ public class CameraEncoder implements VideoCodecCB, INotify {
 
     @Override
     public void notifyAvcData(int channel, byte[] data, int size, long pts) {
-        byte[] params = new byte[12];
+        byte[] params = new byte[10];
         ByteUtil.shortToBytes((short) channel, params, 0, true);
         ByteUtil.longToBytes(pts, params, 2, true);
         Notify.get().handledata(NotifyType.NOTI_CAMOUT_AVC, data, size, params);
@@ -100,7 +100,7 @@ public class CameraEncoder implements VideoCodecCB, INotify {
 
     @Override
     public void notifyHevcData(int channel, byte[] data, int size, long pts) {
-        byte[] params = new byte[12];
+        byte[] params = new byte[10];
         ByteUtil.shortToBytes((short) channel, params, 0, true);
         ByteUtil.longToBytes(pts, params, 2, true);
         Notify.get().handledata(NotifyType.NOTI_CAMOUT_AVC, data, size, params);

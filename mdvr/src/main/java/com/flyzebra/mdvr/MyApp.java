@@ -4,8 +4,7 @@ import android.app.Application;
 
 import com.flyzebra.utils.FlyLog;
 
-public class MdvrApplication extends Application {
-
+public class MyApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();

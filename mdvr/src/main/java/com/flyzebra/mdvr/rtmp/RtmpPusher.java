@@ -13,6 +13,7 @@ import com.flyzebra.core.notify.INotify;
 import com.flyzebra.core.notify.Notify;
 import com.flyzebra.core.notify.NotifyType;
 import com.flyzebra.mdvr.Config;
+import com.flyzebra.mdvr.Global;
 import com.flyzebra.rtmp.RtmpDump;
 import com.flyzebra.utils.ByteUtil;
 import com.flyzebra.utils.FlyLog;
@@ -27,8 +28,6 @@ public class RtmpPusher implements INotify {
     private final ByteBuffer sendBuf = ByteBuffer.wrap(new byte[1920 * 1080 * 2]);
     private Thread sendThread;
     private final Object sendLock = new Object();
-    private byte[] videoHead = null;
-    private byte[] audioHead = null;
 
     public RtmpPusher(int channel) {
         mChannel = channel;
@@ -85,7 +84,8 @@ public class RtmpPusher implements INotify {
                 boolean flag = true;
                 if (NotifyType.NOTI_CAMOUT_AVC == type) {
                     long pts = ByteUtil.bytes2Long(params, 2, true);
-                    if (!is_send_video_head && videoHead != null) {
+                    if (!is_send_video_head) {
+                        byte[] videoHead = Global.videoHeadMap.get(mChannel);
                         if (Config.CAM_MIME_TYPE.equals(MediaFormat.MIMETYPE_VIDEO_AVC)) {
                             flag = sendAvcHead(rtmp, videoHead, videoHead.length);
                             if (flag) is_send_video_head = true;
@@ -102,7 +102,8 @@ public class RtmpPusher implements INotify {
                         }
                     }
                 } else if (NotifyType.NOTI_MICOUT_AAC == type) {
-                    if (!is_send_audio_head && audioHead != null) {
+                    if (!is_send_audio_head) {
+                        byte[] audioHead = Global.audioHeadMap.get(mChannel);
                         if (sendAacHead(rtmp, audioHead, audioHead.length))
                             is_send_audio_head = true;
                     }
@@ -167,17 +168,7 @@ public class RtmpPusher implements INotify {
 
     @Override
     public void handle(int type, byte[] data, int size, byte[] params) {
-        if (NotifyType.NOTI_MICOUT_SPS == type) {
-            short channel = ByteUtil.bytes2Short(params, 0, true);
-            if (mChannel != channel) return;
-            audioHead = new byte[size];
-            System.arraycopy(data, 0, audioHead, 0, size);
-        } else if (NotifyType.NOTI_CAMOUT_SPS == type) {
-            short channel = ByteUtil.bytes2Short(params, 0, true);
-            if (mChannel != channel) return;
-            videoHead = new byte[size];
-            System.arraycopy(data, 0, videoHead, 0, size);
-        } else if (NotifyType.NOTI_MICOUT_AAC == type || NotifyType.NOTI_CAMOUT_AVC == type) {
+        if (NotifyType.NOTI_MICOUT_AAC == type || NotifyType.NOTI_CAMOUT_AVC == type) {
             short channel = ByteUtil.bytes2Short(params, 0, true);
             if (mChannel != channel) return;
             if (!is_rtmp.get()) return;

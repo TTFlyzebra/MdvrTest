@@ -13,7 +13,7 @@ import com.quectel.qcarapi.stream.QCarCamera;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class CameraService1080P implements Runnable {
+public class CameraService1080P{
     public static final int CAM_WIDTH = 1920;
     public static final int CAM_HEIGHT = 1080;
     public static final int MAX_CAM = 4;
@@ -28,6 +28,32 @@ public class CameraService1080P implements Runnable {
     private final VideoYuvThread[] yuvThreads = new VideoYuvThread[MAX_CAM];
     private final ByteBuffer[] videoBuffer = new ByteBuffer[MAX_CAM];
     private final CameraEncoder[] cameraEncoders = new CameraEncoder[MAX_CAM];
+
+    protected final Runnable openCameraTasker = () -> {
+        if (qCarCamera1 == null) {
+            qCarCamera1 = new QCarCamera(1);
+        }
+//        if(qCarCamera2 == null){
+//            qCarCamera2 = new QCarCamera(2);
+//        }
+        camer_open_ret = qCarCamera1.cameraOpen(4, 5);
+        if (camer_open_ret != 0) {
+            FlyLog.e("QCarCamera open failed, ret=%d", camer_open_ret);
+            mHandler.postDelayed(this.openCameraTasker, 1000);
+            return;
+        }
+//        camer_open_ret = qCarCamera2.cameraOpen(4, 4);
+//        if (camer_open_ret != 0) {
+//            FlyLog.e("QCarCamera2 open failed, ret=%d", camer_open_ret);
+//            mHandler.postDelayed(this.openCameraTask, 1000);
+//            return;
+//        }
+        FlyLog.d("QCarCamera open success!");
+        for (int i = 0; i < MAX_CAM; i++) {
+            yuvThreads[i] = new VideoYuvThread(i);
+            yuvThreads[i].start();
+        }
+    };
 
     public CameraService1080P(Context context) {
         mContext = context;
@@ -44,7 +70,7 @@ public class CameraService1080P implements Runnable {
         for (int i = 0; i < MAX_CAM; i++) {
             cameraEncoders[i].onCreate();
         }
-        mHandler.post(this);
+        mHandler.post(openCameraTasker);
     }
 
     public void onDerstory() {
@@ -79,33 +105,6 @@ public class CameraService1080P implements Runnable {
 
         }
         FlyLog.d("YuvService exit!");
-    }
-
-    @Override
-    public void run() {
-        if (qCarCamera1 == null) {
-            qCarCamera1 = new QCarCamera(1);
-        }
-//        if(qCarCamera2 == null){
-//            qCarCamera2 = new QCarCamera(2);
-//        }
-        camer_open_ret = qCarCamera1.cameraOpen(4, 5);
-        if (camer_open_ret != 0) {
-            FlyLog.e("QCarCamera open failed, ret=%d", camer_open_ret);
-            mHandler.postDelayed(CameraService1080P.this, 1000);
-            return;
-        }
-//        camer_open_ret = qCarCamera2.cameraOpen(4, 4);
-//        if (camer_open_ret != 0) {
-//            FlyLog.e("QCarCamera2 open failed, ret=%d", camer_open_ret);
-//            mHandler.postDelayed(CameraService_1080.this, 1000);
-//            return;
-//        }
-        FlyLog.d("QCarCamera open success!");
-        for (int i = 0; i < MAX_CAM; i++) {
-            yuvThreads[i] = new VideoYuvThread(i);
-            yuvThreads[i].start();
-        }
     }
 
     private class VideoYuvThread extends Thread implements Runnable {

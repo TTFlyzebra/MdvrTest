@@ -18,7 +18,7 @@
         tools:ignore="ScopedStorage" />
 
     <application
-        android:name=".MdvrApplication"
+        android:name=".MyApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -30,7 +30,7 @@
         android:theme="@style/Theme.Dvrtest"
         tools:targetApi="s">
         <activity
-            android:name=".MdvrActivity"
+            android:name=".MdvrActivity1"
             android:exported="true"
             android:screenOrientation="reverseLandscape">
             <intent-filter>

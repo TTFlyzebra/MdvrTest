@@ -1,16 +1,15 @@
 package com.flyzebra.mdvr.store;
 
+import android.text.TextUtils;
+
 import com.flyzebra.core.notify.INotify;
 import com.flyzebra.core.notify.Notify;
 import com.flyzebra.core.notify.NotifyType;
+import com.flyzebra.mdvr.Global;
+import com.flyzebra.mdvr.model.ZebraMuxer;
 import com.flyzebra.utils.ByteUtil;
-import com.flyzebra.utils.DateUtil;
 import com.flyzebra.utils.FlyLog;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -20,34 +19,24 @@ public class StorageTasker implements INotify {
     private final ByteBuffer saveBuf = ByteBuffer.wrap(new byte[1920 * 1080 * 2]);
     private final Object saveLock = new Object();
     private Thread saveThread;
-    private byte[] videoHead = null;
-    private byte[] audioHead = null;
-    private byte[] head = new byte[]{0x00, 0x00, 0x00, 0x01};
 
     public StorageTasker(int channel) {
         mChannel = channel;
     }
 
-    public void onCreate(final StorageTFcard tFcard) {
-        if (tFcard == null) return;
+    public void onCreate(StorageService service) {
+        if (service == null) return;
         FlyLog.d("StorageTasker[%d] start !", mChannel);
         Notify.get().registerListener(this);
 
         is_stop.set(false);
         saveThread = new Thread(() -> {
-            String savePath = tFcard.getPath() + File.separator + "MD201";
-            File file = new File(savePath);
-            if (!file.exists()) {
-                if (!file.mkdirs()) {
-                    FlyLog.e("create save file path %s failed!", savePath);
-                    return;
-                }
-            }
+            int type = 0;
+            long pts = 0;
+            int size = 0;
             int dataSize = 1280 * 720;
             byte[] data = new byte[dataSize];
-            int type = 0;
-            int size = 0;
-            RandomAccessFile randomAccessFile = null;
+            ZebraMuxer zebraMuxer = null;
             long lastCount = 0;
             while (!is_stop.get()) {
                 synchronized (saveLock) {
@@ -61,6 +50,7 @@ public class StorageTasker implements INotify {
                     if (is_stop.get()) break;
                     saveBuf.flip();
                     type = saveBuf.getInt();
+                    pts = saveBuf.getLong();
                     size = saveBuf.getInt();
                     if (dataSize < size) {
                         dataSize = size;
@@ -69,53 +59,35 @@ public class StorageTasker implements INotify {
                     saveBuf.get(data, 8, size);
                     saveBuf.compact();
                 }
-                boolean is_newfile = false;
                 long count = System.currentTimeMillis() / (1000 * 300);
-                if (type == 0x01 && count > lastCount && (data[0] & 0x1f) != 1) {
+                boolean is_newfile = false;
+                if (type == 1 && count > lastCount && (data[0] & 0x1f) != 1) {
                     lastCount = count;
                     is_newfile = true;
+                    if (zebraMuxer != null) zebraMuxer.close();
                 }
                 if (is_newfile) {
-                    if (randomAccessFile != null) {
-                        try {
-                            randomAccessFile.close();
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-                    if (tFcard.freeBytes() < 4L * 1024 * 1024 * 1024) {
-                        FlyLog.e("TF card free bytes %d", tFcard.freeBytes());
+                    String fileName = service.getSaveFileName(mChannel);
+                    if (TextUtils.isEmpty(fileName)) {
+                        FlyLog.e("get recored filename failed！");
                         return;
                     }
-                    try {
-                        randomAccessFile = new RandomAccessFile(savePath + File.separator + "CHANNEL_" + mChannel + "_" + DateUtil.getCurrentDate() + ".mp4", "rws");
-                    } catch (FileNotFoundException e) {
-                        throw new RuntimeException(e);
-                    }
-                    try {
-                        randomAccessFile.write(head);
-                        randomAccessFile.write(videoHead);
-                        randomAccessFile.write(head);
-                        randomAccessFile.write(audioHead);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
+                    zebraMuxer = new ZebraMuxer(fileName);
+                    byte[] videoHead = Global.videoHeadMap.get(mChannel);
+                    byte[] audioHead = Global.audioHeadMap.get(mChannel);
+                    zebraMuxer.addVideoTrack(videoHead, videoHead.length);
+                    zebraMuxer.addAudioTrack(audioHead, audioHead.length);
                 }
-                if (type == 0x01 && randomAccessFile != null) {
-                    try {
-                        randomAccessFile.write(head);
-                        randomAccessFile.write(data);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
+                if (zebraMuxer != null) {
+                    if (type == 1) {
+                        zebraMuxer.writeVideoFrame(data, size, pts);
+                    } else {
+                        zebraMuxer.writeAudioFrame(data, size, pts);
                     }
                 }
             }
-            if (randomAccessFile != null) {
-                try {
-                    randomAccessFile.close();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+            if (zebraMuxer != null) {
+                zebraMuxer.close();
             }
         }, "save_task" + mChannel);
         saveThread.start();
@@ -142,25 +114,17 @@ public class StorageTasker implements INotify {
 
     @Override
     public void handle(int type, byte[] data, int size, byte[] params) {
-        if (NotifyType.NOTI_MICOUT_SPS == type) {
+        if (NotifyType.NOTI_CAMOUT_AVC == type) {
             short channel = ByteUtil.bytes2Short(params, 0, true);
             if (mChannel != channel) return;
-            audioHead = new byte[size];
-            System.arraycopy(data, 0, audioHead, 0, size);
-        } else if (NotifyType.NOTI_CAMOUT_SPS == type) {
-            short channel = ByteUtil.bytes2Short(params, 0, true);
-            if (mChannel != channel) return;
-            videoHead = new byte[size];
-            System.arraycopy(data, 0, videoHead, 0, size);
-        } else if (NotifyType.NOTI_CAMOUT_AVC == type) {
-            short channel = ByteUtil.bytes2Short(params, 0, true);
-            if (mChannel != channel) return;
+            long pts = ByteUtil.bytes2Long(params, 2, true);
             synchronized (saveLock) {
                 if (saveBuf.remaining() < size) {
                     FlyLog.e("save buffer[%d] is full, clean all buffer!", mChannel);
                     saveBuf.clear();
                 }
                 saveBuf.putInt(1);
+                saveBuf.putLong(pts);
                 saveBuf.putInt(size);
                 saveBuf.put(data, 0, size);
                 saveLock.notify();
@@ -168,12 +132,14 @@ public class StorageTasker implements INotify {
         } else if (NotifyType.NOTI_MICOUT_AAC == type) {
             short channel = ByteUtil.bytes2Short(params, 0, true);
             if (mChannel != channel) return;
+            long pts = ByteUtil.bytes2Long(params, 2, true);
             synchronized (saveLock) {
                 if (saveBuf.remaining() < size) {
                     FlyLog.e("save buffer[%d] is full, clean all buffer!", mChannel);
                     saveBuf.clear();
                 }
                 saveBuf.putInt(2);
+                saveBuf.putLong(pts);
                 saveBuf.putInt(size);
                 saveBuf.put(data, 0, size);
                 saveLock.notify();

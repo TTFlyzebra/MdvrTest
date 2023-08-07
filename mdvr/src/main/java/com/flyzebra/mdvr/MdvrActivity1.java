@@ -12,28 +12,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.flyzebra.core.notify.INotify;
 import com.flyzebra.core.notify.Notify;
 import com.flyzebra.core.notify.NotifyType;
-import com.flyzebra.mdvr.camera.CameraService;
-import com.flyzebra.mdvr.mic.MicService;
-import com.flyzebra.mdvr.rtmp.RtmpService;
 import com.flyzebra.mdvr.view.GlVideoView;
 import com.flyzebra.utils.ByteUtil;
 import com.flyzebra.utils.FlyLog;
 import com.flyzebra.utils.PropUtil;
 import com.flyzebra.utils.ShellUtil;
 
-public class MdvrActivity extends AppCompatActivity implements INotify {
-    static {
-        System.loadLibrary("mmqcar_qcar_jni");
-    }
-
+public class MdvrActivity1 extends AppCompatActivity implements INotify {
     private final GlVideoView[] mGlVideoViews = new GlVideoView[Config.MAX_CAM];
     private final int[] mGlVideoViewIds = new int[]{R.id.sv01, R.id.sv02, R.id.sv03, R.id.sv04};
     //private MyRecevier recevier = new MyRecevier();
-
-    private final RtmpService rtmpService = new RtmpService(this);
-    //private final CameraService_1080 cameraService = new CameraService_1080(this);
-    private final CameraService cameraService = new CameraService(this);
-    private final MicService micService = new MicService(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +30,7 @@ public class MdvrActivity extends AppCompatActivity implements INotify {
 
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main1);
 
         PropUtil.set("ctl.stop", "MonitorHobotApk");
         ShellUtil.exec("am force-stop com.hobot.sample.app");
