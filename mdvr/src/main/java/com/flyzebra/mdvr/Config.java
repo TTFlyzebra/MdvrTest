@@ -5,7 +5,7 @@ import android.media.MediaFormat;
 
 public class Config {
     public static final String CAM_MIME_TYPE = MediaFormat.MIMETYPE_VIDEO_AVC;
-    public static final int CAM_BIT_RATE = 2000000;
+    public static final int CAM_BIT_RATE = 1000000;
     public static final int MAX_CAM = 4;
 
     public static final String MIC_MIME_TYPE = MediaFormat.MIMETYPE_AUDIO_AAC;

@@ -4,6 +4,7 @@ import com.flyzebra.core.notify.INotify;
 import com.flyzebra.core.notify.Notify;
 import com.flyzebra.core.notify.NotifyType;
 import com.flyzebra.utils.ByteUtil;
+import com.flyzebra.utils.DateUtil;
 import com.flyzebra.utils.FlyLog;
 
 import java.io.File;
@@ -34,7 +35,7 @@ public class StorageTasker implements INotify {
 
         is_stop.set(false);
         saveThread = new Thread(() -> {
-            String savePath = tFcard.getPath() + File.separator + "MD201" + File.separator + "CHANNEL-" + mChannel;
+            String savePath = tFcard.getPath() + File.separator + "MD201";
             File file = new File(savePath);
             if (!file.exists()) {
                 if (!file.mkdirs()) {
@@ -44,7 +45,7 @@ public class StorageTasker implements INotify {
             }
             int dataSize = 1280 * 720;
             byte[] data = new byte[dataSize];
-            byte type = 0;
+            int type = 0;
             int size = 0;
             RandomAccessFile randomAccessFile = null;
             long lastCount = 0;
@@ -59,13 +60,13 @@ public class StorageTasker implements INotify {
                     }
                     if (is_stop.get()) break;
                     saveBuf.flip();
-                    type = saveBuf.get();
+                    type = saveBuf.getInt();
                     size = saveBuf.getInt();
                     if (dataSize < size) {
                         dataSize = size;
                         data = new byte[dataSize];
                     }
-                    saveBuf.get(data, 0, size);
+                    saveBuf.get(data, 8, size);
                     saveBuf.compact();
                 }
                 boolean is_newfile = false;
@@ -82,8 +83,12 @@ public class StorageTasker implements INotify {
                             throw new RuntimeException(e);
                         }
                     }
+                    if (tFcard.freeBytes() < 4L * 1024 * 1024 * 1024) {
+                        FlyLog.e("TF card free bytes %d", tFcard.freeBytes());
+                        return;
+                    }
                     try {
-                        randomAccessFile = new RandomAccessFile(savePath + File.separator + System.currentTimeMillis(), "rws");
+                        randomAccessFile = new RandomAccessFile(savePath + File.separator + "CHANNEL_" + mChannel + "_" + DateUtil.getCurrentDate() + ".mp4", "rws");
                     } catch (FileNotFoundException e) {
                         throw new RuntimeException(e);
                     }
@@ -92,12 +97,11 @@ public class StorageTasker implements INotify {
                         randomAccessFile.write(videoHead);
                         randomAccessFile.write(head);
                         randomAccessFile.write(audioHead);
-                        FlyLog.e("videoHead len=%d, audioHead len=%d");
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
                 }
-                if (randomAccessFile != null) {
+                if (type == 0x01 && randomAccessFile != null) {
                     try {
                         randomAccessFile.write(head);
                         randomAccessFile.write(data);
@@ -156,7 +160,7 @@ public class StorageTasker implements INotify {
                     FlyLog.e("save buffer[%d] is full, clean all buffer!", mChannel);
                     saveBuf.clear();
                 }
-                saveBuf.put((byte) 0x01);
+                saveBuf.putInt(1);
                 saveBuf.putInt(size);
                 saveBuf.put(data, 0, size);
                 saveLock.notify();
@@ -169,7 +173,7 @@ public class StorageTasker implements INotify {
                     FlyLog.e("save buffer[%d] is full, clean all buffer!", mChannel);
                     saveBuf.clear();
                 }
-                saveBuf.put((byte) 0x02);
+                saveBuf.putInt(2);
                 saveBuf.putInt(size);
                 saveBuf.put(data, 0, size);
                 saveLock.notify();

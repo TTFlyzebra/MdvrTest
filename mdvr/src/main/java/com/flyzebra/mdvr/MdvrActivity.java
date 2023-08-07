@@ -12,7 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.flyzebra.core.notify.INotify;
 import com.flyzebra.core.notify.Notify;
 import com.flyzebra.core.notify.NotifyType;
-import com.flyzebra.mdvr.camera.CameraService_720;
+import com.flyzebra.mdvr.camera.CameraService;
 import com.flyzebra.mdvr.mic.MicService;
 import com.flyzebra.mdvr.rtmp.RtmpService;
 import com.flyzebra.mdvr.view.GlVideoView;
@@ -32,7 +32,7 @@ public class MdvrActivity extends AppCompatActivity implements INotify {
 
     private final RtmpService rtmpService = new RtmpService(this);
     //private final CameraService_1080 cameraService = new CameraService_1080(this);
-    private final CameraService_720 cameraService = new CameraService_720(this);
+    private final CameraService cameraService = new CameraService(this);
     private final MicService micService = new MicService(this);
 
     @Override

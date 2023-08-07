@@ -13,7 +13,7 @@ import com.quectel.qcarapi.stream.QCarCamera;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class CameraService_1080 implements Runnable {
+public class CameraService1080P implements Runnable {
     public static final int CAM_WIDTH = 1920;
     public static final int CAM_HEIGHT = 1080;
     public static final int MAX_CAM = 4;
@@ -29,7 +29,7 @@ public class CameraService_1080 implements Runnable {
     private final ByteBuffer[] videoBuffer = new ByteBuffer[MAX_CAM];
     private final CameraEncoder[] cameraEncoders = new CameraEncoder[MAX_CAM];
 
-    public CameraService_1080(Context context) {
+    public CameraService1080P(Context context) {
         mContext = context;
         for (int i = 0; i < MAX_CAM; i++) {
             cameraEncoders[i] = new CameraEncoder(i, CAM_WIDTH, CAM_HEIGHT);
@@ -92,7 +92,7 @@ public class CameraService_1080 implements Runnable {
         camer_open_ret = qCarCamera1.cameraOpen(4, 5);
         if (camer_open_ret != 0) {
             FlyLog.e("QCarCamera open failed, ret=%d", camer_open_ret);
-            mHandler.postDelayed(CameraService_1080.this, 1000);
+            mHandler.postDelayed(CameraService1080P.this, 1000);
             return;
         }
 //        camer_open_ret = qCarCamera2.cameraOpen(4, 4);

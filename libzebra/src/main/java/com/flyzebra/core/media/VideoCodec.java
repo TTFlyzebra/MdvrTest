@@ -33,8 +33,8 @@ public class VideoCodec implements Runnable {
             MediaFormat format = MediaFormat.createVideoFormat(mimeType, width, height);
             format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar);
             format.setInteger(MediaFormat.KEY_BIT_RATE, bitrate);
-            format.setInteger(MediaFormat.KEY_FRAME_RATE, 25);
-            format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1);
+            format.setInteger(MediaFormat.KEY_FRAME_RATE, 24);
+            format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 5);
             format.setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CBR);
             codec = MediaCodec.createEncoderByType(mimeType);
             codec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);

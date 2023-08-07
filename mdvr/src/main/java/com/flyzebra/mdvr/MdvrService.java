@@ -8,7 +8,8 @@ import androidx.annotation.Nullable;
 
 import com.flyzebra.core.Fzebra;
 import com.flyzebra.core.notify.INotify;
-import com.flyzebra.mdvr.camera.CameraService_720;
+import com.flyzebra.mdvr.camera.CameraService;
+import com.flyzebra.mdvr.camera.CameraService1080P;
 import com.flyzebra.mdvr.mic.MicService;
 import com.flyzebra.mdvr.rtmp.RtmpService;
 import com.flyzebra.mdvr.store.StorageService;
@@ -17,8 +18,8 @@ import com.flyzebra.utils.FlyLog;
 public class MdvrService extends Service implements INotify {
     private final StorageService storeService = new StorageService(this);
     private final RtmpService rtmpService = new RtmpService(this);
-    //private final CameraService_1080 cameraService = new CameraService_1080(this);
-    private final CameraService_720 cameraService = new CameraService_720(this);
+    private final CameraService cameraService = new CameraService(this);
+    //private final CameraService1080P cameraService = new CameraService1080P(this);
     private final MicService micService = new MicService(this);
 
     @Nullable

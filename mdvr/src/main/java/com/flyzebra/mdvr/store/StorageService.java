@@ -51,7 +51,7 @@ public class StorageService{
         }
     }
 
-    private StorageTFcard getStorageTFcard() {
+    public StorageTFcard getStorageTFcard() {
         StorageManager manager = (StorageManager) mContext.getSystemService(mContext.STORAGE_SERVICE);
         List<StorageVolume> list = manager.getStorageVolumes();
         for (StorageVolume volume : list) {

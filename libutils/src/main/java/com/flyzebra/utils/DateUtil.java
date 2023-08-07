@@ -7,7 +7,13 @@ import java.util.Date;
 import java.util.Locale;
 
 public class DateUtil {
-	public static String ymdhms="yyyyMMdd_HHmmss";
+	public static String ymdhms="yyyyMMddHHmmss";
+
+	public static String getCurrentDate(){
+		SimpleDateFormat sdf = new SimpleDateFormat(ymdhms, Locale.getDefault());
+		Date date = new Date(System.currentTimeMillis());
+		return sdf.format(date);
+	}
 
 	public static String getCurrentDate(String dateFormat){
 		SimpleDateFormat sdf = new SimpleDateFormat(dateFormat,Locale.getDefault());
@@ -44,7 +50,5 @@ public class DateUtil {
 		SimpleDateFormat sdf = new SimpleDateFormat(dateFormat,Locale.getDefault());
 		return sdf.format(date);
 	}
-	
-	
-	
+
 }
