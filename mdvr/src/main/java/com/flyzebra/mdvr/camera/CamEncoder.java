@@ -18,7 +18,7 @@ import com.flyzebra.utils.FlyLog;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class CameraEncoder implements VideoCodecCB, INotify {
+public class CamEncoder implements VideoCodecCB, INotify {
     private final int mChannel;
     private int width;
     private int height;
@@ -28,7 +28,7 @@ public class CameraEncoder implements VideoCodecCB, INotify {
     private final Object yuvLock = new Object();
     private final AtomicBoolean is_stop = new AtomicBoolean(true);
 
-    public CameraEncoder(int channel, int width, int height) {
+    public CamEncoder(int channel, int width, int height) {
         this.mChannel = channel;
         this.width = width;
         this.height = height;

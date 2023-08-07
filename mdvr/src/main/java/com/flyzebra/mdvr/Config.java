@@ -18,5 +18,6 @@ public class Config {
     public static final String RTMP_URL = "rtmp://192.168.3.8/live";
 
     public static final long MIN_STORE = 4294967296L;//4G
+    public static final long RECORD_TIME = 1000 * 300;
 
 }

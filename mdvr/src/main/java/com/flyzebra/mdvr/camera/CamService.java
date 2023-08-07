@@ -14,7 +14,7 @@ import com.quectel.qcarapi.stream.QCarCamera;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class CameraService {
+public class CamService {
     public static final int CAM_WIDTH = 1280;
     public static final int CAM_HEIGHT = 720;
     public static final int MAX_CAM = 4;
@@ -28,7 +28,7 @@ public class CameraService {
     private final AtomicBoolean is_stop = new AtomicBoolean(true);
     private final VideoYuvThread[] yuvThreads = new VideoYuvThread[4];
     private final ByteBuffer[] videoBuffer = new ByteBuffer[MAX_CAM];
-    private final CameraEncoder[] cameraEncoders = new CameraEncoder[MAX_CAM];
+    private final CamEncoder[] cameraEncoders = new CamEncoder[MAX_CAM];
 
     protected final Runnable openCameraTasker = () -> {
         if (qCarCamera == null) {
@@ -51,10 +51,10 @@ public class CameraService {
         }
     };
 
-    public CameraService(Context context) {
+    public CamService(Context context) {
         mContext = context;
         for (int i = 0; i < MAX_CAM; i++) {
-            cameraEncoders[i] = new CameraEncoder(i, CAM_WIDTH, CAM_HEIGHT);
+            cameraEncoders[i] = new CamEncoder(i, CAM_WIDTH, CAM_HEIGHT);
         }
     }
 

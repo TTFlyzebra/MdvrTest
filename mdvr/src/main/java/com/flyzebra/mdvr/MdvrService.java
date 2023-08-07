@@ -10,7 +10,7 @@ import com.flyzebra.core.Fzebra;
 import com.flyzebra.core.notify.INotify;
 import com.flyzebra.core.notify.Notify;
 import com.flyzebra.core.notify.NotifyType;
-import com.flyzebra.mdvr.camera.CameraService;
+import com.flyzebra.mdvr.camera.CamService;
 import com.flyzebra.mdvr.mic.MicService;
 import com.flyzebra.mdvr.rtmp.RtmpService;
 import com.flyzebra.mdvr.store.StorageService;
@@ -24,8 +24,8 @@ public class MdvrService extends Service implements INotify {
 
     private final StorageService storeService = new StorageService(this);
     private final RtmpService rtmpService = new RtmpService(this);
-    private final CameraService cameraService = new CameraService(this);
-    //private final CameraService1080P cameraService = new CameraService1080P(this);
+    private final CamService cameraService = new CamService(this);
+    //private final CamService1080P cameraService = new CamService1080P(this);
     private final MicService micService = new MicService(this);
 
     @Nullable

@@ -5,6 +5,7 @@ import android.text.TextUtils;
 import com.flyzebra.core.notify.INotify;
 import com.flyzebra.core.notify.Notify;
 import com.flyzebra.core.notify.NotifyType;
+import com.flyzebra.mdvr.Config;
 import com.flyzebra.mdvr.Global;
 import com.flyzebra.mdvr.model.ZebraMuxer;
 import com.flyzebra.utils.ByteUtil;
@@ -16,9 +17,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class StorageTasker implements INotify {
     private final int mChannel;
     private final AtomicBoolean is_stop = new AtomicBoolean(true);
-    private final ByteBuffer saveBuf = ByteBuffer.wrap(new byte[1920 * 1080 * 2]);
+    private final ByteBuffer saveBuf = ByteBuffer.wrap(new byte[10 * 1024 * 1024]);
     private final Object saveLock = new Object();
     private Thread saveThread;
+    private int videoHeadSize = 16;
+    private int audioHeadSize = 16;
 
     public StorageTasker(int channel) {
         mChannel = channel;
@@ -31,12 +34,10 @@ public class StorageTasker implements INotify {
 
         is_stop.set(false);
         saveThread = new Thread(() -> {
-            int type = 0;
-            long pts = 0;
-            int size = 0;
-            int dataSize = 1280 * 720;
-            byte[] data = new byte[dataSize];
-            ZebraMuxer zebraMuxer = null;
+            int dataSize = 0;
+            int mallocSize = 1024 * 1024;
+            byte[] data = new byte[mallocSize];
+            ZebraMuxer muxer = null;
             long lastCount = 0;
             while (!is_stop.get()) {
                 synchronized (saveLock) {
@@ -49,47 +50,51 @@ public class StorageTasker implements INotify {
                     }
                     if (is_stop.get()) break;
                     saveBuf.flip();
-                    type = saveBuf.getInt();
-                    pts = saveBuf.getLong();
-                    size = saveBuf.getInt();
-                    if (dataSize < size) {
-                        dataSize = size;
-                        data = new byte[dataSize];
+                    dataSize = saveBuf.limit();
+                    if (mallocSize < dataSize) {
+                        mallocSize = dataSize;
+                        data = new byte[mallocSize];
                     }
-                    saveBuf.get(data, 8, size);
+                    saveBuf.get(data, 0, dataSize);
                     saveBuf.compact();
                 }
-                long count = System.currentTimeMillis() / (1000 * 300);
-                boolean is_newfile = false;
-                if (type == 1 && count > lastCount && (data[0] & 0x1f) != 1) {
-                    lastCount = count;
-                    is_newfile = true;
-                    if (zebraMuxer != null) zebraMuxer.close();
-                }
-                if (is_newfile) {
-                    String fileName = service.getSaveFileName(mChannel);
-                    if (TextUtils.isEmpty(fileName)) {
-                        FlyLog.e("get recored filename failed！");
-                        return;
-                    }else{
-                        FlyLog.d("create new recored file %s", fileName);
+                int pos = 0;
+                while (pos < dataSize) {
+                    int size = ByteUtil.bytes2Int(data, pos, true);
+                    int type = ByteUtil.bytes2Int(data, 4 + pos, true);
+                    long count = System.currentTimeMillis() / Config.RECORD_TIME;
+                    boolean is_newfile = false;
+                    if (type == ZebraMuxer.VIDEO_FRAME && count > lastCount && (data[pos + videoHeadSize] & 0x1f) != 1) {
+                        lastCount = count;
+                        is_newfile = true;
+                        if (muxer != null) muxer.close();
                     }
-                    zebraMuxer = new ZebraMuxer(fileName);
-                    byte[] videoHead = Global.videoHeadMap.get(mChannel);
-                    byte[] audioHead = Global.audioHeadMap.get(mChannel);
-                    zebraMuxer.addVideoTrack(videoHead, videoHead.length);
-                    zebraMuxer.addAudioTrack(audioHead, audioHead.length);
-                }
-                if (zebraMuxer != null) {
-                    if (type == 1) {
-                        zebraMuxer.writeVideoFrame(data, size, pts);
-                    } else {
-                        zebraMuxer.writeAudioFrame(data, size, pts);
+                    if (is_newfile) {
+                        String fileName = service.getSaveFileName(mChannel);
+                        if (TextUtils.isEmpty(fileName)) {
+                            FlyLog.e("create recored filename failed！");
+                            return;
+                        } else {
+                            FlyLog.d("create new recored file %s", fileName);
+                        }
+                        muxer = new ZebraMuxer(fileName);
+                        byte[] videoHead = Global.videoHeadMap.get(mChannel);
+                        byte[] audioHead = Global.audioHeadMap.get(mChannel);
+                        muxer.addVideoTrack(videoHead, videoHead.length);
+                        muxer.addAudioTrack(audioHead, audioHead.length);
                     }
+                    if (muxer != null) {
+                        if (type == ZebraMuxer.VIDEO_FRAME) {
+                            muxer.writeVideoFrame(data, pos, size);
+                        } else if (type == ZebraMuxer.AUDIO_FRAME) {
+                            muxer.writeAudioFrame(data, pos, size);
+                        }
+                    }
+                    pos += size;
                 }
             }
-            if (zebraMuxer != null) {
-                zebraMuxer.close();
+            if (muxer != null) {
+                muxer.close();
             }
         }, "save_task" + mChannel);
         saveThread.start();
@@ -122,12 +127,14 @@ public class StorageTasker implements INotify {
             long pts = ByteUtil.bytes2Long(params, 2, true);
             synchronized (saveLock) {
                 if (saveBuf.remaining() < size) {
-                    FlyLog.e("save buffer[%d] is full, clean all buffer!", mChannel);
+                    FlyLog.e("avc save buffer[%d] is full, clean all buffer!", mChannel);
                     saveBuf.clear();
                 }
-                saveBuf.putInt(1);
-                saveBuf.putLong(pts);
-                saveBuf.putInt(size);
+                byte[] head = new byte[videoHeadSize];
+                ByteUtil.intToBytes(size + videoHeadSize, head, 0, true);
+                ByteUtil.intToBytes(ZebraMuxer.VIDEO_FRAME, head, 4, true);
+                ByteUtil.longToBytes(pts, head, 8, true);
+                saveBuf.put(head, 0, videoHeadSize);
                 saveBuf.put(data, 0, size);
                 saveLock.notify();
             }
@@ -137,12 +144,14 @@ public class StorageTasker implements INotify {
             long pts = ByteUtil.bytes2Long(params, 2, true);
             synchronized (saveLock) {
                 if (saveBuf.remaining() < size) {
-                    FlyLog.e("save buffer[%d] is full, clean all buffer!", mChannel);
+                    FlyLog.e("aac save buffer[%d] is full, clean all buffer!", mChannel);
                     saveBuf.clear();
                 }
-                saveBuf.putInt(2);
-                saveBuf.putLong(pts);
-                saveBuf.putInt(size);
+                byte[] head = new byte[audioHeadSize];
+                ByteUtil.intToBytes(size + audioHeadSize, head, 0, true);
+                ByteUtil.intToBytes(ZebraMuxer.AUDIO_FRAME, head, 4, true);
+                ByteUtil.longToBytes(pts, head, 8, true);
+                saveBuf.put(head, 0, audioHeadSize);
                 saveBuf.put(data, 0, size);
                 saveLock.notify();
             }

@@ -1,5 +1,6 @@
 package com.flyzebra.mdvr.model;
 
+import com.flyzebra.utils.ByteUtil;
 import com.flyzebra.utils.FlyLog;
 
 import java.io.IOException;
@@ -23,9 +24,11 @@ public class ZebraMuxer {
     public void addVideoTrack(byte[] videoHead, int size) {
         if (file != null) {
             try {
-                file.writeInt(VIDEO_HEAD);
-                file.writeInt(size);
-                file.write(videoHead, 0, size);
+                byte[] data = new byte[size + 8];
+                ByteUtil.intToBytes(size, data, 0, true);
+                ByteUtil.intToBytes(VIDEO_HEAD, data, 4, true);
+                System.arraycopy(videoHead, 0, data, 8, size);
+                file.write(data, 0, size + 8);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -35,35 +38,31 @@ public class ZebraMuxer {
     public void addAudioTrack(byte[] audioHead, int size) {
         if (file != null) {
             try {
-                file.writeInt(AUDIO_HEAD);
-                file.writeInt(size);
-                file.write(audioHead, 0, size);
+                byte[] data = new byte[size + 8];
+                ByteUtil.intToBytes(size, data, 0, true);
+                ByteUtil.intToBytes(AUDIO_HEAD, data, 4, true);
+                System.arraycopy(audioHead, 0, data, 8, size);
+                file.write(data, 0, size + 8);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
     }
 
-    public void writeVideoFrame(byte[] data, int size, long pts) {
+    public void writeVideoFrame(byte[] data, int offset, int size) {
         if (file != null) {
             try {
-                file.writeInt(VIDEO_FRAME);
-                file.writeInt(size + 8);
-                file.writeLong(pts);
-                file.write(data, 0, size);
+                file.write(data, offset, size);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
     }
 
-    public void writeAudioFrame(byte[] data, int size, long pts) {
+    public void writeAudioFrame(byte[] data, int offset, int size) {
         if (file != null) {
             try {
-                file.writeInt(AUDIO_FRAME);
-                file.writeInt(size + 8);
-                file.writeLong(pts);
-                file.write(data, 0, size);
+                file.write(data, offset, size);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
