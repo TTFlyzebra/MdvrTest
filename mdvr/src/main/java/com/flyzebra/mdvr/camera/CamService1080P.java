@@ -6,6 +6,7 @@ import android.os.Looper;
 
 import com.flyzebra.core.notify.Notify;
 import com.flyzebra.core.notify.NotifyType;
+import com.flyzebra.mdvr.Config;
 import com.flyzebra.utils.ByteUtil;
 import com.flyzebra.utils.FlyLog;
 import com.quectel.qcarapi.stream.QCarCamera;
@@ -58,7 +59,7 @@ public class CamService1080P {
     public CamService1080P(Context context) {
         mContext = context;
         for (int i = 0; i < MAX_CAM; i++) {
-            cameraEncoders[i] = new CamEncoder(i, CAM_WIDTH, CAM_HEIGHT);
+            cameraEncoders[i] = new CamEncoder(i, CAM_WIDTH, CAM_HEIGHT, Config.FRAME_RATE, Config.I_FRAME_INTERVAL, Config.BIT_RATE);
         }
     }
 

@@ -3,9 +3,11 @@ package com.flyzebra.mdvr.camera;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
 
 import com.flyzebra.core.notify.Notify;
 import com.flyzebra.core.notify.NotifyType;
+import com.flyzebra.mdvr.Config;
 import com.flyzebra.mdvr.Global;
 import com.flyzebra.utils.ByteUtil;
 import com.flyzebra.utils.FlyLog;
@@ -54,7 +56,7 @@ public class CamService {
     public CamService(Context context) {
         mContext = context;
         for (int i = 0; i < MAX_CAM; i++) {
-            cameraEncoders[i] = new CamEncoder(i, CAM_WIDTH, CAM_HEIGHT);
+            cameraEncoders[i] = new CamEncoder(i, CAM_WIDTH, CAM_HEIGHT, Config.FRAME_RATE, Config.I_FRAME_INTERVAL, Config.BIT_RATE);
         }
     }
 
@@ -110,6 +112,8 @@ public class CamService {
             videoBuffer[channel] = ByteBuffer.wrap(new byte[size]);
             qCarCamera.setVideoColorFormat(channel, QCarCamera.YUV420_NV12);
             qCarCamera.startVideoStream(channel);
+            long frame_time = 1000L / Config.FRAME_RATE;
+            long last_time = SystemClock.uptimeMillis() - frame_time;
             while (!is_stop.get()) {
                 QCarCamera.FrameInfo info = qCarCamera.getVideoFrameInfo(channel, videoBuffer[channel]);
                 if (info != null) {
@@ -125,6 +129,17 @@ public class CamService {
                 } else {
                     FlyLog.e("Camera getVideoFrameInfo return null!");
                 }
+                //control fps
+                long current_time = SystemClock.uptimeMillis();
+                long sleep_time = frame_time - (current_time - last_time);
+                if (sleep_time > 0 && sleep_time < frame_time) {
+                    try {
+                        Thread.sleep(sleep_time);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                last_time = SystemClock.uptimeMillis();
             }
         }
     }

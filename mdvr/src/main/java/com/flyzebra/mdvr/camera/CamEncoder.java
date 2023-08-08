@@ -20,18 +20,24 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CamEncoder implements VideoCodecCB, INotify {
     private final int mChannel;
-    private int width;
-    private int height;
+    private final int width;
+    private final int height;
+    private final int frame_rate;
+    private final int i_frame_interval;
+    private final int bitrate;
     private byte[] yuvBuf = null;
     private long ptsUsec = 0;
     private Thread yuvThread;
     private final Object yuvLock = new Object();
     private final AtomicBoolean is_stop = new AtomicBoolean(true);
 
-    public CamEncoder(int channel, int width, int height) {
+    public CamEncoder(int channel, int width, int height, int frame_rate, int i_frame_interval, int bitrate) {
         this.mChannel = channel;
         this.width = width;
         this.height = height;
+        this.frame_rate = frame_rate;
+        this.i_frame_interval = i_frame_interval;
+        this.bitrate = bitrate;
     }
 
     public void onCreate() {
@@ -40,7 +46,7 @@ public class CamEncoder implements VideoCodecCB, INotify {
         is_stop.set(false);
         yuvThread = new Thread(() -> {
             VideoCodec videoCodec = new VideoCodec(mChannel, this);
-            videoCodec.initCodec(Config.CAM_MIME_TYPE, width, height, Config.CAM_BIT_RATE);
+            videoCodec.initCodec(Config.CAM_MIME_TYPE, width, height, frame_rate, i_frame_interval, bitrate);
             while (!is_stop.get()) {
                 //long stime = SystemClock.uptimeMillis();
                 synchronized (yuvLock) {
@@ -58,7 +64,7 @@ public class CamEncoder implements VideoCodecCB, INotify {
                 //FlyLog.e("encoder one yuv frame use %s millis.", SystemClock.uptimeMillis() - stime);
             }
             videoCodec.releaseCodec();
-        }, "camera-avc" + mChannel);
+        }, "cam-avc" + mChannel);
         yuvThread.start();
     }
 

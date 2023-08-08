@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.RadioGroup;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -19,9 +20,12 @@ import com.flyzebra.utils.PropUtil;
 import com.flyzebra.utils.ShellUtil;
 
 public class MdvrActivity1 extends AppCompatActivity implements INotify {
+    //private MyRecevier recevier = new MyRecevier();
     private final GlVideoView[] mGlVideoViews = new GlVideoView[Config.MAX_CAM];
     private final int[] mGlVideoViewIds = new int[]{R.id.sv01, R.id.sv02, R.id.sv03, R.id.sv04};
-    //private MyRecevier recevier = new MyRecevier();
+    private RadioGroup radioGroup;
+    private GlVideoView glVideoView;
+    private int mSelectChannel = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,9 +42,30 @@ public class MdvrActivity1 extends AppCompatActivity implements INotify {
         startService(new Intent(this, MdvrService.class));
         Notify.get().registerListener(this);
 
+        glVideoView = findViewById(R.id.full_sv);
+        //glVideoView.setVisibility(View.GONE);
+
         for (int i = 0; i < Config.MAX_CAM; i++) {
             mGlVideoViews[i] = findViewById(mGlVideoViewIds[i]);
+            mGlVideoViews[i].setVisibility(View.GONE);
         }
+
+        radioGroup = findViewById(R.id.radio_group);
+        //radioGroup.setVisibility(View.GONE);
+        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                if (checkedId == R.id.radio_bt01) {
+                    mSelectChannel = 0;
+                } else if (checkedId == R.id.radio_bt02) {
+                    mSelectChannel = 1;
+                } else if (checkedId == R.id.radio_bt03) {
+                    mSelectChannel = 2;
+                } else if (checkedId == R.id.radio_bt04) {
+                    mSelectChannel = 3;
+                }
+            }
+        });
 
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction("android.hardware.usb.action.USB_STATE");
@@ -80,9 +105,10 @@ public class MdvrActivity1 extends AppCompatActivity implements INotify {
             int channel = ByteUtil.bytes2Short(params, 0, true);
             int width = ByteUtil.bytes2Short(params, 2, true);
             int height = ByteUtil.bytes2Short(params, 4, true);
-//            long ptsUsec = ByteUtil.bytes2Long(params, 6, true);
-            mGlVideoViews[channel].upFrame(data, size, width, height);
+            //mGlVideoViews[channel].upFrame(data, size, width, height);
+            if (mSelectChannel == channel) {
+                glVideoView.upFrame(data, size, width, height);
+            }
         }
     }
-
 }
