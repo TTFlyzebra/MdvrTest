@@ -7,7 +7,7 @@ public class Config {
     public static final String CAM_MIME_TYPE = MediaFormat.MIMETYPE_VIDEO_AVC;
     public static final int MAX_CAM = 4;
     public static final int FRAME_RATE = 16;
-    public static final int I_FRAME_INTERVAL = 5;
+    public static final int I_FRAME_INTERVAL = 1;
     public static final int BIT_RATE = 2000000;
 
     public static final String MIC_MIME_TYPE = MediaFormat.MIMETYPE_AUDIO_AAC;
@@ -21,4 +21,7 @@ public class Config {
 
     public static final long MIN_STORE = 4294967296L;//4G
     public static final long RECORD_TIME = 300000;//5min
+
+    public static final String WIFI_SSID = "\"F-6165\"";
+    public static final String WIFI_PSWD = "\"12344321\"";
 }

@@ -1,4 +1,4 @@
-package com.flyzebra.mdvr;
+package com.flyzebra.mdvr.activiy;
 
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -13,6 +13,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.flyzebra.core.notify.INotify;
 import com.flyzebra.core.notify.Notify;
 import com.flyzebra.core.notify.NotifyType;
+import com.flyzebra.mdvr.Config;
+import com.flyzebra.mdvr.MdvrService;
+import com.flyzebra.mdvr.R;
 import com.flyzebra.mdvr.view.GlVideoView;
 import com.flyzebra.utils.ByteUtil;
 import com.flyzebra.utils.FlyLog;
