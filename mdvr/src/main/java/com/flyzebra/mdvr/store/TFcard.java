@@ -3,9 +3,9 @@ package com.flyzebra.mdvr.store;
 import android.os.StatFs;
 import android.text.TextUtils;
 
-public class StorageTFcard {
+public class TFcard {
     private String mPath;
-    public StorageTFcard(String path) {
+    public TFcard(String path) {
         mPath = path;
     }
 

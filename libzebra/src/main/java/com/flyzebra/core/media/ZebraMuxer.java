@@ -1,4 +1,4 @@
-package com.flyzebra.mdvr.model;
+package com.flyzebra.core.media;
 
 import com.flyzebra.utils.ByteUtil;
 import com.flyzebra.utils.FlyLog;

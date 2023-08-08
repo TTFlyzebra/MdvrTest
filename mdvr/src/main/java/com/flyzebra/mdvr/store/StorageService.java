@@ -23,7 +23,7 @@ import java.util.List;
 public class StorageService {
     private final Context mContext;
     private final StorageReceiver receiver = new StorageReceiver();
-    private final Hashtable<Integer, StorageTasker> taskerMap = new Hashtable<>();
+    private final Hashtable<Integer, FileSaveTasker> taskerMap = new Hashtable<>();
     private boolean is_recored = false;
     private String rootPath = null;
 
@@ -52,7 +52,7 @@ public class StorageService {
         if (is_recored) return;
 
         //没有TF卡不录像
-        StorageTFcard tfCard = getStorageTFcard();
+        TFcard tfCard = getStorageTFcard();
         if (tfCard == null) {
             FlyLog.e("TF card not found!");
             return;
@@ -75,7 +75,7 @@ public class StorageService {
         }
 
         for (int i = 0; i < MAX_CAM; i++) {
-            StorageTasker tasker = new StorageTasker(i);
+            FileSaveTasker tasker = new FileSaveTasker(i);
             tasker.onCreate(this);
             taskerMap.put(i, tasker);
         }
@@ -84,14 +84,14 @@ public class StorageService {
 
     public void stopRecord() {
         if (!is_recored) return;
-        Enumeration<StorageTasker> elements = taskerMap.elements();
+        Enumeration<FileSaveTasker> elements = taskerMap.elements();
         while (elements.hasMoreElements()) {
             elements.nextElement().onDestory();
         }
         is_recored = false;
     }
 
-    public StorageTFcard getStorageTFcard() {
+    public TFcard getStorageTFcard() {
         StorageManager manager = (StorageManager) mContext.getSystemService(Context.STORAGE_SERVICE);
         List<StorageVolume> list = manager.getStorageVolumes();
         for (StorageVolume volume : list) {
@@ -102,7 +102,7 @@ public class StorageService {
                 getPath.setAccessible(true);
                 String tfPath = (String) getPath.invoke(volume);
                 if (!TextUtils.isEmpty(tfPath)) {
-                    return new StorageTFcard(tfPath);
+                    return new TFcard(tfPath);
                 }
             } catch (Exception e) {
                FlyLog.e(e.toString());
@@ -116,7 +116,7 @@ public class StorageService {
         File rootFile = new File(rootPath);
         if (!rootFile.exists()) return null;
         //自动删除文件
-        StorageTFcard storageTFcard = getStorageTFcard();
+        TFcard storageTFcard = getStorageTFcard();
         if (storageTFcard == null) return null;
         if (storageTFcard.freeBytes() < Config.MIN_STORE) {
             File[] files = rootFile.listFiles();
@@ -185,7 +185,7 @@ public class StorageService {
                 if (!is_recored) {
                     startRecord();
                 } else {
-                    StorageTFcard tFcard = getStorageTFcard();
+                    TFcard tFcard = getStorageTFcard();
                     if (tFcard == null) {
                         stopRecord();
                     }

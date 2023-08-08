@@ -14,6 +14,7 @@ import com.flyzebra.mdvr.camera.CamService;
 import com.flyzebra.mdvr.mic.MicService;
 import com.flyzebra.mdvr.rtmp.RtmpService;
 import com.flyzebra.mdvr.store.StorageService;
+import com.flyzebra.mdvr.wifi.WifiService;
 import com.flyzebra.utils.ByteUtil;
 import com.flyzebra.utils.FlyLog;
 
@@ -21,7 +22,7 @@ public class MdvrService extends Service implements INotify {
     static {
         System.loadLibrary("mmqcar_qcar_jni");
     }
-
+    private final WifiService wifiService = new WifiService(this);
     private final StorageService storeService = new StorageService(this);
     private final RtmpService rtmpService = new RtmpService(this);
     private final CamService cameraService = new CamService(this);
@@ -41,6 +42,7 @@ public class MdvrService extends Service implements INotify {
         Notify.get().registerListener(this);
         Fzebra.get().init();
         Fzebra.get().enableRtspServer();
+        wifiService.onCreate();
         storeService.onCreate();
         rtmpService.onCreate();
         cameraService.onCreate();
@@ -49,6 +51,7 @@ public class MdvrService extends Service implements INotify {
 
     @Override
     public void onDestroy() {
+        wifiService.onDestory();
         storeService.onDestory();
         rtmpService.onDestory();
         cameraService.onDerstory();

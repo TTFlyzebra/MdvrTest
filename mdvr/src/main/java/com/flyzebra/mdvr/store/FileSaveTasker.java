@@ -2,19 +2,19 @@ package com.flyzebra.mdvr.store;
 
 import android.text.TextUtils;
 
+import com.flyzebra.core.media.ZebraMuxer;
 import com.flyzebra.core.notify.INotify;
 import com.flyzebra.core.notify.Notify;
 import com.flyzebra.core.notify.NotifyType;
 import com.flyzebra.mdvr.Config;
 import com.flyzebra.mdvr.Global;
-import com.flyzebra.mdvr.model.ZebraMuxer;
 import com.flyzebra.utils.ByteUtil;
 import com.flyzebra.utils.FlyLog;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class StorageTasker implements INotify {
+public class FileSaveTasker implements INotify {
     private final int mChannel;
     private final AtomicBoolean is_stop = new AtomicBoolean(true);
     private final ByteBuffer saveBuf = ByteBuffer.wrap(new byte[10 * 1024 * 1024]);
@@ -23,7 +23,7 @@ public class StorageTasker implements INotify {
     private int videoHeadSize = 16;
     private int audioHeadSize = 16;
 
-    public StorageTasker(int channel) {
+    public FileSaveTasker(int channel) {
         mChannel = channel;
     }
 
