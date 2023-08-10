@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.LinearLayout;
+import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,15 +22,17 @@ import com.flyzebra.mdvr.view.GlVideoView;
 import com.flyzebra.utils.ByteUtil;
 import com.flyzebra.utils.FlyLog;
 import com.flyzebra.utils.PropUtil;
+import com.flyzebra.utils.SPUtil;
 import com.flyzebra.utils.ShellUtil;
 
 public class MdvrActivity1 extends AppCompatActivity implements INotify {
     //private MyRecevier recevier = new MyRecevier();
     private final GlVideoView[] mGlVideoViews = new GlVideoView[Config.MAX_CAM];
     private final int[] mGlVideoViewIds = new int[]{R.id.sv01, R.id.sv02, R.id.sv03, R.id.sv04};
-    private RadioGroup radioGroup;
     private GlVideoView glVideoView;
-    private int mSelectChannel = 0;
+    private LinearLayout layoutSurfaceViews;
+    private RadioGroup radioGroup;
+    private int mSelectChannel = 4;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,19 +50,20 @@ public class MdvrActivity1 extends AppCompatActivity implements INotify {
         Notify.get().registerListener(this);
 
         glVideoView = findViewById(R.id.full_sv);
-        //glVideoView.setVisibility(View.GONE);
+        layoutSurfaceViews = findViewById(R.id.ll_svs);
 
         for (int i = 0; i < Config.MAX_CAM; i++) {
             mGlVideoViews[i] = findViewById(mGlVideoViewIds[i]);
-            mGlVideoViews[i].setVisibility(View.GONE);
         }
 
         radioGroup = findViewById(R.id.radio_group);
-        //radioGroup.setVisibility(View.GONE);
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
-                if (checkedId == R.id.radio_bt01) {
+                if (checkedId == R.id.radio_btall) {
+                    FlyLog.e("setOnCheckedChangeListener all selected!");
+                    mSelectChannel = -1;
+                } else if (checkedId == R.id.radio_bt01) {
                     mSelectChannel = 0;
                 } else if (checkedId == R.id.radio_bt02) {
                     mSelectChannel = 1;
@@ -67,12 +72,28 @@ public class MdvrActivity1 extends AppCompatActivity implements INotify {
                 } else if (checkedId == R.id.radio_bt04) {
                     mSelectChannel = 3;
                 }
+                SPUtil.set(MdvrActivity1.this, "SELECET_CHANNEL", mSelectChannel);
+                glVideoView.setVisibility(mSelectChannel == -1 ? View.GONE : View.VISIBLE);
+                layoutSurfaceViews.setVisibility(mSelectChannel == -1 ? View.VISIBLE : View.GONE);
             }
         });
 
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction("android.hardware.usb.action.USB_STATE");
         //registerReceiver(recevier, intentFilter);
+
+        mSelectChannel = (int) SPUtil.get(MdvrActivity1.this, "SELECET_CHANNEL", 0);
+        if (mSelectChannel == -1) {
+            ((RadioButton) findViewById(R.id.radio_btall)).setChecked(true);
+        } else if (mSelectChannel == 0) {
+            ((RadioButton) findViewById(R.id.radio_bt01)).setChecked(true);
+        } else if (mSelectChannel == 1) {
+            ((RadioButton) findViewById(R.id.radio_bt02)).setChecked(true);
+        } else if (mSelectChannel == 2) {
+            ((RadioButton) findViewById(R.id.radio_bt03)).setChecked(true);
+        } else if (mSelectChannel == 3) {
+            ((RadioButton) findViewById(R.id.radio_bt04)).setChecked(true);
+        }
     }
 
     @Override
@@ -108,8 +129,9 @@ public class MdvrActivity1 extends AppCompatActivity implements INotify {
             int channel = ByteUtil.bytes2Short(params, 0, true);
             int width = ByteUtil.bytes2Short(params, 2, true);
             int height = ByteUtil.bytes2Short(params, 4, true);
-            //mGlVideoViews[channel].upFrame(data, size, width, height);
-            if (mSelectChannel == channel) {
+            if (mSelectChannel == -1) {
+                mGlVideoViews[channel].upFrame(data, size, width, height);
+            } else if (mSelectChannel == channel) {
                 glVideoView.upFrame(data, size, width, height);
             }
         }

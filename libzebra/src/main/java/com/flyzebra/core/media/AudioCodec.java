@@ -50,7 +50,7 @@ public class AudioCodec implements Runnable {
 
     public void inPumData(byte[] data, int size, long pts) {
         if (!is_codec_init.get() || data == null || size <= 0) return;
-        int inIndex = codec.dequeueInputBuffer(40000);
+        int inIndex = codec.dequeueInputBuffer(200000);
         if (inIndex < 0) {
             FlyLog.e("AudioEncoder codec->dequeueInputBuffer inIdex=%d error!", inIndex);
             return;
@@ -81,7 +81,7 @@ public class AudioCodec implements Runnable {
     public void run() {
         MediaCodec.BufferInfo mBufferInfo = new MediaCodec.BufferInfo();
         while (is_codec_init.get()) {
-            int outputIndex = codec.dequeueOutputBuffer(mBufferInfo, 40000);
+            int outputIndex = codec.dequeueOutputBuffer(mBufferInfo, 200000);
             switch (outputIndex) {
                 case MediaCodec.INFO_TRY_AGAIN_LATER:
                     break;
