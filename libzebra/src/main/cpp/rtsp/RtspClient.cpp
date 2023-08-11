@@ -161,13 +161,13 @@ void RtspClient::sendThread() {
             }
         }
         while (!is_stop && !sendData.empty()) {
-            tv.tv_sec = 2;
+            tv.tv_sec = 5;
             tv.tv_usec = 0;
             FD_ZERO(&set);
             FD_SET(mSocket, &set);
             int32_t ret = select(mSocket + 1, nullptr, &set, nullptr, &tv);
             if (ret == 0) {
-                FLOGD("RtspClient sendThread select write error. ret[%d].", ret);
+                FLOGD("RtspClient sendThread select write error. socket[%d]ret[%d].",mSocket, ret);
                 disconnect();
                 break;
             }

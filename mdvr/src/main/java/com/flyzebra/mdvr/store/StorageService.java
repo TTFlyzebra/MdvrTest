@@ -58,12 +58,6 @@ public class StorageService {
             return;
         }
 
-        //空间不足4G不录像
-        if (tfCard.freeBytes() < Config.MIN_STORE) {
-            FlyLog.e("TF card free bytes is too small %d", tfCard.freeBytes());
-            return;
-        }
-
         //创建目录失败不录像
         rootPath = tfCard.getPath() + File.separator + "MD201";
         File file = new File(rootPath);
@@ -74,6 +68,15 @@ public class StorageService {
             }
         }
 
+        //根据文件创建日期自动删除录像文件
+        autoDeleteFiles(tfCard, file);
+
+        //空间不足4G不录像
+        if (tfCard.freeBytes() < Config.MIN_STORE) {
+            FlyLog.e("TF card free bytes is too small %d", tfCard.freeBytes());
+            return;
+        }
+
         for (int i = 0; i < MAX_CAM; i++) {
             FileSaveTasker tasker = new FileSaveTasker(i);
             tasker.onCreate(this);
@@ -82,43 +85,8 @@ public class StorageService {
         is_recored = true;
     }
 
-    public void stopRecord() {
-        if (!is_recored) return;
-        Enumeration<FileSaveTasker> elements = taskerMap.elements();
-        while (elements.hasMoreElements()) {
-            elements.nextElement().onDestory();
-        }
-        is_recored = false;
-    }
-
-    public TFcard getStorageTFcard() {
-        StorageManager manager = (StorageManager) mContext.getSystemService(Context.STORAGE_SERVICE);
-        List<StorageVolume> list = manager.getStorageVolumes();
-        for (StorageVolume volume : list) {
-            if (volume == null || !volume.isRemovable()) continue;
-            try {
-                Class<?> myclass = Class.forName(volume.getClass().getName());
-                Method getPath = myclass.getDeclaredMethod("getPath", null);
-                getPath.setAccessible(true);
-                String tfPath = (String) getPath.invoke(volume);
-                if (!TextUtils.isEmpty(tfPath)) {
-                    return new TFcard(tfPath);
-                }
-            } catch (Exception e) {
-               FlyLog.e(e.toString());
-            }
-        }
-        return null;
-    }
-
-    public String getSaveFileName(int channel) {
-        if (TextUtils.isEmpty(rootPath)) return null;
-        File rootFile = new File(rootPath);
-        if (!rootFile.exists()) return null;
-        //自动删除文件
-        TFcard storageTFcard = getStorageTFcard();
-        if (storageTFcard == null) return null;
-        if (storageTFcard.freeBytes() < Config.MIN_STORE) {
+    private void autoDeleteFiles(TFcard tfCard, File rootFile) {
+        if (tfCard.freeBytes() < Config.MIN_STORE) {
             File[] files = rootFile.listFiles();
             if (files != null) {
                 Arrays.sort(files, (f1, f2) -> {
@@ -131,7 +99,7 @@ public class StorageService {
                         return -1;
                 });
             } else {
-                return null;
+                return;
             }
             long lastModified = 0;
             for (File file : files) {
@@ -140,7 +108,7 @@ public class StorageService {
                 boolean flag = file.delete();
                 if (flag) {
                     FlyLog.d("delete file %s", file.getAbsolutePath());
-                    if (storageTFcard.freeBytes() > Config.MIN_STORE) break;
+                    if (tfCard.freeBytes() > Config.MIN_STORE) break;
                 } else {
                     FlyLog.e("delete file failed %s", file.getAbsolutePath());
                 }
@@ -170,6 +138,49 @@ public class StorageService {
                 }
             }
         }
+    }
+
+    public void stopRecord() {
+        if (!is_recored) return;
+        Enumeration<FileSaveTasker> elements = taskerMap.elements();
+        while (elements.hasMoreElements()) {
+            elements.nextElement().onDestory();
+        }
+        is_recored = false;
+    }
+
+    public TFcard getStorageTFcard() {
+        StorageManager manager = (StorageManager) mContext.getSystemService(Context.STORAGE_SERVICE);
+        List<StorageVolume> list = manager.getStorageVolumes();
+        for (StorageVolume volume : list) {
+            if (volume == null || !volume.isRemovable()) continue;
+            try {
+                Class<?> myclass = Class.forName(volume.getClass().getName());
+                Method getPath = myclass.getDeclaredMethod("getPath", null);
+                getPath.setAccessible(true);
+                String tfPath = (String) getPath.invoke(volume);
+                if (!TextUtils.isEmpty(tfPath)) {
+                    return new TFcard(tfPath);
+                }
+            } catch (Exception e) {
+                FlyLog.e(e.toString());
+            }
+        }
+        return null;
+    }
+
+    public String getSaveFileName(int channel) {
+        if (TextUtils.isEmpty(rootPath)) return null;
+        File rootFile = new File(rootPath);
+        if (!rootFile.exists()) return null;
+        //自动删除文件
+
+
+        TFcard storageTFcard = getStorageTFcard();
+        if (storageTFcard == null) return null;
+
+        autoDeleteFiles(storageTFcard, rootFile);
+
         if (storageTFcard.freeBytes() < Config.MIN_STORE) {
             FlyLog.e("TF card free bytes is too small %d", storageTFcard.freeBytes());
             return null;
