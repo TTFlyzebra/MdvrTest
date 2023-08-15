@@ -16,10 +16,16 @@ android {
     }
 
     signingConfigs {
-        main {
-            storeFile file("../signApk/platform.jks") //签名文件路径
+        aospKey {
+            storeFile file("../signApk/platform.jks")
             storePassword "123456"
             keyAlias "quectel"
+            keyPassword "123456"
+        }
+        flyzebraKey {
+            storeFile file("../signApk/flyzebra.jks")
+            storePassword "123456"
+            keyAlias "flyzebra"
             keyPassword "123456"
         }
     }
@@ -27,13 +33,13 @@ android {
     buildTypes {
         release {
             minifyEnabled false
-            signingConfig signingConfigs.main
+            signingConfig null
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
 
         debug {
             minifyEnabled false
-            signingConfig signingConfigs.main
+            signingConfig null
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -44,23 +50,48 @@ android {
     }
 
     sourceSets {
-        AndroidP {
+        AndroidP_aosp {
             jniLibs.srcDirs = ['libs/androidp']
         }
-        AndroidQ {
+        AndroidP_flyzebra {
+            jniLibs.srcDirs = ['libs/androidp']
+        }
+        AndroidQ_aosp {
+            jniLibs.srcDirs = ['libs/androidq']
+        }
+        AndroidQ_flyzebra {
             jniLibs.srcDirs = ['libs/androidq']
         }
     }
 
     productFlavors {
-        AndroidP {
+        AndroidP_aosp {
             versionName "1.0"
+            signingConfig signingConfigs.aospKey
             ndk {
                 abiFilters "armeabi-v7a"
             }
         }
-        AndroidQ {
+
+        AndroidP_flyzebra {
             versionName "1.0"
+            signingConfig signingConfigs.flyzebraKey
+            ndk {
+                abiFilters "armeabi-v7a"
+            }
+        }
+
+        AndroidQ_aosp {
+            versionName "1.0"
+            signingConfig signingConfigs.aospKey
+            ndk {
+                abiFilters "armeabi-v7a"
+            }
+        }
+
+        AndroidQ_flyzebra {
+            versionName "1.0"
+            signingConfig signingConfigs.flyzebraKey
             ndk {
                 abiFilters "armeabi-v7a"
             }

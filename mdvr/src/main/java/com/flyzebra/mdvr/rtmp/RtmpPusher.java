@@ -102,12 +102,12 @@ public class RtmpPusher implements INotify {
                         }
                     }
                 } else if (NotifyType.NOTI_MICOUT_AAC == type) {
+                    long pts = ByteUtil.bytes2Long(params, 2, true);
                     if (!is_send_audio_head) {
                         byte[] audioHead = Global.audioHeadMap.get(mChannel);
                         if (sendAacHead(rtmp, audioHead, audioHead.length))
                             is_send_audio_head = true;
                     }
-                    long pts = ByteUtil.bytes2Long(params, 2, true);
                     flag = sendAacData(rtmp, data, size, pts);
                 }
                 if (!flag) {
