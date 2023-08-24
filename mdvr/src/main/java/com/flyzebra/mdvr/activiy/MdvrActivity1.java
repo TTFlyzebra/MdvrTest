@@ -61,7 +61,6 @@ public class MdvrActivity1 extends AppCompatActivity implements INotify {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 if (checkedId == R.id.radio_btall) {
-                    FlyLog.e("setOnCheckedChangeListener all selected!");
                     mSelectChannel = -1;
                 } else if (checkedId == R.id.radio_bt01) {
                     mSelectChannel = 0;

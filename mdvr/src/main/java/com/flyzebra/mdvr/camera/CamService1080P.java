@@ -37,7 +37,7 @@ public class CamService1080P {
 //        if(qCarCamera2 == null){
 //            qCarCamera2 = new QCarCamera(2);
 //        }
-        camer_open_ret = qCarCamera1.cameraOpen(4, 5);
+        camer_open_ret = qCarCamera1.cameraOpen(4, 3);
         if (camer_open_ret != 0) {
             FlyLog.e("QCarCamera open failed, ret=%d", camer_open_ret);
             mHandler.postDelayed(this.openCameraTasker, 1000);

@@ -1,6 +1,8 @@
 package com.flyzebra.mdvr;
 
+import android.app.AlarmManager;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 
@@ -12,7 +14,6 @@ import com.flyzebra.core.notify.Notify;
 import com.flyzebra.core.notify.NotifyType;
 import com.flyzebra.mdvr.camera.CamService;
 import com.flyzebra.mdvr.mic.MicService;
-import com.flyzebra.mdvr.rtmp.RtmpService;
 import com.flyzebra.mdvr.store.StorageService;
 import com.flyzebra.mdvr.wifi.WifiService;
 import com.flyzebra.utils.ByteUtil;
@@ -24,7 +25,7 @@ public class MdvrService extends Service implements INotify {
     }
     private final WifiService wifiService = new WifiService(this);
     private final StorageService storeService = new StorageService(this);
-    private final RtmpService rtmpService = new RtmpService(this);
+    //private final RtmpService rtmpService = new RtmpService(this);
     private final CamService cameraService = new CamService(this);
     //private final CamService1080P cameraService = new CamService1080P(this);
     private final MicService micService = new MicService(this);
@@ -38,13 +39,17 @@ public class MdvrService extends Service implements INotify {
     @Override
     public void onCreate() {
         FlyLog.d("MdvrService start!");
+
+        AlarmManager mAlarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+        mAlarmManager.setTimeZone("Asia/Shanghai");
+
         Global.qCarCameras.clear();
         Notify.get().registerListener(this);
         Fzebra.get().init();
         Fzebra.get().enableRtspServer();
         wifiService.onCreate();
         storeService.onCreate();
-        rtmpService.onCreate();
+        //rtmpService.onCreate();
         cameraService.onCreate();
         micService.onCreate();
     }
@@ -53,7 +58,7 @@ public class MdvrService extends Service implements INotify {
     public void onDestroy() {
         wifiService.onDestory();
         storeService.onDestory();
-        rtmpService.onDestory();
+        //rtmpService.onDestory();
         cameraService.onDerstory();
         micService.onDistory();
         Fzebra.get().disableRtspServer();

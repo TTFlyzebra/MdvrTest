@@ -17,13 +17,13 @@ android {
 
     signingConfigs {
         aospKey {
-            storeFile file("../signApk/platform.jks")
+            storeFile file("../signkey/platform.jks")
             storePassword "123456"
             keyAlias "quectel"
             keyPassword "123456"
         }
         flyzebraKey {
-            storeFile file("../signApk/flyzebra.jks")
+            storeFile file("../signkey/flyzebra.jks")
             storePassword "123456"
             keyAlias "flyzebra"
             keyPassword "123456"
@@ -96,10 +96,6 @@ android {
                 abiFilters "armeabi-v7a"
             }
         }
-    }
-
-    buildFeatures {
-        viewBinding true
     }
 }
 

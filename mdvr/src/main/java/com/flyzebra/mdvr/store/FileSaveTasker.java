@@ -81,7 +81,7 @@ public class FileSaveTasker implements INotify {
                         byte[] videoHead = Global.videoHeadMap.get(mChannel);
                         byte[] audioHead = Global.audioHeadMap.get(mChannel);
                         muxer.addVideoTrack(videoHead, videoHead.length);
-                        muxer.addAudioTrack(audioHead, audioHead.length);
+                        if (audioHead != null) muxer.addAudioTrack(audioHead, audioHead.length);
                     }
                     if (muxer != null) {
                         if (type == ZebraMuxer.VIDEO_FRAME) {

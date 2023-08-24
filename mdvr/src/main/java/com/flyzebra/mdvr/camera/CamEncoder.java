@@ -47,6 +47,9 @@ public class CamEncoder implements VideoCodecCB, INotify {
         yuvThread = new Thread(() -> {
             VideoCodec videoCodec = new VideoCodec(mChannel, this);
             videoCodec.initCodec(Config.CAM_MIME_TYPE, width, height, frame_rate, i_frame_interval, bitrate);
+            int size = width * height * 3 / 2;
+            byte[] tempData =  new byte[size];
+            long pts = 0;
             while (!is_stop.get()) {
                 //long stime = SystemClock.uptimeMillis();
                 synchronized (yuvLock) {
@@ -58,9 +61,11 @@ public class CamEncoder implements VideoCodecCB, INotify {
                         }
                     }
                     if (is_stop.get()) break;
-                    videoCodec.inYuvData(yuvBuf,  width * height * 3 / 2, ptsUsec);
+                    System.arraycopy(yuvBuf,0, tempData,0, size);
+                    pts = ptsUsec;
                     yuvBuf = null;
                 }
+                videoCodec.inYuvData(tempData,  size, pts);
                 //FlyLog.e("encoder one yuv frame use %s millis.", SystemClock.uptimeMillis() - stime);
             }
             videoCodec.releaseCodec();
