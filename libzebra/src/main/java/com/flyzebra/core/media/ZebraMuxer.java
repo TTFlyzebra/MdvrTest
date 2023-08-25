@@ -17,7 +17,7 @@ public class ZebraMuxer {
     private String fileName;
     private RandomAccessFile file = null;
 
-    private Executor executor = Executors.newFixedThreadPool(1);
+    private static final Executor executor = Executors.newFixedThreadPool(1);
 
     public ZebraMuxer(String path) {
         try {
