@@ -67,7 +67,7 @@ public class FileSaveTasker implements INotify {
                     if (type == ZebraMuxer.VIDEO_FRAME && count > lastCount && (data[pos + videoHeadSize] & 0x1f) != 1) {
                         lastCount = count;
                         is_newfile = true;
-                        if (muxer != null) muxer.close();
+                        if (muxer != null) muxer.close(true);
                     }
                     if (is_newfile) {
                         String fileName = service.getSaveFileName(mChannel);
@@ -94,7 +94,7 @@ public class FileSaveTasker implements INotify {
                 }
             }
             if (muxer != null) {
-                muxer.close();
+                muxer.close(false);
             }
         }, "save_task" + mChannel);
         saveThread.start();
@@ -134,8 +134,9 @@ public class FileSaveTasker implements INotify {
                 ByteUtil.intToBytes(size + videoHeadSize, head, 0, true);
                 ByteUtil.intToBytes(ZebraMuxer.VIDEO_FRAME, head, 4, true);
                 ByteUtil.longToBytes(pts, head, 8, true);
-                saveBuf.put(head, 0, videoHeadSize);
+                saveBuf.put(head, 0, 8);
                 saveBuf.put(data, 0, size);
+                saveBuf.put(head, 8, 8);
                 saveLock.notify();
             }
         } else if (NotifyType.NOTI_MICOUT_AAC == type) {
@@ -151,8 +152,9 @@ public class FileSaveTasker implements INotify {
                 ByteUtil.intToBytes(size + audioHeadSize, head, 0, true);
                 ByteUtil.intToBytes(ZebraMuxer.AUDIO_FRAME, head, 4, true);
                 ByteUtil.longToBytes(pts, head, 8, true);
-                saveBuf.put(head, 0, audioHeadSize);
+                saveBuf.put(head, 0, 8);
                 saveBuf.put(data, 0, size);
+                saveBuf.put(head, 8, 8);
                 saveLock.notify();
             }
         }

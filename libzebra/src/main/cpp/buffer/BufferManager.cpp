@@ -6,6 +6,7 @@
 #include "BufferManager.h"
 #include "LoopBuf.h"
 #include "utils/FlyLog.h"
+#include "utils/SysUtil.h"
 
 BufferManager *BufferManager::m_pInstance = nullptr;
 
@@ -25,6 +26,7 @@ BufferManager::BufferManager()
         : is_stop(false), fixed_t(nullptr) {
     FLOGD("%s()", __func__);
     fixed_t = new std::thread(&BufferManager::selfFixedThread, this);
+    SysUtil::setThreadName(fixed_t, "BufferManager");
 }
 
 BufferManager::~BufferManager() {
@@ -68,11 +70,5 @@ void BufferManager::releaseBuffer(LoopBuf *buffer) {
 }
 
 void BufferManager::selfFixedThread() const {
-    int32_t test_count = 0;
-    while (!is_stop) {
-        for (int i = 0; i < 10; i++) {
-            usleep(100000);
-            if (is_stop) return;
-        }
-    }
+    //TODO::
 }

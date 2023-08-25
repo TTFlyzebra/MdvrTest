@@ -3,19 +3,26 @@ package com.flyzebra.core.media;
 import com.flyzebra.utils.ByteUtil;
 import com.flyzebra.utils.FlyLog;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class ZebraMuxer {
     public static final int VIDEO_HEAD = 1;
     public static final int AUDIO_HEAD = 2;
     public static final int VIDEO_FRAME = 3;
     public static final int AUDIO_FRAME = 4;
+    private String fileName;
     private RandomAccessFile file = null;
+
+    private Executor executor = Executors.newFixedThreadPool(1);
 
     public ZebraMuxer(String path) {
         try {
-            file = new RandomAccessFile(path, "rws");
+            this.fileName = path;
+            file = new RandomAccessFile(path + ".tmp", "rws");
         } catch (Exception e) {
             FlyLog.e(e.toString());
         }
@@ -69,13 +76,28 @@ public class ZebraMuxer {
         }
     }
 
-    public void close() {
-        if (file != null) {
-            try {
+    public void close(boolean flag) {
+        try {
+            if (file != null) {
                 file.close();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+                if (flag) {
+                    executor.execute(() -> {
+                        File tmpFile = new File(fileName + ".tmp");
+                        for (int i = 0; i < 3; i++) {
+                            if (tmpFile.renameTo(new File(fileName + ".mp4"))) {
+                                FlyLog.d("rename file name to " + fileName + ".mp4");
+                                break;
+                            } else {
+                                //TODO:
+                                FlyLog.e("rename file name to " + fileName + ".mp4 failed!");
+                            }
+                        }
+                    });
+
+                }
             }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 }
