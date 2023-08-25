@@ -77,27 +77,27 @@ public class ZebraMuxer {
     }
 
     public void close(boolean flag) {
-        try {
-            if (file != null) {
+        if (file != null) {
+            try {
                 file.close();
-                if (flag) {
-                    executor.execute(() -> {
-                        File tmpFile = new File(fileName + ".tmp");
-                        for (int i = 0; i < 3; i++) {
-                            if (tmpFile.renameTo(new File(fileName + ".mp4"))) {
-                                FlyLog.d("rename file name to " + fileName + ".mp4");
-                                break;
-                            } else {
-                                //TODO:
-                                FlyLog.e("rename file name to " + fileName + ".mp4 failed!");
-                            }
-                        }
-                    });
-
-                }
+            } catch (IOException e) {
+                FlyLog.e(e.toString());
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            if (flag) {
+                executor.execute(() -> {
+                    File tmpFile = new File(fileName + ".tmp");
+                    for (int i = 0; i < 3; i++) {
+                        if (tmpFile.renameTo(new File(fileName + ".mp4"))) {
+                            FlyLog.d("rename file name to " + fileName + ".mp4");
+                            break;
+                        } else {
+                            //TODO:
+                            FlyLog.e("rename file name to " + fileName + ".mp4 failed!");
+                        }
+                    }
+                });
+
+            }
         }
     }
 }
