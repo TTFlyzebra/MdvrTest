@@ -1,13 +1,14 @@
 package com.flyzebra.core.media;
 
+import android.os.Handler;
+import android.os.HandlerThread;
+
 import com.flyzebra.utils.ByteUtil;
 import com.flyzebra.utils.FlyLog;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 public class ZebraMuxer {
     public static final int VIDEO_HEAD = 1;
@@ -17,7 +18,13 @@ public class ZebraMuxer {
     private String fileName;
     private RandomAccessFile file = null;
 
-    private static final Executor executor = Executors.newFixedThreadPool(1);
+    private static final HandlerThread fileThread = new HandlerThread("File_Rename");
+
+    static {
+        fileThread.start();
+    }
+
+    private static final Handler tHandler = new Handler(fileThread.getLooper());
 
     public ZebraMuxer(String path) {
         try {
@@ -84,7 +91,7 @@ public class ZebraMuxer {
                 FlyLog.e(e.toString());
             }
             if (flag) {
-                executor.execute(() -> {
+                tHandler.post(() -> {
                     File tmpFile = new File(fileName + ".tmp");
                     for (int i = 0; i < 3; i++) {
                         if (tmpFile.renameTo(new File(fileName + ".mp4"))) {
@@ -96,7 +103,6 @@ public class ZebraMuxer {
                         }
                     }
                 });
-
             }
         }
     }
