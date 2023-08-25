@@ -43,8 +43,11 @@ public class MdvrService extends Service implements INotify {
         AlarmManager mAlarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
         mAlarmManager.setTimeZone("Asia/Shanghai");
 
-        Global.qCarCameras.clear();
         Notify.get().registerListener(this);
+        Global.qCarCameras.clear();
+        Global.audioHeadMap.clear();
+        Global.videoHeadMap.clear();
+
         Fzebra.get().init();
         Fzebra.get().enableRtspServer();
         wifiService.onCreate();

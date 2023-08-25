@@ -10,7 +10,9 @@ import com.flyzebra.core.notify.NotifyType;
 import com.flyzebra.mdvr.Config;
 import com.flyzebra.mdvr.Global;
 import com.flyzebra.utils.ByteUtil;
+import com.flyzebra.utils.DateUtil;
 import com.flyzebra.utils.FlyLog;
+import com.quectel.qcarapi.osd.QCarOsd;
 import com.quectel.qcarapi.stream.QCarCamera;
 
 import java.nio.ByteBuffer;
@@ -43,9 +45,34 @@ public class CamService {
             return;
         }
 
+        Global.qCarCameras.put(1, qCarCamera);
         FlyLog.d("QCarCamera open success!");
 
-        Global.qCarCameras.put(1, qCarCamera);
+        //添加水印
+        QCarOsd osd = new QCarOsd();
+        String font_path = "/system/fonts/RobotoCondensed-Light.ttf";
+        osd.initOsd(font_path.getBytes(), 4);
+        osd.setOsdColor(255, 0, 0);
+        qCarCamera.setMainOsd(osd);
+
+        for (int i = 0; i < MAX_CAM; i++) {
+            String text = "CHANNEL-" + (i + 1) + DateUtil.getCurrentDate(" yyyy-MM-dd HH:mm:ss");
+            osd.setOsd(i, text.getBytes(), -1, 800, 40);
+        }
+
+        new Thread(() -> {
+            while (!is_stop.get()) {
+                for (int i = 0; i < MAX_CAM; i++) {
+                    String text = "CHANNEL-" + (i + 1) + DateUtil.getCurrentDate(" yyyy-MM-dd HH:mm:ss");
+                    osd.setOsd(i, text.getBytes(), i, 800, 40);
+                }
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }).start();
 
         for (int i = 0; i < MAX_CAM; i++) {
             yuvThreads[i] = new VideoYuvThread(i);

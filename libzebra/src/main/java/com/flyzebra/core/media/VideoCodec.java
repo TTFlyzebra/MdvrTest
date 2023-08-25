@@ -51,7 +51,7 @@ public class VideoCodec implements Runnable {
 
     public void inYuvData(byte[] data, int size, long pts) {
         if (!is_codec_init.get() || data == null || size <= 0) return;
-        int inIndex = codec.dequeueInputBuffer(200000);
+        int inIndex = codec.dequeueInputBuffer(1000000);
         if (inIndex < 0) {
             FlyLog.e("VideoEncoder codec->dequeueInputBuffer inIdex=%d error!", inIndex);
             return;
