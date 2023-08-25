@@ -28,7 +28,7 @@ public class VideoCodec implements Runnable {
         mCallBack = cb;
     }
 
-    public void initCodec(String mimeType, int width, int height, int fps, int i_frame, int bitrate) {
+    public void initCodec(String mimeType, int width, int height, int fps, int i_frame, int bitrate, int bitrate_mode) {
         try {
             MediaFormat format = MediaFormat.createVideoFormat(mimeType, width, height);
             format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Flexible);
@@ -51,7 +51,7 @@ public class VideoCodec implements Runnable {
 
     public void inYuvData(byte[] data, int size, long pts) {
         if (!is_codec_init.get() || data == null || size <= 0) return;
-        int inIndex = codec.dequeueInputBuffer(1000000);
+        int inIndex = codec.dequeueInputBuffer(200000);
         if (inIndex < 0) {
             FlyLog.e("VideoEncoder codec->dequeueInputBuffer inIdex=%d error!", inIndex);
             return;

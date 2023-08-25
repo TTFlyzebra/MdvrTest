@@ -9,6 +9,7 @@ public class Config {
     public static final int FRAME_RATE = 25;
     public static final int I_FRAME_INTERVAL = 2;
     public static final int BIT_RATE = 2048;
+    public static final int BITRATE_MODE = 1;// BITRATE_MODE_VBR = 1, BITRATE_MODE_CBR = 2;
 
     public static final String MIC_MIME_TYPE = MediaFormat.MIMETYPE_AUDIO_AAC;
     public static final int MIC_SAMPLE = 48000;

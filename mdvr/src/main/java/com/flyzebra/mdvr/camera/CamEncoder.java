@@ -7,6 +7,8 @@
  */
 package com.flyzebra.mdvr.camera;
 
+import android.os.SystemClock;
+
 import com.flyzebra.core.media.VideoCodec;
 import com.flyzebra.core.media.VideoCodecCB;
 import com.flyzebra.core.notify.INotify;
@@ -25,19 +27,21 @@ public class CamEncoder implements VideoCodecCB, INotify {
     private final int frame_rate;
     private final int i_frame_interval;
     private final int bitrate;
+    private final int bitrate_mode;
     private byte[] yuvBuf = null;
     private long ptsUsec = 0;
     private Thread yuvThread;
     private final Object yuvLock = new Object();
     private final AtomicBoolean is_stop = new AtomicBoolean(true);
 
-    public CamEncoder(int channel, int width, int height, int frame_rate, int i_frame_interval, int bitrate) {
+    public CamEncoder(int channel, int width, int height, int frame_rate, int i_frame_interval, int bitrate, int bitrate_mode) {
         this.mChannel = channel;
         this.width = width;
         this.height = height;
         this.frame_rate = frame_rate;
         this.i_frame_interval = i_frame_interval;
         this.bitrate = bitrate;
+        this.bitrate_mode = bitrate_mode;
     }
 
     public void onCreate() {
@@ -46,9 +50,9 @@ public class CamEncoder implements VideoCodecCB, INotify {
         is_stop.set(false);
         yuvThread = new Thread(() -> {
             VideoCodec videoCodec = new VideoCodec(mChannel, this);
-            videoCodec.initCodec(Config.CAM_MIME_TYPE, width, height, frame_rate, i_frame_interval, bitrate);
+            videoCodec.initCodec(Config.CAM_MIME_TYPE, width, height, frame_rate, i_frame_interval, bitrate, bitrate_mode);
             int size = width * height * 3 / 2;
-            byte[] tempData =  new byte[size];
+            byte[] tempData = new byte[size];
             long pts = 0;
             while (!is_stop.get()) {
                 //long stime = SystemClock.uptimeMillis();
@@ -61,11 +65,11 @@ public class CamEncoder implements VideoCodecCB, INotify {
                         }
                     }
                     if (is_stop.get()) break;
-                    System.arraycopy(yuvBuf,0, tempData,0, size);
+                    System.arraycopy(yuvBuf, 0, tempData, 0, size);
                     pts = ptsUsec;
                     yuvBuf = null;
                 }
-                videoCodec.inYuvData(tempData,  size, pts);
+                videoCodec.inYuvData(tempData, size, pts);
                 //FlyLog.e("encoder one yuv frame use %s millis.", SystemClock.uptimeMillis() - stime);
             }
             videoCodec.releaseCodec();
@@ -103,10 +107,15 @@ public class CamEncoder implements VideoCodecCB, INotify {
 
     @Override
     public void notifyAvcData(int channel, byte[] data, int size, long pts) {
+        long stime = SystemClock.uptimeMillis();
         byte[] params = new byte[10];
         ByteUtil.shortToBytes((short) channel, params, 0, true);
         ByteUtil.longToBytes(pts, params, 2, true);
         Notify.get().handledata(NotifyType.NOTI_CAMOUT_AVC, data, size, params);
+        long utime = SystemClock.uptimeMillis() - stime;
+        if (utime > 50) {
+            FlyLog.e("notifyAvcData  use time %d, data size %d", utime, size);
+        }
     }
 
     @Override

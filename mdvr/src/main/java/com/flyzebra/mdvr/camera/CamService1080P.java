@@ -23,7 +23,7 @@ public class CamService1080P {
     private int height;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private QCarCamera qCarCamera1 = null;
-//    private QCarCamera qCarCamera2 = null;
+    //    private QCarCamera qCarCamera2 = null;
     private int camer_open_ret = -1;
     private final AtomicBoolean is_stop = new AtomicBoolean(true);
     private final VideoYuvThread[] yuvThreads = new VideoYuvThread[MAX_CAM];
@@ -59,7 +59,7 @@ public class CamService1080P {
     public CamService1080P(Context context) {
         mContext = context;
         for (int i = 0; i < MAX_CAM; i++) {
-            cameraEncoders[i] = new CamEncoder(i, CAM_WIDTH, CAM_HEIGHT, Config.FRAME_RATE, Config.I_FRAME_INTERVAL, Config.BIT_RATE);
+            cameraEncoders[i] = new CamEncoder(i, CAM_WIDTH, CAM_HEIGHT, Config.FRAME_RATE, Config.I_FRAME_INTERVAL, Config.BIT_RATE, Config.BITRATE_MODE);
         }
     }
 
@@ -92,10 +92,10 @@ public class CamService1080P {
 
         if (camer_open_ret == 0) {
             for (int i = 0; i < MAX_CAM; i++) {
-                if(qCarCamera1!=null)qCarCamera1.stopVideoStream(i);
+                if (qCarCamera1 != null) qCarCamera1.stopVideoStream(i);
 //                if(qCarCamera2!=null)qCarCamera2.stopVideoStream(i);
             }
-            if(qCarCamera1!=null){
+            if (qCarCamera1 != null) {
                 qCarCamera1.cameraClose();
                 qCarCamera1.release();
             }

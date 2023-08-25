@@ -33,15 +33,13 @@ public class MicService {
 
     public MicService(Context context) {
         this.mContext = context;
-        for (int i = 0; i < MAX_CAM; i++) {
-            micEncoders[i] = new MicEncoder(i);
-        }
     }
 
     public void onCreate() {
         FlyLog.d("MicService start!");
         is_stop.set(false);
         for (int i = 0; i < MAX_CAM; i++) {
+            micEncoders[i] = new MicEncoder(i);
             micEncoders[i].onCreate();
         }
         int bufferSize = AudioRecord.getMinBufferSize(Config.MIC_SAMPLE, Config.MIC_CHANNEL, Config.MIC_FORMAT);

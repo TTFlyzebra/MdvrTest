@@ -30,7 +30,7 @@ public class CamService {
     private QCarCamera qCarCamera = null;
     private int camer_open_ret = -1;
     private final AtomicBoolean is_stop = new AtomicBoolean(true);
-    private final VideoYuvThread[] yuvThreads = new VideoYuvThread[4];
+    private final VideoYuvThread[] yuvThreads = new VideoYuvThread[MAX_CAM];
     private final ByteBuffer[] videoBuffer = new ByteBuffer[MAX_CAM];
     private final CamEncoder[] cameraEncoders = new CamEncoder[MAX_CAM];
 
@@ -82,9 +82,6 @@ public class CamService {
 
     public CamService(Context context) {
         mContext = context;
-        for (int i = 0; i < MAX_CAM; i++) {
-            cameraEncoders[i] = new CamEncoder(i, CAM_WIDTH, CAM_HEIGHT, Config.FRAME_RATE, Config.I_FRAME_INTERVAL, Config.BIT_RATE);
-        }
     }
 
     public void onCreate() {
@@ -93,6 +90,7 @@ public class CamService {
         this.height = CAM_HEIGHT;
         is_stop.set(false);
         for (int i = 0; i < MAX_CAM; i++) {
+            cameraEncoders[i] = new CamEncoder(i, CAM_WIDTH, CAM_HEIGHT, Config.FRAME_RATE, Config.I_FRAME_INTERVAL, Config.BIT_RATE, Config.BITRATE_MODE);
             cameraEncoders[i].onCreate();
         }
         mHandler.post(openCameraTasker);
