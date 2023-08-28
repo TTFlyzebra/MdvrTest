@@ -20,7 +20,7 @@ public class RtmpServer {
         mContext = context;
     }
 
-    public void onCreate() {
+    public void start() {
         String imei = IDUtil.getIMEI(mContext);
         if(TextUtils.isEmpty(imei)) imei = "860123456789012";
         for (int i = 0; i < MAX_CAM; i++) {
@@ -30,7 +30,7 @@ public class RtmpServer {
         }
     }
 
-    public void onDestory() {
+    public void stop() {
         Enumeration<RtmpPusher> elements = pusherMap.elements();
         while (elements.hasMoreElements()) {
             elements.nextElement().onDestory();

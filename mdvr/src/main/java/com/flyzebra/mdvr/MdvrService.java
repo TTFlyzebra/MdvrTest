@@ -14,6 +14,7 @@ import com.flyzebra.core.notify.Notify;
 import com.flyzebra.core.notify.NotifyType;
 import com.flyzebra.mdvr.camera.CamServer;
 import com.flyzebra.mdvr.mic.MicServer;
+import com.flyzebra.mdvr.rtmp.RtmpServer;
 import com.flyzebra.mdvr.store.StorageServer;
 import com.flyzebra.mdvr.wifi.WifiService;
 import com.flyzebra.utils.ByteUtil;
@@ -23,12 +24,12 @@ public class MdvrService extends Service implements INotify {
     static {
         System.loadLibrary("mmqcar_qcar_jni");
     }
-    private final WifiService wifiService = new WifiService(this);
-    private final StorageServer storeService = new StorageServer(this);
-    //private final RtmpService rtmpService = new RtmpService(this);
-    private final CamServer cameraService = new CamServer(this);
-    //private final CamService1080P cameraService = new CamService1080P(this);
-    private final MicServer micService = new MicServer(this);
+    private final WifiService wifiServer = new WifiService(this);
+    private final StorageServer storeServer = new StorageServer(this);
+    private final RtmpServer rtmpServer = new RtmpServer(this);
+    private final CamServer cameraServer = new CamServer(this);
+    //private final CamServer1080P cameraServer = new CamServer1080P(this);
+    private final MicServer micServer = new MicServer(this);
 
     @Nullable
     @Override
@@ -49,22 +50,22 @@ public class MdvrService extends Service implements INotify {
         Global.videoHeadMap.clear();
 
         Fzebra.get().init();
-        Fzebra.get().enableRtspServer();
-        wifiService.onCreate();
-        storeService.onCreate();
-        //rtmpService.onCreate();
-        cameraService.onCreate();
-        micService.onCreate();
+        Fzebra.get().startRtspServer();
+        wifiServer.start();
+        storeServer.start();
+        rtmpServer.start();
+        cameraServer.start();
+        micServer.start();
     }
 
     @Override
     public void onDestroy() {
-        wifiService.onDestory();
-        storeService.onDestory();
-        //rtmpService.onDestory();
-        cameraService.onDerstory();
-        micService.onDistory();
-        Fzebra.get().disableRtspServer();
+        wifiServer.stop();
+        storeServer.stop();
+        rtmpServer.stop();
+        cameraServer.stop();
+        micServer.stop();
+        Fzebra.get().stopRtspServer();
         Fzebra.get().release();
         Notify.get().unregisterListener(this);
         FlyLog.d("MdvrService exit!");

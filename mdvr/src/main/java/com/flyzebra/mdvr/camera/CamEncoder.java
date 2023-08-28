@@ -44,7 +44,7 @@ public class CamEncoder implements VideoCodecCB, INotify {
         this.bitrate_mode = bitrate_mode;
     }
 
-    public void onCreate() {
+    public void start() {
         FlyLog.d("CameraEncoder[%d] start!", mChannel);
         Notify.get().registerListener(this);
         is_stop.set(false);
@@ -77,7 +77,7 @@ public class CamEncoder implements VideoCodecCB, INotify {
         yuvThread.start();
     }
 
-    public void onDistory() {
+    public void stop() {
         is_stop.set(true);
         Notify.get().unregisterListener(this);
         synchronized (yuvLock) {

@@ -31,4 +31,5 @@ dependencies {
     implementation 'com.google.android.material:material:1.5.0'
     implementation files('libs/libarcsoft_visdrive_engine.aar')
     implementation project(path: ':libzebra')
+    implementation project(path: ':libutils')
 }

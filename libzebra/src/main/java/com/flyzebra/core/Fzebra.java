@@ -34,12 +34,12 @@ public class Fzebra implements INotify {
         _release(pointer);
     }
 
-    public void enableRtspServer(){
+    public void startRtspServer(){
         if (_ptr_obj < 0) return;
         _enableRtspServer(_ptr_obj);
     }
 
-    public void disableRtspServer(){
+    public void stopRtspServer(){
         if (_ptr_obj < 0) return;
         _disableRtspServer(_ptr_obj);
     }

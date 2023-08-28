@@ -84,24 +84,24 @@ public class CamServer {
         mContext = context;
     }
 
-    public void onCreate() {
+    public void start() {
         FlyLog.d("YuvService start!");
         this.width = CAM_WIDTH;
         this.height = CAM_HEIGHT;
         is_stop.set(false);
         for (int i = 0; i < MAX_CAM; i++) {
             cameraEncoders[i] = new CamEncoder(i, CAM_WIDTH, CAM_HEIGHT, Config.FRAME_RATE, Config.I_FRAME_INTERVAL, Config.BIT_RATE, Config.BITRATE_MODE);
-            cameraEncoders[i].onCreate();
+            cameraEncoders[i].start();
         }
         mHandler.post(openCameraTasker);
     }
 
-    public void onDerstory() {
+    public void stop() {
         is_stop.set(true);
         mHandler.removeCallbacksAndMessages(null);
 
         for (int i = 0; i < MAX_CAM; i++) {
-            cameraEncoders[i].onDistory();
+            cameraEncoders[i].stop();
         }
 
         for (int i = 0; i < MAX_CAM; i++) {

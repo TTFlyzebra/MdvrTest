@@ -32,7 +32,7 @@ public class MicEncoder implements AudioCodecCB, INotify {
         mChannel = channel;
     }
 
-    public void onCreate() {
+    public void start() {
         FlyLog.d("MicEncoder[%d] start!", mChannel);
         Notify.get().registerListener(this);
         is_stop.set(false);
@@ -63,7 +63,7 @@ public class MicEncoder implements AudioCodecCB, INotify {
         pcmThread.start();
     }
 
-    public void onDistory() {
+    public void stop() {
         is_stop.set(true);
         Notify.get().unregisterListener(this);
         synchronized (pcmLock) {

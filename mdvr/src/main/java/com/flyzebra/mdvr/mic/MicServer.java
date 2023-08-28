@@ -35,12 +35,12 @@ public class MicServer {
         this.mContext = context;
     }
 
-    public void onCreate() {
+    public void start() {
         FlyLog.d("MicService start!");
         is_stop.set(false);
         for (int i = 0; i < MAX_CAM; i++) {
             micEncoders[i] = new MicEncoder(i);
-            micEncoders[i].onCreate();
+            micEncoders[i].start();
         }
         int bufferSize = AudioRecord.getMinBufferSize(Config.MIC_SAMPLE, Config.MIC_CHANNEL, Config.MIC_FORMAT);
         if (ActivityCompat.checkSelfPermission(mContext,
@@ -99,7 +99,7 @@ public class MicServer {
         mRecordThread.start();
     }
 
-    public void onDistory() {
+    public void stop() {
         is_stop.set(true);
         try {
             if (mRecordThread != null) {
@@ -110,7 +110,7 @@ public class MicServer {
             e.printStackTrace();
         }
         for (int i = 0; i < MAX_CAM; i++) {
-            micEncoders[i].onDistory();
+            micEncoders[i].stop();
         }
         FlyLog.d("MicService exit!");
     }

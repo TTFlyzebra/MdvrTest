@@ -41,7 +41,7 @@ public class StorageServer {
         mContext = context;
     }
 
-    public void onCreate() {
+    public void start() {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_MEDIA_MOUNTED);
         filter.addAction(Intent.ACTION_MEDIA_UNMOUNTED);
@@ -52,7 +52,7 @@ public class StorageServer {
         startRecord();
     }
 
-    public void onDestory() {
+    public void stop() {
         tHandler.removeCallbacksAndMessages(null);
         mHandler.removeCallbacksAndMessages(null);
         mContext.unregisterReceiver(receiver);
