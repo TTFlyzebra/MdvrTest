@@ -12,11 +12,11 @@ import java.io.File;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
-public class RtmpService {
+public class RtmpServer {
     private Context mContext;
     private final Hashtable<Integer, RtmpPusher> pusherMap = new Hashtable<>();
 
-    public RtmpService(Context context) {
+    public RtmpServer(Context context) {
         mContext = context;
     }
 

@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * rn9175音频，四路麦克风使用一路48k2channels16bit录入，每路为48k1channel8bit
  * 实际每路转为48k1channel16bit
  */
-public class MicService {
+public class MicServer {
     private final Context mContext;
     private AudioRecord mAudioRecord;
     private final AtomicBoolean is_stop = new AtomicBoolean(true);
@@ -31,7 +31,7 @@ public class MicService {
     private Thread mRecordThread = null;
     private final MicEncoder[] micEncoders = new MicEncoder[MAX_CAM];
 
-    public MicService(Context context) {
+    public MicServer(Context context) {
         this.mContext = context;
     }
 

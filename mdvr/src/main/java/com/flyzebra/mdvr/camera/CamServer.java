@@ -18,7 +18,7 @@ import com.quectel.qcarapi.stream.QCarCamera;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class CamService {
+public class CamServer {
     public static final int CAM_WIDTH = 1280;
     public static final int CAM_HEIGHT = 720;
     public static final int MAX_CAM = 4;
@@ -80,7 +80,7 @@ public class CamService {
         }
     };
 
-    public CamService(Context context) {
+    public CamServer(Context context) {
         mContext = context;
     }
 

@@ -27,7 +27,7 @@ public class FileSaveTasker implements INotify {
         mChannel = channel;
     }
 
-    public void onCreate(StorageService service) {
+    public void onCreate(StorageServer service) {
         if (service == null) return;
         FlyLog.d("StorageTasker[%d] start !", mChannel);
         Notify.get().registerListener(this);

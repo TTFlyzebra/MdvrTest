@@ -7,11 +7,9 @@ android {
     defaultConfig {
         minSdk rootProject.ext.minSdk
         targetSdk rootProject.ext.targetSdk
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
-                cppFlags ""
-                abiFilters "armeabi-v7a"
+                abiFilters "arm64-v8a"
             }
         }
     }

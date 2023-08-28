@@ -21,7 +21,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 
-public class StorageService {
+public class StorageServer {
     private final Context mContext;
     private final StorageReceiver receiver = new StorageReceiver();
     private final Hashtable<Integer, FileSaveTasker> taskerMap = new Hashtable<>();
@@ -37,7 +37,7 @@ public class StorageService {
     private static final Handler tHandler = new Handler(fileDeleteThread.getLooper());
     private static final Handler mHandler = new Handler(Looper.getMainLooper());
 
-    public StorageService(Context context) {
+    public StorageServer(Context context) {
         mContext = context;
     }
 

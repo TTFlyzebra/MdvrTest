@@ -12,9 +12,9 @@ import com.flyzebra.core.Fzebra;
 import com.flyzebra.core.notify.INotify;
 import com.flyzebra.core.notify.Notify;
 import com.flyzebra.core.notify.NotifyType;
-import com.flyzebra.mdvr.camera.CamService;
-import com.flyzebra.mdvr.mic.MicService;
-import com.flyzebra.mdvr.store.StorageService;
+import com.flyzebra.mdvr.camera.CamServer;
+import com.flyzebra.mdvr.mic.MicServer;
+import com.flyzebra.mdvr.store.StorageServer;
 import com.flyzebra.mdvr.wifi.WifiService;
 import com.flyzebra.utils.ByteUtil;
 import com.flyzebra.utils.FlyLog;
@@ -24,11 +24,11 @@ public class MdvrService extends Service implements INotify {
         System.loadLibrary("mmqcar_qcar_jni");
     }
     private final WifiService wifiService = new WifiService(this);
-    private final StorageService storeService = new StorageService(this);
+    private final StorageServer storeService = new StorageServer(this);
     //private final RtmpService rtmpService = new RtmpService(this);
-    private final CamService cameraService = new CamService(this);
+    private final CamServer cameraService = new CamServer(this);
     //private final CamService1080P cameraService = new CamService1080P(this);
-    private final MicService micService = new MicService(this);
+    private final MicServer micService = new MicServer(this);
 
     @Nullable
     @Override
