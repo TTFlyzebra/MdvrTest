@@ -94,7 +94,7 @@ public class StorageService {
             mHandler.post(this::stopRecord);
             return null;
         }
-        String fileName = "CHANNEL_" + channel + "_" + System.currentTimeMillis() ;
+        String fileName = "CHANNEL_" + channel + "_" + System.currentTimeMillis();
         return rootPath + File.separator + fileName;
     }
 
@@ -102,15 +102,22 @@ public class StorageService {
         if (tfCard.freeBytes() < Config.MIN_STORE) {
             File[] files = rootFile.listFiles();
             if (files != null) {
-                Arrays.sort(files, (f1, f2) -> {
-                    long diff = f1.lastModified() - f2.lastModified();
-                    if (diff > 0)
-                        return 1;
-                    else if (diff == 0)
-                        return 0;
-                    else
-                        return -1;
-                });
+                try {
+                    Arrays.sort(files, (f1, f2) -> {
+                        if (f1 == null || f2 == null) {
+                            return 0;
+                        }
+                        long diff = f1.lastModified() - f2.lastModified();
+                        if (diff > 0)
+                            return 1;
+                        else if (diff == 0)
+                            return 0;
+                        else
+                            return -1;
+                    });
+                } catch (Exception e) {
+                    FlyLog.e(e.toString());
+                }
             } else {
                 return;
             }
