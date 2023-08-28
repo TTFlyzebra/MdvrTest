@@ -110,4 +110,5 @@ dependencies {
     implementation project(path: ':libzebra')
     implementation project(path: ':librtmp')
     implementation project(path: ':libarcsoft')
+    implementation project(path: ':libyuv')
 }

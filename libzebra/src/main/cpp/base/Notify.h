@@ -42,6 +42,7 @@ enum NofifyType {
     NOTI_SNDOUT_SPS,
     NOTI_CAMOUT_SPS,
     NOTI_MICOUT_SPS,
+    NOTI_CAMSUB_YUV,
 };
 
 class INotify {

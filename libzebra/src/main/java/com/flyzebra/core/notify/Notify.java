@@ -93,7 +93,7 @@ public class Notify {
 
     public void miniNotify(byte[] command, int size, long tid, long uid, byte[] params) {
         byte[] sendcmd = new byte[size];
-        System.arraycopy(sendcmd, 0, command, 0, size);
+        System.arraycopy(command, 0, sendcmd, 0, size);
         int start = 8;
         if (tid != 0) {
             ByteUtil.longToBytes(tid, sendcmd, start, true);

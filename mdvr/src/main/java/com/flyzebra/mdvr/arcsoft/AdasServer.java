@@ -4,7 +4,7 @@ import android.content.Context;
 import android.os.SystemClock;
 
 import com.flyzebra.arcsoft.ArcSoftActive;
-import com.flyzebra.arcsoft.ArcSoftDms;
+import com.flyzebra.arcsoft.ArcSoftAdas;
 import com.flyzebra.mdvr.Config;
 import com.flyzebra.mdvr.Global;
 import com.flyzebra.utils.FlyLog;
@@ -13,44 +13,44 @@ import com.quectel.qcarapi.stream.QCarCamera;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class DmsServer {
-    private int mChannel = 1;
+public class AdasServer {
+    private int mChannel = 0;
     private Context mContext;
-    private DmsThread dmsThread = null;
-    private ArcSoftDms arcSoftDms = null;
+    private AdasThread adasThread = null;
+    private ArcSoftAdas arcSoftAdas = null;
     private AtomicBoolean is_stop = new AtomicBoolean(true);
 
-    public DmsServer(Context context) {
+    public AdasServer(Context context) {
         mContext = context;
     }
 
     public void start() {
-        if (!ArcSoftActive.get().isDmsActive()) {
-            FlyLog.e("DMS don't active！");
+        if (!ArcSoftActive.get().isAdasActive()) {
+            FlyLog.e("ADAS don't active！");
             return;
         }
         is_stop.set(false);
-        dmsThread = new DmsThread(mChannel);
-        dmsThread.start();
+        adasThread = new AdasThread(mChannel);
+        adasThread.start();
     }
 
     public void stop() {
         try {
             is_stop.set(true);
-            dmsThread.join();
-            dmsThread = null;
+            adasThread.join();
+            adasThread = null;
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private class DmsThread extends Thread implements Runnable {
+    private class AdasThread extends Thread implements Runnable {
         private final int channel;
         private QCarCamera qCarCamera;
 
-        public DmsThread(int number) {
+        public AdasThread(int number) {
             this.channel = number;
-            setName("dms-" + number);
+            setName("adas-" + number);
         }
 
         @Override
@@ -74,20 +74,21 @@ public class DmsServer {
             long frame_time = 1000L / Config.ADAS_FRAME_RATE;
             long last_time = SystemClock.uptimeMillis() - frame_time;
 
-            if (arcSoftDms == null) {
-                arcSoftDms = new ArcSoftDms(mContext);
+            if (arcSoftAdas == null) {
+                arcSoftAdas = new ArcSoftAdas(mContext);
             }
-            if (!arcSoftDms.initDms()) {
+            if (!arcSoftAdas.initAdas()) {
                 FlyLog.i("AdasServer isn't active!");
                 return;
             }
 
-            arcSoftDms.initDmsParam();
+            arcSoftAdas.initAdasParam();
 
             while (!is_stop.get()) {
                 QCarCamera.FrameInfo info = qCarCamera.getSubFrameInfo(channel, buffer);
                 if (info != null) {
-                    arcSoftDms.detectNV12(buffer, width * height * 3 / 2, width, height);
+                    //FlyLog.e("sub camera=%d ptsSec=%d,ptsUsec=%d,frameID=%d", channel, info.ptsSec, info.ptsUsec, info.frameID);
+                    arcSoftAdas.detectNV12(buffer, width * height * 3 / 2, width, height);
                 } else {
                     FlyLog.e("Camera getVideoFrameInfo return null!");
                 }
@@ -104,9 +105,9 @@ public class DmsServer {
                 last_time = SystemClock.uptimeMillis();
             }
 
-            if (arcSoftDms != null) {
-                arcSoftDms.unInitAdas();
-                arcSoftDms = null;
+            if (arcSoftAdas != null) {
+                arcSoftAdas.unInitAdas();
+                arcSoftAdas = null;
             }
         }
     }

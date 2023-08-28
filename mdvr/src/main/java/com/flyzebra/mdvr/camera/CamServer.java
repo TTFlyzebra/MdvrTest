@@ -7,6 +7,7 @@ import android.os.SystemClock;
 
 import com.flyzebra.core.notify.Notify;
 import com.flyzebra.core.notify.NotifyType;
+import com.flyzebra.core.notify.Protocol;
 import com.flyzebra.mdvr.Config;
 import com.flyzebra.mdvr.Global;
 import com.flyzebra.utils.ByteUtil;
@@ -47,6 +48,8 @@ public class CamServer {
 
         Global.qCarCameras.put(1, qCarCamera);
         FlyLog.d("QCarCamera open success!");
+
+        Notify.get().miniNotify(Protocol.QCAMER_OPENED,Protocol.QCAMER_OPENED.length,0x01, 0, null);
 
         //添加水印
         QCarOsd osd = new QCarOsd();
@@ -113,9 +116,6 @@ public class CamServer {
         }
 
         if (camer_open_ret == 0 && qCarCamera != null) {
-            for (int i = 0; i < MAX_CAM; i++) {
-                qCarCamera.stopVideoStream(i);
-            }
             qCarCamera.cameraClose();
             qCarCamera.release();
         }
@@ -166,6 +166,7 @@ public class CamServer {
                 }
                 last_time = SystemClock.uptimeMillis();
             }
+            qCarCamera.stopVideoStream(channel);
         }
     }
 }

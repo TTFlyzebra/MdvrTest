@@ -36,4 +36,6 @@ public class NotifyType {
 
     public static int NOTI_MICOUT_SPS = 0x10;
 
+    public static int NOTI_CAMSUB_YUV = 0x11;
+
 }

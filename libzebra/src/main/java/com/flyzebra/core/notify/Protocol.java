@@ -1159,4 +1159,17 @@ public class Protocol {
             (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00
     };
     public final static int TYPE_EXEC_SHELL = 0x0604;
+
+    //u-->t
+    //qcamera opened
+    //2byte header EEAA
+    //2byte 0801
+    //4byte data length
+    //8byte TID
+    public final static byte QCAMER_OPENED[] = {
+            (byte) 0xEE, (byte) 0xAA, (byte) 0x08, (byte) 0x01, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x08,
+            (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00
+    };
+    public final static int TYPE_QCAMER_OPENED = 0x0108;
+
 }

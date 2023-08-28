@@ -1159,4 +1159,17 @@ static const uint8_t EXEC_SHELL[16] = {
 };
 static const int16_t TYPE_EXEC_SHELL = 0x0604;
 
+//------------------------------------------------------------------
+//u-->t
+//qcamera opened
+//2byte header EEAA
+//2byte 0801
+//4byte data length
+//8byte TID
+static const uint8_t QCAMER_OPENED[16] = {
+        0xEE, 0xAA, 0x08, 0x01, 0x00, 0x00, 0x00, 0x08,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+static const int16_t TYPE_QCAMER_OPENED = 0x0108;
+
 #endif //F_ZEBRA_PROTOCOL_H
