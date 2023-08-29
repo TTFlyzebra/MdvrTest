@@ -14,7 +14,7 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DmsServer {
-    private int mChannel = 1;
+    private int mChannel = 0;
     private Context mContext;
     private DmsThread dmsThread = null;
     private ArcSoftDms arcSoftDms = null;
@@ -67,7 +67,7 @@ public class DmsServer {
             int width = 1280;
             int height = 720;
             final int size = width * height * 3 / 2;
-            ByteBuffer buffer = ByteBuffer.wrap(new byte[size]);
+            ByteBuffer buffer = ByteBuffer.allocateDirect(size);
 
             qCarCamera.setSubStreamSize(channel, width, height);
             qCarCamera.startSubStream(channel);

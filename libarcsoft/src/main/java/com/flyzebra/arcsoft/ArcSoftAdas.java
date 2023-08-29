@@ -50,7 +50,7 @@ public class ArcSoftAdas {
         ArcADASImageInitInfo adasImageInfo = new ArcADASImageInitInfo();
         adasImageInfo.width = 1280;
         adasImageInfo.height = 720;
-        adasImageInfo.imageFormat = ArcImageFormat.ARC_IMAGE_FORMAT_NV21.getValue();
+        adasImageInfo.imageFormat = ArcImageFormat.ARC_IMAGE_FORMAT_NV12.getValue();
         initParam.arcADASImageInitInfo = adasImageInfo;
 
         ArcADASIntrinsicParam intrinsicParam = new ArcADASIntrinsicParam();

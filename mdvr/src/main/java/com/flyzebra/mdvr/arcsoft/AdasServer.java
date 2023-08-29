@@ -67,7 +67,7 @@ public class AdasServer {
             int width = 1280;
             int height = 720;
             final int size = width * height * 3 / 2;
-            ByteBuffer buffer = ByteBuffer.wrap(new byte[size]);
+            ByteBuffer buffer = ByteBuffer.allocateDirect(size);
 
             qCarCamera.setSubStreamSize(channel, width, height);
             qCarCamera.startSubStream(channel);
@@ -87,7 +87,6 @@ public class AdasServer {
             while (!is_stop.get()) {
                 QCarCamera.FrameInfo info = qCarCamera.getSubFrameInfo(channel, buffer);
                 if (info != null) {
-                    //FlyLog.e("sub camera=%d ptsSec=%d,ptsUsec=%d,frameID=%d", channel, info.ptsSec, info.ptsUsec, info.frameID);
                     arcSoftAdas.detectNV12(buffer, width * height * 3 / 2, width, height);
                 } else {
                     FlyLog.e("Camera getVideoFrameInfo return null!");
