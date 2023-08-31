@@ -5,7 +5,7 @@
  * Date: 2023/6/23 11:07
  * Description:
  */
-package com.flyzebra.mdvr.mic;
+package com.flyzebra.mdvr.encoder;
 
 import com.flyzebra.core.media.AudioCodec;
 import com.flyzebra.core.media.AudioCodecCB;
@@ -19,7 +19,7 @@ import com.flyzebra.utils.FlyLog;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class MicEncoder implements AudioCodecCB, INotify {
+public class AacTasker implements AudioCodecCB, INotify {
     private final int mChannel;
     int pcmSize = (int) (Config.MIC_SAMPLE * 1.0f * 16 / 8 * 2 / 25.0f);
     int pcmBufSize = pcmSize + 8;
@@ -28,12 +28,12 @@ public class MicEncoder implements AudioCodecCB, INotify {
     private final Object pcmLock = new Object();
     private final AtomicBoolean is_stop = new AtomicBoolean(true);
 
-    public MicEncoder(int channel) {
+    public AacTasker(int channel) {
         mChannel = channel;
     }
 
     public void start() {
-        FlyLog.d("MicEncoder[%d] start!", mChannel);
+        FlyLog.d("AacTasker[%d] start!", mChannel);
         Notify.get().registerListener(this);
         is_stop.set(false);
         pcmThread = new Thread(() -> {
@@ -74,7 +74,7 @@ public class MicEncoder implements AudioCodecCB, INotify {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        FlyLog.d("MicEncoder[%d] exit!", mChannel);
+        FlyLog.d("AacTasker[%d] exit!", mChannel);
     }
 
     @Override

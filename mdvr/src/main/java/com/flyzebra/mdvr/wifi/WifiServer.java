@@ -12,10 +12,10 @@ import android.text.format.Formatter;
 import com.flyzebra.mdvr.Config;
 import com.flyzebra.utils.FlyLog;
 
-public class WifiService {
+public class WifiServer {
     private final Context mContext;
 
-    public WifiService(Context context) {
+    public WifiServer(Context context) {
         mContext = context;
     }
 
@@ -23,19 +23,19 @@ public class WifiService {
         Settings.Global.putString(mContext.getContentResolver(), "captive_portal_http_url", "http://connect.rom.miui.com/generate_204");
         Settings.Global.putString(mContext.getContentResolver(), "captive_portal_https_url", "https://connect.rom.miui.com/generate_204");
         WifiManager wifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
-        if(!wifiManager.isWifiEnabled()){
+        if (!wifiManager.isWifiEnabled()) {
             wifiManager.setWifiEnabled(true);
         }
 
         boolean is_wifi_connected = false;
         WifiInfo wifiInfo = wifiManager.getConnectionInfo();
-        if(wifiInfo.getSupplicantState()== SupplicantState.COMPLETED){
+        if (wifiInfo.getSupplicantState() == SupplicantState.COMPLETED) {
             String ssid = wifiInfo.getSSID();
             String ipAddress = Formatter.formatIpAddress(wifiInfo.getIpAddress());
             String macAddress = wifiInfo.getMacAddress();
             DhcpInfo dhcpInfo = wifiManager.getDhcpInfo();
             String gateway = Formatter.formatIpAddress(dhcpInfo.gateway);
-            FlyLog.d("Connect wifi ssid:%s, ip:%s, gateway:%s,  mac:%s.", ssid, ipAddress, gateway, macAddress);
+            FlyLog.d("Connected WIFI ssid:%s, ip:%s, gateway:%s,  mac:%s.", ssid, ipAddress, gateway, macAddress);
             is_wifi_connected = Config.WIFI_SSID.equals(ssid);
         }
 

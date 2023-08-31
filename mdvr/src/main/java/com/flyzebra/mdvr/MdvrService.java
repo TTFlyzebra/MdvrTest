@@ -15,9 +15,11 @@ import com.flyzebra.core.notify.NotifyType;
 import com.flyzebra.mdvr.arcsoft.AdasServer;
 import com.flyzebra.mdvr.arcsoft.DmsServer;
 import com.flyzebra.mdvr.camera.CamServer;
+import com.flyzebra.mdvr.encoder.AacServer;
+import com.flyzebra.mdvr.encoder.AvcServer;
 import com.flyzebra.mdvr.mic.MicServer;
 import com.flyzebra.mdvr.store.StorageServer;
-import com.flyzebra.mdvr.wifi.WifiService;
+import com.flyzebra.mdvr.wifi.WifiServer;
 import com.flyzebra.utils.ByteUtil;
 import com.flyzebra.utils.FlyLog;
 
@@ -25,12 +27,15 @@ public class MdvrService extends Service implements INotify {
     static {
         System.loadLibrary("mmqcar_qcar_jni");
     }
-    private final WifiService wifiServer = new WifiService(this);
+    private final WifiServer wifiServer = new WifiServer(this);
     private final StorageServer storeServer = new StorageServer(this);
     //private final RtmpServer rtmpServer = new RtmpServer(this);
-    private final CamServer cameraServer = new CamServer(this);
+    private final CamServer camServer = new CamServer(this);
     //private final CamServer1080P cameraServer = new CamServer1080P(this);
     private final MicServer micServer = new MicServer(this);
+
+    private final AvcServer avcServer = new AvcServer(this);
+    private final AacServer aacServer = new AacServer(this);
 
     private final AdasServer adasServer = new AdasServer(this);
     private final DmsServer dmsServer = new DmsServer(this);
@@ -43,23 +48,28 @@ public class MdvrService extends Service implements INotify {
 
     @Override
     public void onCreate() {
-        FlyLog.d("MdvrService start!");
+        FlyLog.i("#####MdvrService start!#####");
 
         AlarmManager mAlarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
         mAlarmManager.setTimeZone("Asia/Shanghai");
 
         Notify.get().registerListener(this);
+
         Global.qCarCameras.clear();
         Global.audioHeadMap.clear();
         Global.videoHeadMap.clear();
 
         Fzebra.get().init();
         Fzebra.get().startRtspServer();
+
         wifiServer.start();
         storeServer.start();
         //rtmpServer.start();
-        cameraServer.start();
+        camServer.start();
         micServer.start();
+
+        aacServer.start();
+        avcServer.start();
 
         adasServer.start();
         dmsServer.start();
@@ -67,18 +77,24 @@ public class MdvrService extends Service implements INotify {
 
     @Override
     public void onDestroy() {
-        adasServer.stop();
-        dmsServer.stop();
+        Notify.get().unregisterListener(this);
+        Fzebra.get().stopRtspServer();
+        Fzebra.get().release();
 
         wifiServer.stop();
         storeServer.stop();
         //rtmpServer.stop();
-        cameraServer.stop();
+
+        adasServer.stop();//必须在camServer前面停止
+        dmsServer.stop();//必须在camServer前面停止
+
+        aacServer.stop();
+        avcServer.stop();
+
+        camServer.stop();
         micServer.stop();
-        Fzebra.get().stopRtspServer();
-        Fzebra.get().release();
-        Notify.get().unregisterListener(this);
-        FlyLog.d("MdvrService exit!");
+
+        FlyLog.i("#####MdvrService exit!#####");
     }
 
     @Override

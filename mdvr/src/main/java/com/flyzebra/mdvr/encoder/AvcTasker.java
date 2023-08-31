@@ -5,7 +5,7 @@
  * Date: 2023/6/23 11:07
  * Description:
  */
-package com.flyzebra.mdvr.camera;
+package com.flyzebra.mdvr.encoder;
 
 import android.os.SystemClock;
 
@@ -20,7 +20,7 @@ import com.flyzebra.utils.FlyLog;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class CamEncoder implements VideoCodecCB, INotify {
+public class AvcTasker implements VideoCodecCB, INotify {
     private final int mChannel;
     private final int width;
     private final int height;
@@ -34,7 +34,7 @@ public class CamEncoder implements VideoCodecCB, INotify {
     private final Object yuvLock = new Object();
     private final AtomicBoolean is_stop = new AtomicBoolean(true);
 
-    public CamEncoder(int channel, int width, int height, int frame_rate, int i_frame_interval, int bitrate, int bitrate_mode) {
+    public AvcTasker(int channel, int width, int height, int frame_rate, int i_frame_interval, int bitrate, int bitrate_mode) {
         this.mChannel = channel;
         this.width = width;
         this.height = height;
@@ -45,7 +45,7 @@ public class CamEncoder implements VideoCodecCB, INotify {
     }
 
     public void start() {
-        FlyLog.d("CameraEncoder[%d] start!", mChannel);
+        FlyLog.d("AvcTasker[%d] start!", mChannel);
         Notify.get().registerListener(this);
         is_stop.set(false);
         yuvThread = new Thread(() -> {
@@ -88,7 +88,7 @@ public class CamEncoder implements VideoCodecCB, INotify {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        FlyLog.d("CameraEncoder[%d] exit!", mChannel);
+        FlyLog.d("AvcTasker[%d] exit!", mChannel);
     }
 
     @Override

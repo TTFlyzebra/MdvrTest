@@ -7,11 +7,8 @@ import com.arcsoft.visdrive.sdk.ArcVisDriveEngine;
 import com.arcsoft.visdrive.sdk.constant.common.ArcModType;
 import com.arcsoft.visdrive.sdk.model.common.ArcActivateStatus;
 import com.arcsoft.visdrive.sdk.model.common.ArcActiveEnvParam;
-import com.arcsoft.visdrive.sdk.model.common.ArcActiveFileInfo;
-import com.flyzebra.utils.FlyLog;
 import com.flyzebra.utils.IDUtil;
 
-import java.io.File;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ArcSoftActive {
@@ -48,12 +45,12 @@ public class ArcSoftActive {
 
         int ret = ArcVisDriveEngine.activate(key1, key2, actives, arcActiveEnvParam);
         if (ret == ArcErrorInfo.ARC_ERROR_OK) {
-            ArcActiveFileInfo activeFile = new ArcActiveFileInfo();
-            String activateFilePath = context.getExternalFilesDir("arcsoft").getAbsolutePath() + File.separator + "ArcDriveActiveFile.dat";
-            int result = ArcVisDriveEngine.getActivateFileInfo(activateFilePath, activeFile);
-            if (result == ArcErrorInfo.ARC_ERROR_OK) {
-                FlyLog.d(activeFile.toString());
-            }
+            //ArcActiveFileInfo activeFile = new ArcActiveFileInfo();
+            //String activateFilePath = context.getExternalFilesDir("arcsoft").getAbsolutePath() + File.separator + "ArcDriveActiveFile.dat";
+            //int result = ArcVisDriveEngine.getActivateFileInfo(activateFilePath, activeFile);
+            //if (result == ArcErrorInfo.ARC_ERROR_OK) {
+            //    FlyLog.v(activeFile.toString());
+            //}
             is_active.set(true);
             return true;
         }

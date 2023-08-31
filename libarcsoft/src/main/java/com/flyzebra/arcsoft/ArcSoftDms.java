@@ -62,7 +62,7 @@ public class ArcSoftDms {
          */
         ArcDMSAlarmParam dmsAlarmParam = new ArcDMSAlarmParam();
         int result = engine.getDMSAlarmParam(ArcDMSAlarmType.ALARM_DMS_CALL, dmsAlarmParam);
-        FlyLog.i("getDMSAlarmParam1:%s", dmsAlarmParam.toString());
+        //FlyLog.i("getDMSAlarmParam1:%s", dmsAlarmParam.toString());
         if (result == ArcErrorInfo.ARC_ERROR_OK) {
             dmsAlarmParam.sensitivityLevel = ArcAlarmSensitivityLevel.ALARM_SENSITIVITY_MEDIUM;
             /**
@@ -81,12 +81,12 @@ public class ArcSoftDms {
             engine.setDMSAlarmParam(ArcDMSAlarmType.ALARM_DMS_SEATBELT_UNFASTENED, dmsAlarmParam);
         }
         engine.getDMSAlarmParam(ArcDMSAlarmType.ALARM_DMS_CALL, dmsAlarmParam);
-        FlyLog.i("getDMSAlarmParam2:%s", dmsAlarmParam.toString());
+        //FlyLog.i("getDMSAlarmParam2:%s", dmsAlarmParam.toString());
         ArcDMSDistractScope dmsScope = new ArcDMSDistractScope();
         result = engine.getDMSDistractScopeParam(dmsScope);
-        FlyLog.i("getDMSDistractScopeParam result:" + result);
+        //FlyLog.i("getDMSDistractScopeParam result:" + result);
         if (result == ArcErrorInfo.ARC_ERROR_OK) {
-            FlyLog.i("getDMSDistractScopeParam:" + dmsScope);
+            //FlyLog.i("getDMSDistractScopeParam:" + dmsScope);
             /**
              * 以下为模拟修改数值，实际使用请根据真实环境设置
              */
@@ -95,10 +95,10 @@ public class ArcSoftDms {
             dmsScope.upPitch = 35;
             dmsScope.downPitch = -20;
             result = engine.setDMSDistractScopeParam(dmsScope);
-            FlyLog.i("setDMSDistractScopeParam result:" + result);
+            //FlyLog.i("setDMSDistractScopeParam result:" + result);
             if (result == ArcErrorInfo.ARC_ERROR_OK) {
                 engine.getDMSDistractScopeParam(dmsScope);
-                FlyLog.i("getDMSDistractScopeParam2:" + dmsScope);
+                //FlyLog.i("getDMSDistractScopeParam2:" + dmsScope);
             }
         }
         /**
@@ -107,7 +107,7 @@ public class ArcSoftDms {
         ArcDrivingStatus driveStatus = new ArcDrivingStatus();
         driveStatus.speed = 33;
         result = engine.setDrivingStatus(driveStatus);
-        FlyLog.i("setDrivingStatus result:" + result);
+        //FlyLog.i("setDrivingStatus result:" + result);
     }
 
     public ArcDMSDetectResult detectNV12(ByteBuffer buffer, int size, int width, int height) {
@@ -119,7 +119,9 @@ public class ArcSoftDms {
                 buffer,
                 dmsResult);
         if (ret == ArcErrorInfo.ARC_ERROR_OK) {
-            FlyLog.e(getDMSAlarmText(dmsResult.alarmMask));
+            if (dmsResult.alarmMask > 0) {
+                FlyLog.i(getDMSAlarmText(dmsResult.alarmMask));
+            }
             return dmsResult;
         } else {
             FlyLog.e("ArcADASDetectResult result=%d", ret);
@@ -127,6 +129,15 @@ public class ArcSoftDms {
         }
     }
 
+    //int MOD_DMS_CALL 1 打电话
+    //int MOD_DMS_SMOKE 2 抽烟
+    //int MOD_DMS_CLOSE_EYE 4 闭眼
+    //int MOD_DMS_YAWN 8 打哈欠
+    //int MOD_DMS_DISTRACT 16 分心
+    //int MOD_DMS_DRIVER_ABNORMAL 32 驾驶员异常
+    //int MOD_DMS_IR_BLOCKING 64 红外阻断
+    //int MOD_DMS_LENS_COVERED 128 摄像头遮挡
+    //int MOD_DMS_SEATBELT_UNFASTENED 256 未系安全带
     private String getDMSAlarmText(int alarmMask) {
         switch (alarmMask) {
             case ArcDMSDetectMaskType.MOD_DMS_CALL:

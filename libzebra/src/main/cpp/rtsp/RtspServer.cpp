@@ -108,8 +108,12 @@ void RtspServer::serverSocket() {
         while (!is_stop) {
             int32_t client_socket = accept(server_socket, (struct sockaddr *) nullptr, nullptr);
             if (client_socket <= 0) {
-                FLOGE("RtspServer accpet socket error. [%s(%d)]", strerror(errno), errno);
-                continue;
+                if (!is_stop) {
+                    FLOGE("RtspServer accpet socket error. [%s(%d)]", strerror(errno), errno);
+                    continue;
+                } else {
+                    break;
+                }
             }
             if (is_stop) break;
             auto *client = new RtspClient(this, N, client_socket);

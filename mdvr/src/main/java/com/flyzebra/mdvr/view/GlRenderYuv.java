@@ -25,17 +25,17 @@ public class GlRenderYuv implements GLSurfaceView.Renderer {
     private final FloatBuffer textureBuffer;
     //顶点坐标
     static float[] vertexData = {   // in counterclockwise order:
-            -1f, -1f, 0.0f, // bottom left
-            +1f, -1f, 0.0f, // bottom right
-            -1f, +1f, 0.0f, // top left
-            +1f, +1f, 0.0f,  // top right
+            -1f, -1f, // bottom left
+            +1f, -1f, // bottom right
+            -1f, +1f, // top left
+            +1f, +1f,  // top right
     };
     //纹理坐标
     static float[] textureData = {   // in counterclockwise order:
-            0.0f, 1.0f, 0.0f, // bottom left
-            1.0f, 1.0f, 0.0f, // bottom right
-            0.0f, 0.0f, 0.0f, // top left
-            1.0f, 0.0f, 0.0f,  // top right
+            0.0f, 1.0f, // bottom left
+            1.0f, 1.0f, // bottom right
+            0.0f, 0.0f, // top left
+            1.0f, 0.0f,  // top right
     };
 
     protected float[] vMatrixData = {
@@ -157,8 +157,8 @@ public class GlRenderYuv implements GLSurfaceView.Renderer {
 
         GLES20.glEnableVertexAttribArray(vPosition);
         GLES20.glEnableVertexAttribArray(fPosition);
-        GLES20.glVertexAttribPointer(vPosition, 3, GLES20.GL_FLOAT, false, 0, vertexBuffer);
-        GLES20.glVertexAttribPointer(fPosition, 3, GLES20.GL_FLOAT, false, 0, textureBuffer);
+        GLES20.glVertexAttribPointer(vPosition, 2, GLES20.GL_FLOAT, false, 0, vertexBuffer);
+        GLES20.glVertexAttribPointer(fPosition, 2, GLES20.GL_FLOAT, false, 0, textureBuffer);
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
         GLES20.glDisableVertexAttribArray(vPosition);
         GLES20.glDisableVertexAttribArray(fPosition);

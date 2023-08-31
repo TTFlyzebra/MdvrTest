@@ -1,7 +1,5 @@
 package com.flyzebra.mdvr.mic;
 
-import static com.flyzebra.mdvr.Config.MAX_CAM;
-
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -29,19 +27,15 @@ public class MicServer {
     int pcmSize = (int) (Config.MIC_SAMPLE * 1.0f * 16 / 8 * 2 / 25.0f);
     private final byte[] pcm = new byte[pcmSize];
     private Thread mRecordThread = null;
-    private final MicEncoder[] micEncoders = new MicEncoder[MAX_CAM];
+
 
     public MicServer(Context context) {
         this.mContext = context;
     }
 
     public void start() {
-        FlyLog.d("MicService start!");
+        FlyLog.d("MicServer start!");
         is_stop.set(false);
-        for (int i = 0; i < MAX_CAM; i++) {
-            micEncoders[i] = new MicEncoder(i);
-            micEncoders[i].start();
-        }
         int bufferSize = AudioRecord.getMinBufferSize(Config.MIC_SAMPLE, Config.MIC_CHANNEL, Config.MIC_FORMAT);
         if (ActivityCompat.checkSelfPermission(mContext,
                 Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
@@ -109,9 +103,6 @@ public class MicServer {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        for (int i = 0; i < MAX_CAM; i++) {
-            micEncoders[i].stop();
-        }
-        FlyLog.d("MicService exit!");
+        FlyLog.d("MicServer exit!");
     }
 }

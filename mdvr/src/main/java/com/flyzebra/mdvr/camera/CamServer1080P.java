@@ -6,7 +6,6 @@ import android.os.Looper;
 
 import com.flyzebra.core.notify.Notify;
 import com.flyzebra.core.notify.NotifyType;
-import com.flyzebra.mdvr.Config;
 import com.flyzebra.utils.ByteUtil;
 import com.flyzebra.utils.FlyLog;
 import com.quectel.qcarapi.stream.QCarCamera;
@@ -28,7 +27,6 @@ public class CamServer1080P {
     private final AtomicBoolean is_stop = new AtomicBoolean(true);
     private final VideoYuvThread[] yuvThreads = new VideoYuvThread[MAX_CAM];
     private final ByteBuffer[] videoBuffer = new ByteBuffer[MAX_CAM];
-    private final CamEncoder[] cameraEncoders = new CamEncoder[MAX_CAM];
 
     protected final Runnable openCameraTasker = () -> {
         if (qCarCamera1 == null) {
@@ -58,9 +56,6 @@ public class CamServer1080P {
 
     public CamServer1080P(Context context) {
         mContext = context;
-        for (int i = 0; i < MAX_CAM; i++) {
-            cameraEncoders[i] = new CamEncoder(i, CAM_WIDTH, CAM_HEIGHT, Config.FRAME_RATE, Config.I_FRAME_INTERVAL, Config.BIT_RATE, Config.BITRATE_MODE);
-        }
     }
 
     public void onCreate() {
@@ -68,19 +63,12 @@ public class CamServer1080P {
         this.width = CAM_WIDTH;
         this.height = CAM_HEIGHT;
         is_stop.set(false);
-        for (int i = 0; i < MAX_CAM; i++) {
-            cameraEncoders[i].start();
-        }
         mHandler.post(openCameraTasker);
     }
 
     public void onDerstory() {
         is_stop.set(true);
         mHandler.removeCallbacksAndMessages(null);
-
-        for (int i = 0; i < MAX_CAM; i++) {
-            cameraEncoders[i].stop();
-        }
 
         for (int i = 0; i < MAX_CAM; i++) {
             try {

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
+import android.util.Log;
 
 import com.flyzebra.core.notify.Notify;
 import com.flyzebra.core.notify.NotifyType;
@@ -15,14 +16,12 @@ import com.flyzebra.utils.DateUtil;
 import com.flyzebra.utils.FlyLog;
 import com.quectel.qcarapi.osd.QCarOsd;
 import com.quectel.qcarapi.stream.QCarCamera;
+import com.quectel.qcarapi.util.QCarLog;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CamServer {
-    public static final int CAM_WIDTH = 1280;
-    public static final int CAM_HEIGHT = 720;
-    public static final int MAX_CAM = 4;
 
     private Context mContext;
     private int width;
@@ -31,9 +30,8 @@ public class CamServer {
     private QCarCamera qCarCamera = null;
     private int camer_open_ret = -1;
     private final AtomicBoolean is_stop = new AtomicBoolean(true);
-    private final VideoYuvThread[] yuvThreads = new VideoYuvThread[MAX_CAM];
-    private final ByteBuffer[] videoBuffer = new ByteBuffer[MAX_CAM];
-    private final CamEncoder[] cameraEncoders = new CamEncoder[MAX_CAM];
+    private final VideoYuvThread[] yuvThreads = new VideoYuvThread[Config.MAX_CAM];
+    private final ByteBuffer[] videoBuffer = new ByteBuffer[Config.MAX_CAM];
 
     protected final Runnable openCameraTasker = () -> {
         if (qCarCamera == null) {
@@ -57,15 +55,13 @@ public class CamServer {
         osd.initOsd(font_path.getBytes(), 4);
         osd.setOsdColor(255, 0, 0);
         qCarCamera.setMainOsd(osd);
-
-        for (int i = 0; i < MAX_CAM; i++) {
+        for (int i = 0; i < Config.MAX_CAM; i++) {
             String text = "CHANNEL-" + (i + 1) + DateUtil.getCurrentDate(" yyyy-MM-dd HH:mm:ss");
             osd.setOsd(i, text.getBytes(), -1, 800, 40);
         }
-
         new Thread(() -> {
             while (!is_stop.get()) {
-                for (int i = 0; i < MAX_CAM; i++) {
+                for (int i = 0; i < Config.MAX_CAM; i++) {
                     String text = "CHANNEL-" + (i + 1) + DateUtil.getCurrentDate(" yyyy-MM-dd HH:mm:ss");
                     osd.setOsd(i, text.getBytes(), i, 800, 40);
                 }
@@ -76,8 +72,9 @@ public class CamServer {
                 }
             }
         }).start();
+        //添加水印结束
 
-        for (int i = 0; i < MAX_CAM; i++) {
+        for (int i = 0; i < Config.MAX_CAM; i++) {
             yuvThreads[i] = new VideoYuvThread(i);
             yuvThreads[i].start();
         }
@@ -88,14 +85,11 @@ public class CamServer {
     }
 
     public void start() {
-        FlyLog.d("YuvService start!");
-        this.width = CAM_WIDTH;
-        this.height = CAM_HEIGHT;
+        FlyLog.d("CamServer start!");
+        this.width = Config.CAM_WIDTH;
+        this.height = Config.CAM_HEIGHT;
         is_stop.set(false);
-        for (int i = 0; i < MAX_CAM; i++) {
-            cameraEncoders[i] = new CamEncoder(i, CAM_WIDTH, CAM_HEIGHT, Config.FRAME_RATE, Config.I_FRAME_INTERVAL, Config.BIT_RATE, Config.BITRATE_MODE);
-            cameraEncoders[i].start();
-        }
+        QCarLog.setTagLogLevel(Log.ASSERT);
         mHandler.post(openCameraTasker);
     }
 
@@ -103,11 +97,7 @@ public class CamServer {
         is_stop.set(true);
         mHandler.removeCallbacksAndMessages(null);
 
-        for (int i = 0; i < MAX_CAM; i++) {
-            cameraEncoders[i].stop();
-        }
-
-        for (int i = 0; i < MAX_CAM; i++) {
+        for (int i = 0; i < Config.MAX_CAM; i++) {
             try {
                 if (yuvThreads[i] != null) yuvThreads[i].join();
             } catch (InterruptedException e) {
@@ -119,7 +109,7 @@ public class CamServer {
             qCarCamera.cameraClose();
             qCarCamera.release();
         }
-        FlyLog.d("YuvService exit!");
+        FlyLog.d("CamServer exit!");
     }
 
     private class VideoYuvThread extends Thread implements Runnable {
@@ -134,7 +124,7 @@ public class CamServer {
         public void run() {
             qCarCamera.setVideoSize(channel, width, height);
             final int size = width * height * 3 / 2;
-            videoBuffer[channel] = ByteBuffer.wrap(new byte[size]);
+            videoBuffer[channel] = ByteBuffer.allocateDirect(size);
             qCarCamera.setVideoColorFormat(channel, QCarCamera.YUV420_NV12);
             qCarCamera.startVideoStream(channel);
             long frame_time = 1000L / Config.FRAME_RATE;

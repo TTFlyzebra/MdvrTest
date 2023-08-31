@@ -110,7 +110,7 @@ public class ArcSoftAdas {
     public void initAdasParam() {
         ArcADASAlarmParam alarmParam = new ArcADASAlarmParam();
         int result = engine.getADASAlarmParam(ArcADASAlarmType.ALARM_ADAS_FCW, alarmParam);
-        FlyLog.i("getADASAlarmParam:" + alarmParam);
+        //FlyLog.i("getADASAlarmParam:" + alarmParam);
         if (result == 0) {
             alarmParam.sensitivityLevel = 1;
             alarmParam.arcAlarmParam.interval = 4;
@@ -119,11 +119,11 @@ public class ArcSoftAdas {
             engine.setADASAlarmParam(ArcADASAlarmType.ALARM_ADAS_FCW, alarmParam);
             engine.setADASAlarmParam(ArcADASAlarmType.ALARM_ADAS_HMW, alarmParam);
             result = engine.setADASAlarmParam(ArcADASAlarmType.ALARM_ADAS_PCW, alarmParam);
-            FlyLog.i("setADASAlarmParam result:" + result);
+            //FlyLog.i("setADASAlarmParam result:" + result);
             ArcDrivingStatus driveStatus = new ArcDrivingStatus();
             driveStatus.speed = 33;
             result = engine.setDrivingStatus(driveStatus);
-            FlyLog.i("setDrivingStatus result:" + result);
+            //FlyLog.i("setDrivingStatus result:" + result);
         }
     }
 
@@ -137,22 +137,31 @@ public class ArcSoftAdas {
                 adasResult);
         if (ret == ArcErrorInfo.ARC_ERROR_OK) {
             if (adasResult.alarmMask > 0) {
-                if (adasResult.arcAdasDetectResultDetail.arcAdasObjectInfoArray != null) {
-                    FlyLog.i("alarmMask:" + adasResult.alarmMask
-                            + ", objInfo1:" + adasResult.arcAdasDetectResultDetail.arcAdasObjectInfoArray[0].toString());
-                }
-                if (adasResult.arcAdasDetectResultDetail.arcAdasLaneLineInfoArray != null) {
-                    FlyLog.i("alarmMask:" + adasResult.alarmMask
-                            + ", laneDepType:" + adasResult.laneDepartureType
-                            + ", lineInfo1:" + adasResult.arcAdasDetectResultDetail.arcAdasLaneLineInfoArray[0].toString());
-                }
-            } else {
-                FlyLog.i("alarmMask:" + adasResult.alarmMask);
+                FlyLog.i(getADASAlarmText(adasResult.alarmMask));
             }
             return adasResult;
         } else {
             FlyLog.e("ArcADASDetectResult result=%d", ret);
             return null;
+        }
+    }
+
+    //int MOD_ADAS_LDW 1 车道偏离
+    //int MOD_ADAS_FCW 2 前向碰撞
+    //int MOD_ADAS_HMW 4 车距过近
+    //int MOD_ADAS_PCW 8 行人碰撞
+    private String getADASAlarmText(int alarmMask) {
+        switch (alarmMask) {
+            case ArcADASDetectMaskType.MOD_ADAS_LDW:
+                return "车道偏离";
+            case ArcADASDetectMaskType.MOD_ADAS_FCW:
+                return "前向碰撞";
+            case ArcADASDetectMaskType.MOD_ADAS_HMW:
+                return "车距过近";
+            case ArcADASDetectMaskType.MOD_ADAS_PCW:
+                return "行人碰撞";
+            default:
+                return "无";
         }
     }
 

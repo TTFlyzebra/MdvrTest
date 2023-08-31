@@ -25,23 +25,23 @@ public class DmsServer {
     }
 
     public void start() {
-        if (!ArcSoftActive.get().isDmsActive()) {
-            FlyLog.e("DMS don't active！");
-            return;
-        }
+        FlyLog.d("DmsServer start!");
         is_stop.set(false);
         dmsThread = new DmsThread(mChannel);
         dmsThread.start();
     }
 
     public void stop() {
-        try {
-            is_stop.set(true);
-            dmsThread.join();
+        is_stop.set(true);
+        if (dmsThread != null) {
+            try {
+                dmsThread.join();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
             dmsThread = null;
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
         }
+        FlyLog.d("DmsServer stop!");
     }
 
     private class DmsThread extends Thread implements Runnable {
@@ -64,6 +64,20 @@ public class DmsServer {
                 qCarCamera = Global.qCarCameras.get(1);
             }
 
+            while (!is_stop.get()) {
+                if (ArcSoftActive.get().isDmsActive()) {
+                    break;
+                } else {
+                    FlyLog.e("DMS don't active！");
+                    ArcSoftActive.get().active(mContext.getApplicationContext(), Config.appId, Config.appSecret);
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+
             int width = 1280;
             int height = 720;
             final int size = width * height * 3 / 2;
@@ -71,7 +85,8 @@ public class DmsServer {
 
             qCarCamera.setSubStreamSize(channel, width, height);
             qCarCamera.startSubStream(channel);
-            long frame_time = 1000L / Config.ADAS_FRAME_RATE;
+
+            long frame_time = 1000L / Config.DMS_FRAME_RATE;
             long last_time = SystemClock.uptimeMillis() - frame_time;
 
             if (arcSoftDms == null) {
@@ -103,6 +118,8 @@ public class DmsServer {
                 }
                 last_time = SystemClock.uptimeMillis();
             }
+
+            qCarCamera.stopSubStream(mChannel);
 
             if (arcSoftDms != null) {
                 arcSoftDms.unInitAdas();

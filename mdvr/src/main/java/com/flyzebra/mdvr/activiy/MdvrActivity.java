@@ -20,7 +20,6 @@ import com.flyzebra.mdvr.MdvrService;
 import com.flyzebra.mdvr.R;
 import com.flyzebra.mdvr.view.GlVideoView;
 import com.flyzebra.utils.ByteUtil;
-import com.flyzebra.utils.FlyLog;
 import com.flyzebra.utils.PropUtil;
 import com.flyzebra.utils.SPUtil;
 import com.flyzebra.utils.ShellUtil;
@@ -37,8 +36,6 @@ public class MdvrActivity extends AppCompatActivity implements INotify {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        FlyLog.d("MdvrActiviy start!");
-
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_main1);
@@ -114,7 +111,6 @@ public class MdvrActivity extends AppCompatActivity implements INotify {
         //unregisterReceiver(recevier);
         Notify.get().unregisterListener(this);
         stopService(new Intent(this, MdvrService.class));
-        FlyLog.d("MdvrActiviy exit!");
     }
 
     @Override

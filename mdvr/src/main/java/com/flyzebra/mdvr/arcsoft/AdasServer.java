@@ -14,7 +14,7 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AdasServer {
-    private int mChannel = 0;
+    private int mChannel = 1;
     private Context mContext;
     private AdasThread adasThread = null;
     private ArcSoftAdas arcSoftAdas = null;
@@ -25,23 +25,23 @@ public class AdasServer {
     }
 
     public void start() {
-        if (!ArcSoftActive.get().isAdasActive()) {
-            FlyLog.e("ADAS don't active！");
-            return;
-        }
+        FlyLog.d("AdasServer start!");
         is_stop.set(false);
         adasThread = new AdasThread(mChannel);
         adasThread.start();
     }
 
     public void stop() {
-        try {
-            is_stop.set(true);
-            adasThread.join();
+        is_stop.set(true);
+        if (adasThread != null) {
+            try {
+                adasThread.join();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
             adasThread = null;
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
         }
+        FlyLog.d("AdasServer stop!");
     }
 
     private class AdasThread extends Thread implements Runnable {
@@ -64,9 +64,24 @@ public class AdasServer {
                 qCarCamera = Global.qCarCameras.get(1);
             }
 
+            while (!is_stop.get()) {
+                if (ArcSoftActive.get().isAdasActive()) {
+                    break;
+                } else {
+                    FlyLog.e("ADAS don't active！");
+                    ArcSoftActive.get().active(mContext.getApplicationContext(), Config.appId, Config.appSecret);
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+
             int width = 1280;
             int height = 720;
             final int size = width * height * 3 / 2;
+
             ByteBuffer buffer = ByteBuffer.allocateDirect(size);
 
             qCarCamera.setSubStreamSize(channel, width, height);
@@ -103,6 +118,8 @@ public class AdasServer {
                 }
                 last_time = SystemClock.uptimeMillis();
             }
+
+            qCarCamera.stopSubStream(mChannel);
 
             if (arcSoftAdas != null) {
                 arcSoftAdas.unInitAdas();
