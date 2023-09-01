@@ -20,6 +20,7 @@ import com.flyzebra.mdvr.encoder.AvcServer;
 import com.flyzebra.mdvr.mic.MicServer;
 import com.flyzebra.mdvr.store.StorageServer;
 import com.flyzebra.mdvr.wifi.WifiServer;
+import com.flyzebra.mdvr.wifip2p.WifiP2PServer;
 import com.flyzebra.utils.ByteUtil;
 import com.flyzebra.utils.FlyLog;
 
@@ -27,11 +28,11 @@ public class MdvrService extends Service implements INotify {
     static {
         System.loadLibrary("mmqcar_qcar_jni");
     }
-    private final WifiServer wifiServer = new WifiServer(this);
     private final StorageServer storeServer = new StorageServer(this);
+    private final WifiServer wifiServer = new WifiServer(this);
+    private final WifiP2PServer wifiP2PServer = new WifiP2PServer(this);
     //private final RtmpServer rtmpServer = new RtmpServer(this);
     private final CamServer camServer = new CamServer(this);
-    //private final CamServer1080P cameraServer = new CamServer1080P(this);
     private final MicServer micServer = new MicServer(this);
 
     private final AvcServer avcServer = new AvcServer(this);
@@ -62,9 +63,12 @@ public class MdvrService extends Service implements INotify {
         Fzebra.get().init();
         Fzebra.get().startRtspServer();
 
-        wifiServer.start();
         storeServer.start();
+        wifiServer.start();
+        wifiP2PServer.start();
+
         //rtmpServer.start();
+
         camServer.start();
         micServer.start();
 
@@ -81,8 +85,10 @@ public class MdvrService extends Service implements INotify {
         Fzebra.get().stopRtspServer();
         Fzebra.get().release();
 
-        wifiServer.stop();
         storeServer.stop();
+        wifiServer.stop();
+        wifiP2PServer.stop();
+
         //rtmpServer.stop();
 
         adasServer.stop();//必须在camServer前面停止

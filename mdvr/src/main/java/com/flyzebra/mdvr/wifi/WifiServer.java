@@ -20,6 +20,7 @@ public class WifiServer {
     }
 
     public void start() {
+        FlyLog.d("WifiServer start!");
         Settings.Global.putString(mContext.getContentResolver(), "captive_portal_http_url", "http://connect.rom.miui.com/generate_204");
         Settings.Global.putString(mContext.getContentResolver(), "captive_portal_https_url", "https://connect.rom.miui.com/generate_204");
         WifiManager wifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
@@ -51,7 +52,7 @@ public class WifiServer {
     }
 
     public void stop() {
-
+        FlyLog.d("WifiServer stop!");
     }
 
 }

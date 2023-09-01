@@ -22,7 +22,6 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CamServer {
-
     private Context mContext;
     private int width;
     private int height;
@@ -37,7 +36,11 @@ public class CamServer {
         if (qCarCamera == null) {
             qCarCamera = new QCarCamera(1);
         }
-        camer_open_ret = qCarCamera.cameraOpen(4, 1);
+        if (Config.CAM_WIDTH == 1920) {
+            camer_open_ret = qCarCamera.cameraOpen(4, 3);
+        } else {
+            camer_open_ret = qCarCamera.cameraOpen(4, 1);
+        }
         if (camer_open_ret != 0) {
             FlyLog.e("QCarCamera open failed, ret=%d", camer_open_ret);
             mHandler.postDelayed(this.openCameraTasker, 1000);
@@ -47,7 +50,7 @@ public class CamServer {
         Global.qCarCameras.put(1, qCarCamera);
         FlyLog.d("QCarCamera open success!");
 
-        Notify.get().miniNotify(Protocol.QCAMER_OPENED,Protocol.QCAMER_OPENED.length,0x01, 0, null);
+        Notify.get().miniNotify(Protocol.QCAMER_OPENED, Protocol.QCAMER_OPENED.length, 0x01, 0, null);
 
         //添加水印
         QCarOsd osd = new QCarOsd();
