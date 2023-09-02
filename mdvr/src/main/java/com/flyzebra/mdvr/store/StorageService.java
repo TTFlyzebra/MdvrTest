@@ -21,7 +21,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 
-public class StorageServer {
+public class StorageService {
     private final Context mContext;
     private final StorageReceiver receiver = new StorageReceiver();
     private final Hashtable<Integer, FileSaveTasker> taskerMap = new Hashtable<>();
@@ -37,11 +37,12 @@ public class StorageServer {
     private static final Handler tHandler = new Handler(fileDeleteThread.getLooper());
     private static final Handler mHandler = new Handler(Looper.getMainLooper());
 
-    public StorageServer(Context context) {
+    public StorageService(Context context) {
         mContext = context;
     }
 
     public void start() {
+        FlyLog.d("StorageService start!");
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_MEDIA_MOUNTED);
         filter.addAction(Intent.ACTION_MEDIA_UNMOUNTED);
@@ -57,6 +58,7 @@ public class StorageServer {
         mHandler.removeCallbacksAndMessages(null);
         mContext.unregisterReceiver(receiver);
         stopRecord();
+        FlyLog.d("StorageService stop!");
     }
 
     public TFcard getStorageTFcard() {

@@ -1,88 +1,93 @@
 package com.flyzebra.mdvr.wifip2p;
 
-import static android.os.Looper.getMainLooper;
-
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.net.wifi.WifiManager;
-import android.net.wifi.p2p.WifiP2pManager;
-import android.net.wifi.p2p.WifiP2pManager.ActionListener;
-import android.net.wifi.p2p.WifiP2pManager.Channel;
+import android.os.Handler;
+import android.os.Looper;
 
 import com.flyzebra.utils.FlyLog;
-import com.flyzebra.utils.IDUtil;
 
-import java.lang.reflect.Method;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class WifiP2PServer {
     private Context mContext;
-    private WifiP2pManager wifiP2pManager;
-    private WifiP2pManager.Channel wifChannel;
-    private IntentFilter intentFilter;
-    private MyRecevier myRecevier;
-    private final AtomicBoolean is_stop = new AtomicBoolean(true);
-    private WifiP2PSocket netServer;
+    private AtomicBoolean is_stop = new AtomicBoolean(true);
+    private Thread workThread;
+    private List<WifiP2PClient> wifiNetClients = new ArrayList<>();
+    private static final Handler mHandler = new Handler(Looper.getMainLooper());
+    private ServerSocket serverSocket = null;
 
     public WifiP2PServer(Context context) {
         mContext = context;
-        netServer = new WifiP2PSocket(context);
     }
 
     public void start() {
-        FlyLog.d("WifiP2PServer start!");
+        FlyLog.d("WifiP2PSocket start!");
         is_stop.set(false);
-        netServer.start();
-        WifiManager wifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
-        if (!wifiManager.isWifiEnabled()) {
-            wifiManager.setWifiEnabled(true);
-        }
+        workThread = new Thread(() -> {
+            try {
+                serverSocket = new ServerSocket(9088);
+            } catch (IOException e) {
+                FlyLog.e(e.toString());
+                return;
+            }
+            while (!is_stop.get()) {
+                try {
+                    Socket client = serverSocket.accept();
+                    FlyLog.e("wifip2p client accept!");
+                    final WifiP2PClient wifiNetClient = new WifiP2PClient(mContext, this, client);
+                    mHandler.post(() -> wifiNetClients.add(wifiNetClient));
+                } catch (IOException e) {
+                    FlyLog.d(e.toString());
+                }
+            }
 
-        wifiP2pManager = (WifiP2pManager) mContext.getSystemService(Context.WIFI_P2P_SERVICE);
-        wifChannel = wifiP2pManager.initialize(mContext, getMainLooper(), null);
-
-        try {
-            Class<?> clz = wifiP2pManager.getClass();
-            Method method = clz.getMethod("setDeviceName", Channel.class, String.class, ActionListener.class);
-            method.setAccessible(true);
-            String name = "MD201_" + IDUtil.getIMEI(mContext);
-            method.invoke(wifiP2pManager, wifChannel, name, null);
-        } catch (Exception e) {
-            FlyLog.e(e.toString());
-        }
-
-        intentFilter = new IntentFilter();
-        intentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
-        intentFilter.addAction(WifiP2pManager.WIFI_P2P_DISCOVERY_CHANGED_ACTION);
-        intentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
-        intentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
-        intentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
-        myRecevier = new MyRecevier();
-        mContext.registerReceiver(myRecevier, intentFilter);
-
-        wifiP2pManager.createGroup(wifChannel, null);
+            mHandler.post(() -> {
+                if (serverSocket != null) {
+                    try {
+                        serverSocket.close();
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    serverSocket = null;
+                }
+            });
+        }, "wifip2p_server");
+        workThread.start();
     }
 
     public void stop() {
+        if (is_stop.get()) return;
+        mHandler.removeCallbacksAndMessages(null);
         is_stop.set(true);
-        netServer.stop();
-        mContext.unregisterReceiver(myRecevier);
-        wifiP2pManager.removeGroup(wifChannel, null);
-        netServer.stop();
-        FlyLog.d("WifiP2PServer stop!");
+        if (serverSocket != null) {
+            try {
+                serverSocket.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            serverSocket = null;
+        }
+        if (workThread != null) {
+            try {
+                workThread.join();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            workThread = null;
+        }
+        for (WifiP2PClient client : wifiNetClients) {
+            client.stop();
+        }
+        wifiNetClients.clear();
+        FlyLog.d("WifiP2PSocket stop!");
     }
 
-    private class MyRecevier extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION.equals(action)) {
-            } else if (WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION.equals(action)) {
-            } else if (WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION.equals(action)) {
-            } else if (WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION.equals(action)) {
-            }
-        }
+    public void disconnected(final WifiP2PClient wifiNetClient) {
+        mHandler.post(() -> wifiNetClients.remove(wifiNetClient));
     }
 }

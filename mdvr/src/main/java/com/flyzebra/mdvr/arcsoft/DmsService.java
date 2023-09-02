@@ -13,19 +13,19 @@ import com.quectel.qcarapi.stream.QCarCamera;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class DmsServer {
+public class DmsService {
     private int mChannel = 0;
     private Context mContext;
     private DmsThread dmsThread = null;
     private ArcSoftDms arcSoftDms = null;
     private AtomicBoolean is_stop = new AtomicBoolean(true);
 
-    public DmsServer(Context context) {
+    public DmsService(Context context) {
         mContext = context;
     }
 
     public void start() {
-        FlyLog.d("DmsServer start!");
+        FlyLog.d("DmsService start!");
         is_stop.set(false);
         dmsThread = new DmsThread(mChannel);
         dmsThread.start();
@@ -41,7 +41,7 @@ public class DmsServer {
             }
             dmsThread = null;
         }
-        FlyLog.d("DmsServer stop!");
+        FlyLog.d("DmsService stop!");
     }
 
     private class DmsThread extends Thread implements Runnable {
@@ -93,7 +93,7 @@ public class DmsServer {
                 arcSoftDms = new ArcSoftDms(mContext);
             }
             if (!arcSoftDms.initDms()) {
-                FlyLog.i("AdasServer isn't active!");
+                FlyLog.i("AdasService isn't active!");
                 return;
             }
 

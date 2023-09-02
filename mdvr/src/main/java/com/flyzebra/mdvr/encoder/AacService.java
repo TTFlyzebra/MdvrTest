@@ -6,16 +6,16 @@ import android.content.Context;
 import com.flyzebra.mdvr.Config;
 import com.flyzebra.utils.FlyLog;
 
-public class AacServer {
+public class AacService {
 
     private final AacTasker[] aacTaskers = new AacTasker[Config.MAX_CAM];
 
-    public AacServer(Context context){
+    public AacService(Context context){
 
     }
 
     public void start() {
-        FlyLog.d("AacServer start!");
+        FlyLog.d("AacService start!");
         for (int i = 0; i < Config.MAX_CAM; i++) {
             aacTaskers[i] = new AacTasker(i);
             aacTaskers[i].start();
@@ -26,6 +26,6 @@ public class AacServer {
         for (int i = 0; i < Config.MAX_CAM; i++) {
             aacTaskers[i].stop();
         }
-        FlyLog.d("AacServer stop!");
+        FlyLog.d("AacService stop!");
     }
 }

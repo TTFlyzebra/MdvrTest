@@ -21,7 +21,7 @@ import com.quectel.qcarapi.util.QCarLog;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class CamServer {
+public class CamService {
     private Context mContext;
     private int width;
     private int height;
@@ -83,12 +83,12 @@ public class CamServer {
         }
     };
 
-    public CamServer(Context context) {
+    public CamService(Context context) {
         mContext = context;
     }
 
     public void start() {
-        FlyLog.d("CamServer start!");
+        FlyLog.d("CamService start!");
         this.width = Config.CAM_WIDTH;
         this.height = Config.CAM_HEIGHT;
         is_stop.set(false);
@@ -112,7 +112,7 @@ public class CamServer {
             qCarCamera.cameraClose();
             qCarCamera.release();
         }
-        FlyLog.d("CamServer exit!");
+        FlyLog.d("CamService exit!");
     }
 
     private class VideoYuvThread extends Thread implements Runnable {

@@ -12,15 +12,15 @@ import com.flyzebra.core.Fzebra;
 import com.flyzebra.core.notify.INotify;
 import com.flyzebra.core.notify.Notify;
 import com.flyzebra.core.notify.NotifyType;
-import com.flyzebra.mdvr.arcsoft.AdasServer;
-import com.flyzebra.mdvr.arcsoft.DmsServer;
-import com.flyzebra.mdvr.camera.CamServer;
-import com.flyzebra.mdvr.encoder.AacServer;
-import com.flyzebra.mdvr.encoder.AvcServer;
-import com.flyzebra.mdvr.mic.MicServer;
-import com.flyzebra.mdvr.store.StorageServer;
-import com.flyzebra.mdvr.wifi.WifiServer;
-import com.flyzebra.mdvr.wifip2p.WifiP2PServer;
+import com.flyzebra.mdvr.arcsoft.AdasService;
+import com.flyzebra.mdvr.arcsoft.DmsService;
+import com.flyzebra.mdvr.camera.CamService;
+import com.flyzebra.mdvr.encoder.AacService;
+import com.flyzebra.mdvr.encoder.AvcService;
+import com.flyzebra.mdvr.mic.MicService;
+import com.flyzebra.mdvr.store.StorageService;
+import com.flyzebra.mdvr.wifi.WifiService;
+import com.flyzebra.mdvr.wifip2p.WifiP2PService;
 import com.flyzebra.utils.ByteUtil;
 import com.flyzebra.utils.FlyLog;
 
@@ -28,18 +28,18 @@ public class MdvrService extends Service implements INotify {
     static {
         System.loadLibrary("mmqcar_qcar_jni");
     }
-    private final StorageServer storeServer = new StorageServer(this);
-    private final WifiServer wifiServer = new WifiServer(this);
-    private final WifiP2PServer wifiP2PServer = new WifiP2PServer(this);
-    //private final RtmpServer rtmpServer = new RtmpServer(this);
-    private final CamServer camServer = new CamServer(this);
-    private final MicServer micServer = new MicServer(this);
+    private final StorageService storeService = new StorageService(this);
+    private final WifiService wifiService = new WifiService(this);
+    private final WifiP2PService wifiP2PService = new WifiP2PService(this);
+    //private final RtmpService rtmpServer = new RtmpService(this);
+    private final CamService camService = new CamService(this);
+    private final MicService micService = new MicService(this);
 
-    private final AvcServer avcServer = new AvcServer(this);
-    private final AacServer aacServer = new AacServer(this);
+    private final AvcService avcService = new AvcService(this);
+    private final AacService aacService = new AacService(this);
 
-    private final AdasServer adasServer = new AdasServer(this);
-    private final DmsServer dmsServer = new DmsServer(this);
+    private final AdasService adasService = new AdasService(this);
+    private final DmsService dmsService = new DmsService(this);
 
     @Nullable
     @Override
@@ -63,20 +63,20 @@ public class MdvrService extends Service implements INotify {
         Fzebra.get().init();
         Fzebra.get().startRtspServer();
 
-        storeServer.start();
-        wifiServer.start();
-        wifiP2PServer.start();
+        storeService.start();
+        wifiService.start();
+        wifiP2PService.start();
 
         //rtmpServer.start();
 
-        camServer.start();
-        micServer.start();
+        camService.start();
+        micService.start();
 
-        aacServer.start();
-        avcServer.start();
+        aacService.start();
+        avcService.start();
 
-        adasServer.start();
-        dmsServer.start();
+        adasService.start();
+        dmsService.start();
     }
 
     @Override
@@ -85,20 +85,20 @@ public class MdvrService extends Service implements INotify {
         Fzebra.get().stopRtspServer();
         Fzebra.get().release();
 
-        storeServer.stop();
-        wifiServer.stop();
-        wifiP2PServer.stop();
+        storeService.stop();
+        wifiService.stop();
+        wifiP2PService.stop();
 
         //rtmpServer.stop();
 
-        adasServer.stop();//必须在camServer前面停止
-        dmsServer.stop();//必须在camServer前面停止
+        adasService.stop();//必须在camServer前面停止
+        dmsService.stop();//必须在camServer前面停止
 
-        aacServer.stop();
-        avcServer.stop();
+        aacService.stop();
+        avcService.stop();
 
-        camServer.stop();
-        micServer.stop();
+        camService.stop();
+        micService.stop();
 
         FlyLog.i("#####MdvrService exit!#####");
     }

@@ -13,7 +13,7 @@ import com.quectel.qcarapi.stream.QCarCamera;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class CamServer1080P {
+public class CamService1080P {
     public static final int CAM_WIDTH = 1920;
     public static final int CAM_HEIGHT = 1080;
     public static final int MAX_CAM = 4;
@@ -54,12 +54,12 @@ public class CamServer1080P {
         }
     };
 
-    public CamServer1080P(Context context) {
+    public CamService1080P(Context context) {
         mContext = context;
     }
 
     public void onCreate() {
-        FlyLog.d("YuvService start!");
+        FlyLog.d("CamService start!");
         this.width = CAM_WIDTH;
         this.height = CAM_HEIGHT;
         is_stop.set(false);
@@ -93,7 +93,7 @@ public class CamServer1080P {
 //            }
 
         }
-        FlyLog.d("YuvService exit!");
+        FlyLog.d("CamService exit!");
     }
 
     private class VideoYuvThread extends Thread implements Runnable {

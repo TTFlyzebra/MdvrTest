@@ -5,16 +5,16 @@ import android.content.Context;
 import com.flyzebra.mdvr.Config;
 import com.flyzebra.utils.FlyLog;
 
-public class AvcServer {
+public class AvcService {
 
     private final AvcTasker[] avcTaskers = new AvcTasker[Config.MAX_CAM];
 
-    public AvcServer(Context context) {
+    public AvcService(Context context) {
 
     }
 
     public void start() {
-        FlyLog.d("AvcServer start!");
+        FlyLog.d("AvcService start!");
 
         for (int i = 0; i < Config.MAX_CAM; i++) {
             avcTaskers[i] = new AvcTasker(i,
@@ -32,7 +32,7 @@ public class AvcServer {
         for (int i = 0; i < Config.MAX_CAM; i++) {
             avcTaskers[i].stop();
         }
-        FlyLog.d("AvcServer stop!");
+        FlyLog.d("AvcService stop!");
     }
 
 }

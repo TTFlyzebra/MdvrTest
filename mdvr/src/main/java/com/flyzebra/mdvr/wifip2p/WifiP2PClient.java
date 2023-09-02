@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class WifiP2PClient {
     private Context mContext;
-    private WifiP2PSocket mServer;
+    private WifiP2PServer mServer;
     private Socket mSocket;
     private final AtomicBoolean is_stop = new AtomicBoolean(true);
     private Thread recvThread;
@@ -21,7 +21,7 @@ public class WifiP2PClient {
     private final Object sendLock = new Object();
     private ByteBuffer sendBuf = ByteBuffer.allocateDirect(2 * 1024 * 1024);
 
-    public WifiP2PClient(Context context, WifiP2PSocket server, Socket socket) {
+    public WifiP2PClient(Context context, WifiP2PServer server, Socket socket) {
         mContext = context;
         mServer = server;
         mSocket = socket;
