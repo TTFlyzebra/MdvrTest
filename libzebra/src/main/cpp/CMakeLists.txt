@@ -10,7 +10,7 @@ include_directories(
 add_library(
         zebra
         SHARED
-        FzebraJNI.cpp
+        Fzebra_jni.cpp
         Fzebra.cpp
         FzebraCB.cpp
         base/Notify.cpp
@@ -27,16 +27,38 @@ add_library(
 )
 
 add_library(
-        yuv
-        STATIC
+        c++
+        SHARED
         IMPORTED)
 
 set_target_properties(
-        yuv
+        c++
         PROPERTIES IMPORTED_LOCATION
-        ${CMAKE_SOURCE_DIR}/libs/${ANDROID_ABI}/libyuv.a)
+        ${CMAKE_SOURCE_DIR}/libs/${ANDROID_ABI}/libC++.so)
+
+add_library(
+        jpeg
+        SHARED
+        IMPORTED)
+
+set_target_properties(
+        jpeg
+        PROPERTIES IMPORTED_LOCATION
+        ${CMAKE_SOURCE_DIR}/libs/${ANDROID_ABI}/libjpeg.so)
+
+add_library(
+        yuvz
+        SHARED
+        IMPORTED)
+
+set_target_properties(
+        yuvz
+        PROPERTIES IMPORTED_LOCATION
+        ${CMAKE_SOURCE_DIR}/libs/${ANDROID_ABI}/libyuvz.so)
 
 target_link_libraries(
         zebra
-        yuv
+        c++
+        jpeg
+        yuvz
         log)

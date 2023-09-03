@@ -8,7 +8,7 @@ package com.flyzebra.libyuv;
 public class FlyYuv {
 
     static {
-        System.loadLibrary("fyuv");
+        System.loadLibrary("flyyuv");
     }
 
     static public native void NV12ToI420(byte[] src, byte[] dst, int dst_offset, int width, int height);

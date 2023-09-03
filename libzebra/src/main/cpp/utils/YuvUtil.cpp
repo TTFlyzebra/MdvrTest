@@ -3,7 +3,7 @@
 //
 
 #include "YuvUtil.h"
-#include "libyuv.h"
+#include "libyuvz.h"
 
 void YuvUtil::I420Copy(const char* src, char* obj, int32_t width, int32_t height)
 {
