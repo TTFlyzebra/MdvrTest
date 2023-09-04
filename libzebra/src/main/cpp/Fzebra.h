@@ -9,6 +9,7 @@
 #include "base/Notify.h"
 #include "FzebraCB.h"
 
+class UserServer;
 class RtspServer;
 
 class Fzebra : public INotify{
@@ -25,6 +26,10 @@ public:
 
     void nativeHandledata(NofifyType type, const char *data, int32_t size, const char *params);
 
+    void startUserServer();
+
+    void stopUserServer();
+
     void startRtspServer();
 
     void stopRtspServer();
@@ -33,6 +38,7 @@ private:
     Notify* N;
     FzebraCB* cb;
 
+    UserServer* user;
     RtspServer* rtsp;
 
 };

@@ -26,8 +26,18 @@
 
 #define TERMINAL_MAX_BUFFER                 8388608
 
+#define MAX_SOCKET_BUFFER                   10485760//1M
+#define MAX_CMD_BUFFER                      10240//10k
+
 #define MAX_CAM                             4
 #define VIDEO_HEAD_MAX_SIZE                 256
 #define AUDIO_HEAD_MAX_SIZE                 64
+
+#define US_WAITTIME                         10000000//10s
+#define SU_WAITTIME                         10000000//10s
+#define TS_WAITTIME                         10000000//10s
+#define ST_WAITTIME                         10000000//10s
+#define UT_WAITTIME                         10000000//10s
+#define TU_WAITTIME                         10000000//10s
 
 #endif //F_ZEBRA_CONFIG_H

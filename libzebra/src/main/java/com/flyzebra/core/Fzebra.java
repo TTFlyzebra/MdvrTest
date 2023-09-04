@@ -34,14 +34,24 @@ public class Fzebra implements INotify {
         _release(pointer);
     }
 
+    public void startUserServer(){
+        if (_ptr_obj < 0) return;
+        _startUserServer(_ptr_obj);
+    }
+
+    public void stopUserServer(){
+        if (_ptr_obj < 0) return;
+        _stopUserServer(_ptr_obj);
+    }
+
     public void startRtspServer(){
         if (_ptr_obj < 0) return;
-        _enableRtspServer(_ptr_obj);
+        _startRtspServer(_ptr_obj);
     }
 
     public void stopRtspServer(){
         if (_ptr_obj < 0) return;
-        _disableRtspServer(_ptr_obj);
+        _stopRtspServer(_ptr_obj);
     }
 
     @Override
@@ -72,8 +82,12 @@ public class Fzebra implements INotify {
 
     private native void _handle(long p_obj, int type, byte[] data, int size, byte[] params);
 
-    private native void _enableRtspServer(long p_obj);
+    private native void _startUserServer(long p_obj);
 
-    private native void _disableRtspServer(long p_obj);
+    private native void _stopUserServer(long p_obj);
+
+    private native void _startRtspServer(long p_obj);
+
+    private native void _stopRtspServer(long p_obj);
 
 }

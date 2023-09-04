@@ -77,11 +77,16 @@ public class MdvrService extends Service implements INotify {
 
         adasService.start();
         dmsService.start();
+
+        Fzebra.get().startUserServer();
     }
 
     @Override
     public void onDestroy() {
         Notify.get().unregisterListener(this);
+
+        Fzebra.get().stopUserServer();
+
         Fzebra.get().stopRtspServer();
         Fzebra.get().release();
 

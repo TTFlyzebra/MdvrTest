@@ -17,6 +17,7 @@ public:
 public:
     Notify* N;
     volatile bool is_stop;
+    std::mutex mlock_stop;
 };
 
 

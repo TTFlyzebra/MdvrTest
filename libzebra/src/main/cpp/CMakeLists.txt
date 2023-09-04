@@ -15,6 +15,9 @@ add_library(
         FzebraCB.cpp
         base/Notify.cpp
         base/BaseNotify.cpp
+        base/Global.cpp
+        base/Terminal.cpp
+        base/User.cpp
         buffer/LoopBuf.cpp
         buffer/BufferManager.cpp
         utils/Base64.cpp
@@ -24,6 +27,8 @@ add_library(
         utils/TimeUtil.cpp
         rtsp/RtspServer.cpp
         rtsp/RtspClient.cpp
+        server/UserServer.cpp
+        server/UserClient.cpp
 )
 
 add_library(

@@ -54,14 +54,28 @@ Java_com_flyzebra_core_Fzebra__1handle(JNIEnv *env, jobject thiz, jlong p_obj, j
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_flyzebra_core_Fzebra__1enableRtspServer(JNIEnv *env, jobject thiz, jlong p_obj) {
+Java_com_flyzebra_core_Fzebra__1startUserServer(JNIEnv *env, jobject thiz, jlong p_obj) {
+    auto *fzebra = reinterpret_cast<Fzebra *>(p_obj);
+    fzebra->startUserServer();
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_flyzebra_core_Fzebra__1stopUserServer(JNIEnv *env, jobject thiz, jlong p_obj) {
+    auto *fzebra = reinterpret_cast<Fzebra *>(p_obj);
+    fzebra->stopUserServer();
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_flyzebra_core_Fzebra__1startRtspServer(JNIEnv *env, jobject thiz, jlong p_obj) {
     auto *fzebra = reinterpret_cast<Fzebra *>(p_obj);
     fzebra->startRtspServer();
 }
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_flyzebra_core_Fzebra__1disableRtspServer(JNIEnv *env, jobject thiz, jlong p_obj) {
+Java_com_flyzebra_core_Fzebra__1stopRtspServer(JNIEnv *env, jobject thiz, jlong p_obj) {
     auto *fzebra = reinterpret_cast<Fzebra *>(p_obj);
     fzebra->stopRtspServer();
 }

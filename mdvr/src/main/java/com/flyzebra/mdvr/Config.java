@@ -28,8 +28,8 @@ public class Config {
     public static String WIFI_SSID = "\"F-6165\"";
     public static String WIFI_PSWD = "\"12344321\"";
 
-    public static int ADAS_FRAME_RATE = 25;
-    public static int DMS_FRAME_RATE = 25;
+    public static int ADAS_FRAME_RATE = 12;
+    public static int DMS_FRAME_RATE = 9;
 
     public static final String appId= "vdpeYwDGohrtjAyMZdQMwNS3DPQF66";
     public static final String appSecret = "dyqtqEpNyKLUZaMVAZdFhgtjskymaR";

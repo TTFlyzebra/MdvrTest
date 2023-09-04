@@ -24,17 +24,14 @@ public class WifiP2PService {
     private IntentFilter intentFilter;
     private MyRecevier myRecevier;
     private final AtomicBoolean is_stop = new AtomicBoolean(true);
-    private WifiP2PServer netServer;
 
     public WifiP2PService(Context context) {
         mContext = context;
-        netServer = new WifiP2PServer(context);
     }
 
     public void start() {
         FlyLog.d("WifiP2PService start!");
         is_stop.set(false);
-        netServer.start();
         WifiManager wifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
         if (!wifiManager.isWifiEnabled()) {
             wifiManager.setWifiEnabled(true);
@@ -67,10 +64,8 @@ public class WifiP2PService {
 
     public void stop() {
         is_stop.set(true);
-        netServer.stop();
         mContext.unregisterReceiver(myRecevier);
         wifiP2pManager.removeGroup(wifChannel, null);
-        netServer.stop();
         FlyLog.d("WifiP2PService stop!");
     }
 

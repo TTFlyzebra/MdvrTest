@@ -6,6 +6,7 @@
 #include "Fzebra.h"
 #include "buffer/BufferManager.h"
 #include "rfc/Protocol.h"
+#include "server/UserServer.h"
 #include "rtsp/RtspServer.h"
 
 Fzebra::Fzebra(JavaVM *jvm, JNIEnv *env, jobject thiz) {
@@ -43,6 +44,15 @@ void Fzebra::nativeNotifydata(const char *data, int32_t size) {
 
 void Fzebra::nativeHandledata(NofifyType type, const char *data, int32_t size, const char *parmas) {
     N->handledata(type, data, size, parmas);
+}
+
+
+void Fzebra::startUserServer() {
+    user = new UserServer(N);
+}
+
+void Fzebra::stopUserServer() {
+    delete user;
 }
 
 void Fzebra::startRtspServer() {

@@ -5,15 +5,14 @@
 #include "BaseNotify.h"
 
 BaseNotify::BaseNotify(Notify* notify)
-: N(notify)
-, is_stop(false)
+    : N(notify)
 {
-    N->registerListener(this);
+
 }
+
 BaseNotify::~BaseNotify()
 {
-    is_stop = true;
-    N->unregisterListener(this);
+
 }
 
 void BaseNotify::notify(const char* data, int32_t size)
