@@ -55,5 +55,6 @@
             </intent-filter>
         </activity>
         <service android:name=".MdvrService" />
+        <service android:name=".screen.ScreenService"/>
     </application>
 </manifest>
