@@ -7,6 +7,6 @@
 
 #include "Terminal.h"
 
-extern char gWeburl[1024];
+extern Terminal* T;
 
 #endif //F_ZEBRA_GLOBAL_H

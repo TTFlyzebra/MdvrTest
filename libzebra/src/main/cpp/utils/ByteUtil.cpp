@@ -5,9 +5,9 @@
 #include "ByteUtil.h"
 #include <string.h>
 
-int64_t ByteUtil::sysIdToInt64(char *data) {
+int64_t ByteUtil::sysIdToInt64(char *data, int len) {
     int64_t tid = 0;
-    for (int i = 0; i < 9; i++) {
+    for (int i = 0; i < len; i++) {
         int64_t ret = 0;
         char x = data[i] & 0xFF;
         if (x >= '0' && x <= '9') {
@@ -20,7 +20,7 @@ int64_t ByteUtil::sysIdToInt64(char *data) {
             continue;
         }
         int64_t pow = 1;
-        int32_t y = 9 - i;
+        int32_t y = len - i;
         for (int i = 1; i < y; i++) {
             pow = pow * 36;
         }
@@ -31,14 +31,25 @@ int64_t ByteUtil::sysIdToInt64(char *data) {
 
 void ByteUtil::int64ToSysId(char *data, int64_t tid) {
     int64_t num = tid;
-    for (int i = 0; i < 9; i++) {
+    int len = 0;
+    char temp[16];
+    while (num > 36) {
         int8_t ni = (num % 36) & 0xFF;
         if (ni < 10) {
-            data[8 - i] = ni + '0';
+            temp[len++] = ni + '0';
         } else {
-            data[8 - i] = ni - 10 + 'A';
+            temp[len++] = ni - 10 + 'A';
         }
         num = num / 36;
+    }
+    if (num < 10) {
+        temp[len] = num + '0';
+    }
+    else {
+        temp[len] = num - 10 + 'A';
+    }
+    for (int i = 0; i <= len; i++) {
+        data[i] = temp[len - i];
     }
 }
 

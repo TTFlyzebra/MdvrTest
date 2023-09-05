@@ -123,9 +123,9 @@ void UserServer::removeClient()
         if (is_stop) break;
         for (auto it = remove_clients.begin(); it != remove_clients.end(); ++it) {
             auto userClient = *it;
-            char sn[10] = { 0 };
+            char sn[16] = { 0 };
             ByteUtil::int64ToSysId(sn, userClient->getUid());
-            FLOGE("[%s][U]->start removed.", sn);
+            FLOGD("[%s][U]->removed.", sn);
             delete userClient;
         }
         remove_clients.clear();

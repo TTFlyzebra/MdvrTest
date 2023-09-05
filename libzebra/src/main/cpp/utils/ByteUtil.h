@@ -12,7 +12,7 @@ public:
     /**
     * 9位系统序列号字符串转8位int64
     **/
-    static int64_t sysIdToInt64(char* data);
+    static int64_t sysIdToInt64(char* data, int len);
     /**
     * 8位int64转为9位系统序列号字符串
     **/

@@ -10,21 +10,24 @@
 #include "FzebraCB.h"
 
 class UserServer;
+
 class RtspServer;
 
-class Fzebra : public INotify{
+class Fzebra : public INotify {
 public:
-    Fzebra(JavaVM* jvm, JNIEnv *env, jobject thiz);
+    Fzebra(JavaVM *jvm, JNIEnv *env, jobject thiz);
 
     ~Fzebra();
 
-    void notify(const char* data, int32_t size) override;
+    void notify(const char *data, int32_t size) override;
 
-    void handle(NofifyType type, const char* data, int32_t size, const char *params) override;
+    void handle(NofifyType type, const char *data, int32_t size, const char *params) override;
 
     void nativeNotifydata(const char *data, int32_t size);
 
     void nativeHandledata(NofifyType type, const char *data, int32_t size, const char *params);
+
+    static void setTid(int64_t tid);
 
     void startUserServer();
 
@@ -35,12 +38,11 @@ public:
     void stopRtspServer();
 
 private:
-    Notify* N;
-    FzebraCB* cb;
+    Notify *N;
+    FzebraCB *cb;
 
-    UserServer* user;
-    RtspServer* rtsp;
-
+    UserServer *user;
+    RtspServer *rtsp;
 };
 
 

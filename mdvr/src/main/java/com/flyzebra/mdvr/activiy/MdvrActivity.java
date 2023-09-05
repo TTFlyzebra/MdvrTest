@@ -18,6 +18,7 @@ import com.flyzebra.core.notify.NotifyType;
 import com.flyzebra.mdvr.Config;
 import com.flyzebra.mdvr.MdvrService;
 import com.flyzebra.mdvr.R;
+import com.flyzebra.mdvr.screen.ScreenService;
 import com.flyzebra.mdvr.view.GlVideoView;
 import com.flyzebra.utils.ByteUtil;
 import com.flyzebra.utils.PropUtil;
@@ -42,6 +43,9 @@ public class MdvrActivity extends AppCompatActivity implements INotify {
 
         PropUtil.set("ctl.stop", "MonitorHobotApk");
         ShellUtil.exec("am force-stop com.hobot.sample.app");
+
+        //Remote Ctrl
+        ScreenService.startService(this);
 
         startService(new Intent(this, MdvrService.class));
         Notify.get().registerListener(this);
@@ -111,6 +115,7 @@ public class MdvrActivity extends AppCompatActivity implements INotify {
         //unregisterReceiver(recevier);
         Notify.get().unregisterListener(this);
         stopService(new Intent(this, MdvrService.class));
+        stopService(new Intent(this, ScreenService.class));
     }
 
     @Override

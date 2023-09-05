@@ -32,6 +32,12 @@ Java_com_flyzebra_core_Fzebra__1release(JNIEnv *env, jobject thiz, jlong p_obj) 
 
 extern "C"
 JNIEXPORT void JNICALL
+Java_com_flyzebra_core_Fzebra__1setTid(JNIEnv *env, jobject thiz, jlong tid) {
+    Fzebra::setTid(tid);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
 Java_com_flyzebra_core_Fzebra__1notify(JNIEnv *env, jobject thiz, jlong p_obj, jbyteArray jdata,
                                        jint size) {
     auto *data = (const char *) env->GetByteArrayElements(jdata, JNI_FALSE);
@@ -45,11 +51,16 @@ JNIEXPORT void JNICALL
 Java_com_flyzebra_core_Fzebra__1handle(JNIEnv *env, jobject thiz, jlong p_obj, jint type,
                                        jbyteArray jdata, jint size, jbyteArray jparams) {
     auto *data = (const char *) env->GetByteArrayElements(jdata, JNI_FALSE);
-    auto *params = (const char *) env->GetByteArrayElements(jparams, JNI_FALSE);
+    const char *params = nullptr;
+    if (jparams != nullptr) {
+        params = (const char *) env->GetByteArrayElements(jparams, JNI_FALSE);
+    }
     auto *fzebra = reinterpret_cast<Fzebra *>(p_obj);
     fzebra->nativeHandledata(static_cast<NofifyType>(type), data, size, params);
     env->ReleaseByteArrayElements(jdata, (jbyte *) data, JNI_ABORT);
-    env->ReleaseByteArrayElements(jparams, (jbyte *) params, JNI_ABORT);
+    if (jparams != nullptr) {
+        env->ReleaseByteArrayElements(jparams, (jbyte *) params, JNI_ABORT);
+    }
 }
 
 extern "C"

@@ -17,6 +17,7 @@ import com.flyzebra.mdvr.arcsoft.DmsService;
 import com.flyzebra.mdvr.camera.CamService;
 import com.flyzebra.mdvr.encoder.AacService;
 import com.flyzebra.mdvr.encoder.AvcService;
+import com.flyzebra.mdvr.input.InputService;
 import com.flyzebra.mdvr.mic.MicService;
 import com.flyzebra.mdvr.store.StorageService;
 import com.flyzebra.mdvr.wifi.WifiService;
@@ -41,6 +42,8 @@ public class MdvrService extends Service implements INotify {
     private final AdasService adasService = new AdasService(this);
     private final DmsService dmsService = new DmsService(this);
 
+    private final InputService inputService = new InputService(this);
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -60,7 +63,7 @@ public class MdvrService extends Service implements INotify {
         Global.audioHeadMap.clear();
         Global.videoHeadMap.clear();
 
-        Fzebra.get().init();
+        Fzebra.get().init(this.getApplicationContext());
         Fzebra.get().startRtspServer();
 
         storeService.start();
@@ -78,14 +81,12 @@ public class MdvrService extends Service implements INotify {
         adasService.start();
         dmsService.start();
 
-        Fzebra.get().startUserServer();
+        inputService.start();
     }
 
     @Override
     public void onDestroy() {
         Notify.get().unregisterListener(this);
-
-        Fzebra.get().stopUserServer();
 
         Fzebra.get().stopRtspServer();
         Fzebra.get().release();
@@ -104,6 +105,8 @@ public class MdvrService extends Service implements INotify {
 
         camService.stop();
         micService.stop();
+
+        inputService.stop();
 
         FlyLog.i("#####MdvrService exit!#####");
     }

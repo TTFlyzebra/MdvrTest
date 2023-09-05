@@ -49,13 +49,16 @@ void FzebraCB::javaNotifydata(const char *data, int32_t size) {
         }
         isAttacked = true;
     }
-    mEnv->CallVoidMethod(mThiz, notifydata, data, size);
+    jbyteArray jdata = mEnv->NewByteArray(static_cast<jsize>(size));
+    mEnv->SetByteArrayRegion(jdata, 0, size, reinterpret_cast<const jbyte *>(data));
+    mEnv->CallVoidMethod(mThiz, notifydata, jdata, size);
+    mEnv->DeleteLocalRef(jdata);
     if (isAttacked) {
         (mjvm)->DetachCurrentThread();
     }
 }
 
-void FzebraCB::javaHandledata(int32_t type, const char *data, int32_t size, const char *parmas) {
+void FzebraCB::javaHandledata(int32_t type, const char *data, int32_t dataLen, const char *parmas, int32_t parmasLen) {
     int status = mjvm->GetEnv((void **) &mEnv, JNI_VERSION_1_4);
     bool isAttacked = false;
     if (status < 0) {
@@ -66,7 +69,13 @@ void FzebraCB::javaHandledata(int32_t type, const char *data, int32_t size, cons
         }
         isAttacked = true;
     }
-    mEnv->CallVoidMethod(mThiz, handledata, type, data, size, parmas);
+    jbyteArray jdata = mEnv->NewByteArray(static_cast<jsize>(dataLen));
+    mEnv->SetByteArrayRegion(jdata, 0, dataLen, reinterpret_cast<const jbyte *>(data));
+    jbyteArray jparmas = mEnv->NewByteArray(static_cast<jsize>(parmasLen));
+    mEnv->SetByteArrayRegion(jparmas, 0, parmasLen, reinterpret_cast<const jbyte *>(parmas));
+    mEnv->CallVoidMethod(mThiz, handledata, type, jdata, dataLen, jparmas);
+    mEnv->DeleteLocalRef(jdata);
+    mEnv->DeleteLocalRef(jparmas);
     if (isAttacked) {
         (mjvm)->DetachCurrentThread();
     }

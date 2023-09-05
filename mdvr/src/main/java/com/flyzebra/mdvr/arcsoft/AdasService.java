@@ -57,7 +57,10 @@ public class AdasService {
         public void run() {
             while (!is_stop.get() && qCarCamera == null) {
                 try {
-                    Thread.sleep(200);
+                    for (int i = 0; i < 15; i++) {
+                        if (is_stop.get()) return;
+                        Thread.sleep(200);
+                    }
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
@@ -71,7 +74,10 @@ public class AdasService {
                     FlyLog.e("ADAS don't active！");
                     ArcSoftActive.get().active(mContext.getApplicationContext(), Config.appId, Config.appSecret);
                     try {
-                        Thread.sleep(1000);
+                        for (int i = 0; i < 15; i++) {
+                            if(is_stop.get()) return;
+                            Thread.sleep(200);
+                        }
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }

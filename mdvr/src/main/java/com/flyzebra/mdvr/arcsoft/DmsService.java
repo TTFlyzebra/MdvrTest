@@ -68,10 +68,13 @@ public class DmsService {
                 if (ArcSoftActive.get().isDmsActive()) {
                     break;
                 } else {
-                    FlyLog.e("DMS don't active！");
+                    FlyLog.w("DMS don't active！");
                     ArcSoftActive.get().active(mContext.getApplicationContext(), Config.appId, Config.appSecret);
                     try {
-                        Thread.sleep(1000);
+                        for (int i = 0; i < 15; i++) {
+                            if(is_stop.get()) return;
+                            Thread.sleep(200);
+                        }
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }

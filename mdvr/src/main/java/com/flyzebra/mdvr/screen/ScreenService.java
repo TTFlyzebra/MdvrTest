@@ -24,6 +24,7 @@ import android.view.Surface;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.flyzebra.core.Fzebra;
 import com.flyzebra.core.notify.INotify;
 import com.flyzebra.core.notify.Notify;
 import com.flyzebra.core.notify.NotifyType;
@@ -32,8 +33,8 @@ import com.flyzebra.mdvr.R;
 import com.flyzebra.mdvr.activiy.MdvrActivity;
 import com.flyzebra.utils.ByteUtil;
 import com.flyzebra.utils.FlyLog;
-import com.flyzebra.utils.IDUtil;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -46,8 +47,8 @@ public class ScreenService extends Service implements INotify {
     private MediaProjectionManager mpManager = null;
     private int mResultCode;
     private Intent mResultData;
-    private int width = 640;
-    private int height = 1280;
+    private int width = 1280;
+    private int height = 720;
     private int mBitRate = 4000000;
     private static final String MIME_TYPE = "video/avc"; // H.264 Advanced Video Coding
     private static final int FRAME_RATE = 25; // 30 fps
@@ -56,7 +57,6 @@ public class ScreenService extends Service implements INotify {
     private Thread workThread = null;
     private AtomicBoolean isStop = new AtomicBoolean(true);
     private Hashtable<Long, Long> mScreenUsers = new Hashtable<>();
-    private long mTid = 0;
 
     private static final HandlerThread mCmdThread = new HandlerThread("screen_cmd");
 
@@ -88,7 +88,6 @@ public class ScreenService extends Service implements INotify {
     @Override
     public void onCreate() {
         mpManager = (MediaProjectionManager) getSystemService(MEDIA_PROJECTION_SERVICE);
-        mTid = Long.parseLong(IDUtil.getIMEI(this));
         Notification.Builder builder = new Notification.Builder(this.getApplicationContext()); //获取一个Notification构造器
         Intent nfIntent = new Intent(this, MdvrActivity.class); //点击后跳转的界面，可以设置跳转数据
         builder.setContentIntent(PendingIntent.getActivity(this, 0, nfIntent, 0)) // 设置PendingIntent
@@ -114,15 +113,17 @@ public class ScreenService extends Service implements INotify {
         notification.defaults = Notification.DEFAULT_SOUND; //设置为默认的声音
         startForeground(1001, notification);
         Notify.get().registerListener(this);
-
         isApplyScreen.set(false);
+        Fzebra.get().startUserServer();
     }
 
     @Override
     public void onDestroy() {
+        Fzebra.get().stopUserServer();
         mCmdHandler.removeCallbacksAndMessages(null);
         Notify.get().unregisterListener(this);
         isApplyScreen.set(false);
+        FlyLog.i("#####MdvrService exit!#####");
     }
 
     @Override
@@ -156,15 +157,19 @@ public class ScreenService extends Service implements INotify {
             MediaCodec codec = null;
             MediaProjection mMediaProjection = null;
             VirtualDisplay mVirtualDisplay = null;
-            try {
+            //try {
                 mMediaProjection = mpManager.getMediaProjection(mResultCode, mResultData);
                 MediaFormat format = MediaFormat.createVideoFormat(MIME_TYPE, width, height);
                 format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
                 format.setInteger(MediaFormat.KEY_BIT_RATE, mBitRate);
                 format.setInteger(MediaFormat.KEY_FRAME_RATE, FRAME_RATE);
                 format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, IFRAME_INTERVAL);
+            try {
                 codec = MediaCodec.createEncoderByType(MIME_TYPE);
-                codec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            codec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
                 Surface surface = codec.createInputSurface();
                 codec.start();
                 mVirtualDisplay = mMediaProjection.createVirtualDisplay(
@@ -181,7 +186,7 @@ public class ScreenService extends Service implements INotify {
                     long crt_time = SystemClock.uptimeMillis();
                     while (it.hasNext()) {
                         Map.Entry<Long, Long> entry = it.next();
-                        if (crt_time - entry.getValue() > 15000) {
+                        if (crt_time - entry.getValue() > 10000) {
                             it.remove();
                             FlyLog.d("User timeout disconnect, %d", entry.getKey());
                         }
@@ -201,8 +206,7 @@ public class ScreenService extends Service implements INotify {
                         byte[] data = new byte[spsLen + ppsLen];
                         spsBuffer.get(data, 0, spsLen);
                         ppsBuffer.get(data, spsLen, ppsLen);
-                        Notify.get().handledata(NotifyType.NOTI_SCREEN_SPS, data, spsLen, null);
-                        break;
+                        Notify.get().handledata(NotifyType.NOTI_SCREEN_SPS, data, (spsLen + ppsLen), null);
                     } else if (eobIndex >= 0) {
                         ByteBuffer data = codec.getOutputBuffer(eobIndex);
                         data.position(bufferInfo.offset);
@@ -212,9 +216,9 @@ public class ScreenService extends Service implements INotify {
                         codec.releaseOutputBuffer(eobIndex, false);
                     }
                 }
-            } catch (Exception e) {
-                FlyLog.e(e.toString());
-            } finally {
+            //} catch (Exception e) {
+            //    FlyLog.e(e.toString());
+            //} finally {
                 if (codec != null) {
                     codec.stop();
                     codec.release();
@@ -225,7 +229,7 @@ public class ScreenService extends Service implements INotify {
                 if (mMediaProjection != null) {
                     mMediaProjection.stop();
                 }
-            }
+            //}
             FlyLog.d("screen work thread exit!");
         }, "screen_encoder");
         workThread.start();
@@ -277,8 +281,7 @@ public class ScreenService extends Service implements INotify {
             case Protocol.TYPE_SCREEN_U_READY: {
                 long uid = ByteUtil.bytes2Long(data, 16, true);
                 mScreenUsers.put(uid, SystemClock.uptimeMillis());
-                FlyLog.d("recv screen avc start, client size[%d]uid[%d]", mScreenUsers.size(), uid);
-                Notify.get().miniNotify(Protocol.SCREEN_T_START, Protocol.SCREEN_T_START.length, mTid, uid, null);
+                Notify.get().miniNotify(Protocol.SCREEN_T_START, Protocol.SCREEN_T_START.length, Fzebra.get().getTid(), 0, null);
                 break;
             }
             case Protocol.TYPE_SCREEN_U_START: {
