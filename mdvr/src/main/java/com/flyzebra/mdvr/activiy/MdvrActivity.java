@@ -1,7 +1,5 @@
 package com.flyzebra.mdvr.activiy;
 
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
@@ -18,7 +16,6 @@ import com.flyzebra.core.notify.NotifyType;
 import com.flyzebra.mdvr.Config;
 import com.flyzebra.mdvr.MdvrService;
 import com.flyzebra.mdvr.R;
-import com.flyzebra.mdvr.screen.ScreenService;
 import com.flyzebra.mdvr.view.GlVideoView;
 import com.flyzebra.utils.ByteUtil;
 import com.flyzebra.utils.PropUtil;
@@ -44,11 +41,7 @@ public class MdvrActivity extends AppCompatActivity implements INotify {
         PropUtil.set("ctl.stop", "MonitorHobotApk");
         ShellUtil.exec("am force-stop com.hobot.sample.app");
 
-        //Remote Ctrl
-        ScreenService.startService(this);
-
-        startService(new Intent(this, MdvrService.class));
-        Notify.get().registerListener(this);
+        MdvrService.startService(this);
 
         glVideoView = findViewById(R.id.full_sv);
         layoutSurfaceViews = findViewById(R.id.ll_svs);
@@ -78,8 +71,8 @@ public class MdvrActivity extends AppCompatActivity implements INotify {
             }
         });
 
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction("android.hardware.usb.action.USB_STATE");
+        //IntentFilter intentFilter = new IntentFilter();
+        //intentFilter.addAction("android.hardware.usb.action.USB_STATE");
         //registerReceiver(recevier, intentFilter);
 
         mSelectChannel = (int) SPUtil.get(MdvrActivity.this, "SELECET_CHANNEL", 0);
@@ -97,6 +90,12 @@ public class MdvrActivity extends AppCompatActivity implements INotify {
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        Notify.get().registerListener(this);
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         View decorView = getWindow().getDecorView();
@@ -110,12 +109,16 @@ public class MdvrActivity extends AppCompatActivity implements INotify {
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+        Notify.get().unregisterListener(this);
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         //unregisterReceiver(recevier);
-        Notify.get().unregisterListener(this);
-        stopService(new Intent(this, MdvrService.class));
-        stopService(new Intent(this, ScreenService.class));
+        //stopService(new Intent(this, MdvrService.class));
     }
 
     @Override
