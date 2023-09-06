@@ -29,8 +29,8 @@ import com.flyzebra.mdvr.encoder.AacService;
 import com.flyzebra.mdvr.encoder.AvcService;
 import com.flyzebra.mdvr.input.InputService;
 import com.flyzebra.mdvr.mic.MicService;
+import com.flyzebra.mdvr.record.RecordService;
 import com.flyzebra.mdvr.screen.ScreenService;
-import com.flyzebra.mdvr.store.StorageService;
 import com.flyzebra.mdvr.wifi.WifiService;
 import com.flyzebra.mdvr.wifip2p.WifiP2PService;
 import com.flyzebra.utils.ByteUtil;
@@ -45,7 +45,7 @@ public class MdvrService extends Service implements INotify {
 
     private final String NOTI_ID = "NOTIFICATION_ID_MCTL";
 
-    private final StorageService storeService = new StorageService(this);
+    private final RecordService recordService = new RecordService(this);
     private final WifiService wifiService = new WifiService(this);
     private final WifiP2PService wifiP2PService = new WifiP2PService(this);
     //private final RtmpService rtmpServer = new RtmpService(this);
@@ -125,7 +125,7 @@ public class MdvrService extends Service implements INotify {
         Fzebra.get().init(this.getApplicationContext());
 
         Fzebra.get().startRtspServer();
-        storeService.start();
+        recordService.start();
         wifiService.start();
         wifiP2PService.start();
 
@@ -168,7 +168,7 @@ public class MdvrService extends Service implements INotify {
         Fzebra.get().stopRtspServer();
         Fzebra.get().release();
 
-        storeService.stop();
+        recordService.stop();
         wifiService.stop();
         wifiP2PService.stop();
 

@@ -1,4 +1,4 @@
-package com.flyzebra.mdvr.store;
+package com.flyzebra.mdvr.record;
 
 import android.os.StatFs;
 import android.text.TextUtils;

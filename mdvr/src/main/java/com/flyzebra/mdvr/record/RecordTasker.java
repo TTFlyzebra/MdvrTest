@@ -1,4 +1,4 @@
-package com.flyzebra.mdvr.store;
+package com.flyzebra.mdvr.record;
 
 import android.os.SystemClock;
 import android.text.TextUtils;
@@ -15,7 +15,7 @@ import com.flyzebra.utils.FlyLog;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class FileSaveTasker implements INotify {
+public class RecordTasker implements INotify {
     private final int mChannel;
     private final AtomicBoolean is_stop = new AtomicBoolean(true);
     private final ByteBuffer saveBuf = ByteBuffer.allocateDirect(2 * 1024 * 1024);
@@ -24,11 +24,11 @@ public class FileSaveTasker implements INotify {
     private int videoHeadSize = 16;
     private int audioHeadSize = 16;
 
-    public FileSaveTasker(int channel) {
+    public RecordTasker(int channel) {
         mChannel = channel;
     }
 
-    public void onCreate(StorageService service) {
+    public void onCreate(RecordService service) {
         if (service == null) return;
         FlyLog.d("StorageTasker[%d] start !", mChannel);
         Notify.get().registerListener(this);
@@ -162,7 +162,7 @@ public class FileSaveTasker implements INotify {
         }
         long utime = SystemClock.uptimeMillis() - stime;
         if (utime > 50) {
-            FlyLog.e("FileSaveTasker handle use type %d, time %d, size %d", type, utime, size);
+            FlyLog.e("RecordTasker handle use type %d, time %d, size %d", type, utime, size);
         }
     }
 }

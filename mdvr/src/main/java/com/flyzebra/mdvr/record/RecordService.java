@@ -1,4 +1,4 @@
-package com.flyzebra.mdvr.store;
+package com.flyzebra.mdvr.record;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -21,14 +21,14 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 
-public class StorageService {
+public class RecordService {
     private final Context mContext;
-    private final StorageReceiver receiver = new StorageReceiver();
-    private final Hashtable<Integer, FileSaveTasker> taskerMap = new Hashtable<>();
+    private final MyReceiver receiver = new MyReceiver();
+    private final Hashtable<Integer, RecordTasker> taskerMap = new Hashtable<>();
     private boolean is_recored = false;
     private String rootPath = null;
 
-    private static final HandlerThread fileDeleteThread = new HandlerThread("StorageService");
+    private static final HandlerThread fileDeleteThread = new HandlerThread("RecordService");
 
     static {
         fileDeleteThread.start();
@@ -37,12 +37,12 @@ public class StorageService {
     private static final Handler tHandler = new Handler(fileDeleteThread.getLooper());
     private static final Handler mHandler = new Handler(Looper.getMainLooper());
 
-    public StorageService(Context context) {
+    public RecordService(Context context) {
         mContext = context;
     }
 
     public void start() {
-        FlyLog.d("StorageService start!");
+        FlyLog.d("RecordService start!");
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_MEDIA_MOUNTED);
         filter.addAction(Intent.ACTION_MEDIA_UNMOUNTED);
@@ -58,7 +58,7 @@ public class StorageService {
         mHandler.removeCallbacksAndMessages(null);
         mContext.unregisterReceiver(receiver);
         stopRecord();
-        FlyLog.d("StorageService stop!");
+        FlyLog.d("RecordService stop!");
     }
 
     public TFcard getStorageTFcard() {
@@ -206,7 +206,7 @@ public class StorageService {
         }
 
         for (int i = 0; i < Config.MAX_CAM; i++) {
-            FileSaveTasker tasker = new FileSaveTasker(i);
+            RecordTasker tasker = new RecordTasker(i);
             tasker.onCreate(this);
             taskerMap.put(i, tasker);
         }
@@ -215,14 +215,14 @@ public class StorageService {
 
     public void stopRecord() {
         if (!is_recored) return;
-        Enumeration<FileSaveTasker> elements = taskerMap.elements();
+        Enumeration<RecordTasker> elements = taskerMap.elements();
         while (elements.hasMoreElements()) {
             elements.nextElement().onDestory();
         }
         is_recored = false;
     }
 
-    public class StorageReceiver extends BroadcastReceiver {
+    public class MyReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(Intent.ACTION_MEDIA_MOUNTED) || intent.getAction().equals(Intent.ACTION_MEDIA_UNMOUNTED)) {
