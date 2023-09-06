@@ -87,6 +87,8 @@ public class GlRenderNv12 implements GLSurfaceView.Renderer {
             setSize(width, height);
         }
         synchronized (objectLock) {
+            y.clear();
+            uv.clear();
             y.put(nv12, 0, width * height);
             uv.put(nv12, width * height, width * height / 2);
             y.flip();
@@ -123,15 +125,15 @@ public class GlRenderNv12 implements GLSurfaceView.Renderer {
     @Override
     public void onDrawFrame(GL10 gl) {
         if (width <= 0 || height <= 0) return;
-        GLES20.glClearColor(0.0f, 0.70f, 0.0f, 1.0f);
         synchronized (objectLock) {
             GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureIds[0]);
-            GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_LUMINANCE, width, height, 0, GLES20.GL_LUMINANCE, GLES20.GL_UNSIGNED_BYTE, y);//
+            GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_LUMINANCE, width, height, 0, GLES20.GL_LUMINANCE, GLES20.GL_UNSIGNED_BYTE, y);
             GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureIds[1]);
             GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_LUMINANCE_ALPHA, width / 2, height / 2, 0, GLES20.GL_LUMINANCE_ALPHA, GLES20.GL_UNSIGNED_BYTE, uv);
         }
+        GLES20.glClearColor(0.0f, 0.70f, 0.0f, 1.0f);
 
         GLES20.glUseProgram(glprogram);
         GLES20.glUniformMatrix4fv(vMatrix, 1, false, vMatrixData, 0);

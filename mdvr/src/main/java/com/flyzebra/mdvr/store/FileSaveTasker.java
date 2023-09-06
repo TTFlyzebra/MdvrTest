@@ -126,7 +126,7 @@ public class FileSaveTasker implements INotify {
             if (mChannel != channel) return;
             long pts = ByteUtil.bytes2Long(params, 2, true);
             synchronized (saveLock) {
-                if (saveBuf.remaining() < size) {
+                if (saveBuf.remaining() < size + videoHeadSize) {
                     FlyLog.e("avc save buffer[%d] is full, clean all buffer!", mChannel);
                     saveBuf.clear();
                 }
@@ -144,7 +144,7 @@ public class FileSaveTasker implements INotify {
             if (mChannel != channel) return;
             long pts = ByteUtil.bytes2Long(params, 2, true);
             synchronized (saveLock) {
-                if (saveBuf.remaining() < size) {
+                if (saveBuf.remaining() < size + audioHeadSize) {
                     FlyLog.e("aac save buffer[%d] is full, clean all buffer!", mChannel);
                     saveBuf.clear();
                 }

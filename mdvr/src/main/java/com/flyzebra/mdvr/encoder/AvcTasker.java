@@ -7,8 +7,6 @@
  */
 package com.flyzebra.mdvr.encoder;
 
-import android.os.SystemClock;
-
 import com.flyzebra.core.media.VideoCodec;
 import com.flyzebra.core.media.VideoCodecCB;
 import com.flyzebra.core.notify.INotify;
@@ -107,15 +105,10 @@ public class AvcTasker implements VideoCodecCB, INotify {
 
     @Override
     public void notifyAvcData(int channel, byte[] data, int size, long pts) {
-        long stime = SystemClock.uptimeMillis();
         byte[] params = new byte[10];
         ByteUtil.shortToBytes((short) channel, params, 0, true);
         ByteUtil.longToBytes(pts, params, 2, true);
         Notify.get().handledata(NotifyType.NOTI_CAMOUT_AVC, data, size, params);
-        long utime = SystemClock.uptimeMillis() - stime;
-        if (utime > 50) {
-            FlyLog.e("notifyAvcData  use time %d, data size %d", utime, size);
-        }
     }
 
     @Override

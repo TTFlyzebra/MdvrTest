@@ -9,6 +9,7 @@ package com.flyzebra.core.notify;
 
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.SystemClock;
 
 import com.flyzebra.utils.ByteUtil;
 import com.flyzebra.utils.FlyLog;
@@ -70,6 +71,7 @@ public class Notify {
     }
 
     public void notifydata(byte[] data, int size) {
+        long stime = SystemClock.uptimeMillis();
         listCount.incrementAndGet();
         for (INotify notify : notifys) {
             notify.notify(data, size);
@@ -78,9 +80,14 @@ public class Notify {
         synchronized (listLock) {
             listLock.notifyAll();
         }
+        long utime = SystemClock.uptimeMillis() - stime;
+        if (SystemClock.uptimeMillis() - stime > 50) {
+            FlyLog.e("Notify notifydata use time %d, size %d", utime, size);
+        }
     }
 
     public void handledata(int type, byte[] data, int size, byte[] params) {
+        long stime = SystemClock.uptimeMillis();
         listCount.incrementAndGet();
         for (INotify notify : notifys) {
             notify.handle(type, data, size, params);
@@ -88,6 +95,10 @@ public class Notify {
         listCount.decrementAndGet();
         synchronized (listLock) {
             listLock.notifyAll();
+        }
+        long utime = SystemClock.uptimeMillis() - stime;
+        if (SystemClock.uptimeMillis() - stime > 50) {
+            FlyLog.e("Notify handledata use type %d, time %d, size %d", type, utime, size);
         }
     }
 
