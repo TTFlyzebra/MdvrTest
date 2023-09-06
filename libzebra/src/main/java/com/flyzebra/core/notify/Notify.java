@@ -81,8 +81,8 @@ public class Notify {
             listLock.notifyAll();
         }
         long utime = SystemClock.uptimeMillis() - stime;
-        if (SystemClock.uptimeMillis() - stime > 50) {
-            FlyLog.e("Notify notifydata use time %d, size %d", utime, size);
+        if (utime > 50) {
+            FlyLog.w("Notify notifydata use time %d, size %d", utime, size);
         }
     }
 
@@ -97,8 +97,8 @@ public class Notify {
             listLock.notifyAll();
         }
         long utime = SystemClock.uptimeMillis() - stime;
-        if (SystemClock.uptimeMillis() - stime > 50) {
-            FlyLog.e("Notify handledata use type %d, time %d, size %d", type, utime, size);
+        if (utime > 50) {
+            FlyLog.w("Notify handledata use type %d, time %d, size %d", type, utime, size);
         }
     }
 

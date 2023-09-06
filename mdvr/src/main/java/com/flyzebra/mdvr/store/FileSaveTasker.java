@@ -1,5 +1,6 @@
 package com.flyzebra.mdvr.store;
 
+import android.os.SystemClock;
 import android.text.TextUtils;
 
 import com.flyzebra.core.media.ZebraMuxer;
@@ -17,7 +18,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class FileSaveTasker implements INotify {
     private final int mChannel;
     private final AtomicBoolean is_stop = new AtomicBoolean(true);
-    private final ByteBuffer saveBuf = ByteBuffer.wrap(new byte[10 * 1024 * 1024]);
+    private final ByteBuffer saveBuf = ByteBuffer.allocateDirect(2 * 1024 * 1024);
     private final Object saveLock = new Object();
     private Thread saveThread;
     private int videoHeadSize = 16;
@@ -121,6 +122,7 @@ public class FileSaveTasker implements INotify {
 
     @Override
     public void handle(int type, byte[] data, int size, byte[] params) {
+        long stime = SystemClock.uptimeMillis();
         if (NotifyType.NOTI_CAMOUT_AVC == type) {
             short channel = ByteUtil.bytes2Short(params, 0, true);
             if (mChannel != channel) return;
@@ -157,6 +159,10 @@ public class FileSaveTasker implements INotify {
                 saveBuf.put(head, 8, 8);
                 saveLock.notify();
             }
+        }
+        long utime = SystemClock.uptimeMillis() - stime;
+        if (utime > 50) {
+            FlyLog.e("FileSaveTasker handle use type %d, time %d, size %d", type, utime, size);
         }
     }
 }

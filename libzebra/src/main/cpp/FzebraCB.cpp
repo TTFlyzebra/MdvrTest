@@ -39,6 +39,7 @@ FzebraCB::~FzebraCB() {
 }
 
 void FzebraCB::javaNotifydata(const char *data, int32_t size) {
+    std::lock_guard<std::mutex> lock(mlock_call);
     int status = mjvm->GetEnv((void **) &mEnv, JNI_VERSION_1_4);
     bool isAttacked = false;
     if (status < 0) {
@@ -59,6 +60,7 @@ void FzebraCB::javaNotifydata(const char *data, int32_t size) {
 }
 
 void FzebraCB::javaHandledata(int32_t type, const char *data, int32_t dataLen, const char *parmas, int32_t parmasLen) {
+    std::lock_guard<std::mutex> lock(mlock_call);
     int status = mjvm->GetEnv((void **) &mEnv, JNI_VERSION_1_4);
     bool isAttacked = false;
     if (status < 0) {
