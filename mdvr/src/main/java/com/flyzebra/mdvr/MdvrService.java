@@ -122,8 +122,6 @@ public class MdvrService extends Service implements INotify {
         Global.audioHeadMap.clear();
         Global.videoHeadMap.clear();
 
-        Fzebra.get().init(this.getApplicationContext());
-
         Fzebra.get().startRtspServer();
         recordService.start();
         wifiService.start();
@@ -166,7 +164,6 @@ public class MdvrService extends Service implements INotify {
     public void onDestroy() {
         Notify.get().unregisterListener(this);
         Fzebra.get().stopRtspServer();
-        Fzebra.get().release();
 
         recordService.stop();
         wifiService.stop();
@@ -187,6 +184,7 @@ public class MdvrService extends Service implements INotify {
         inputService.stop();
 
         Fzebra.get().stopUserServer();
+        Fzebra.get().release();
         FlyLog.i("#####MdvrService exit!#####");
     }
 

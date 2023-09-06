@@ -3,6 +3,7 @@ package com.flyzebra.mdvr;
 import android.app.Application;
 
 import com.flyzebra.arcsoft.ArcSoftActive;
+import com.flyzebra.core.Fzebra;
 import com.flyzebra.utils.FlyLog;
 
 public class MyApp extends Application {
@@ -10,6 +11,9 @@ public class MyApp extends Application {
     public void onCreate() {
         super.onCreate();
         FlyLog.d("##############MDVR Version 1.0.0##############");
+
+        Fzebra.get().init(this.getApplicationContext());
+
         ArcSoftActive.get().init(getApplicationContext());
         ArcSoftActive.get().active(getApplicationContext(), Config.appId, Config.appSecret);
     }

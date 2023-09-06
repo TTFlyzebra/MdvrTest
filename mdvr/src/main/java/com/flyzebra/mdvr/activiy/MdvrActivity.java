@@ -1,5 +1,6 @@
 package com.flyzebra.mdvr.activiy;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
@@ -118,7 +119,7 @@ public class MdvrActivity extends AppCompatActivity implements INotify {
     protected void onDestroy() {
         super.onDestroy();
         //unregisterReceiver(recevier);
-        //stopService(new Intent(this, MdvrService.class));
+        stopService(new Intent(this, MdvrService.class));
     }
 
     @Override

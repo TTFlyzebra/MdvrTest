@@ -5,7 +5,7 @@
 
 #include <cstring>
 #include <cmath>
-#include <libyuvz.h>
+#include <libyuv.h>
 
 void
 FlyYuv::NV12ToI420(unsigned char *src, unsigned char *dst, int dst_offset, int width, int height) {
