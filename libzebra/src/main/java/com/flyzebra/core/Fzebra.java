@@ -54,26 +54,6 @@ public class Fzebra implements INotify {
         return mTid;
     }
 
-    public void startUserServer() {
-        if (_ptr_obj < 0) return;
-        _startUserServer(_ptr_obj);
-    }
-
-    public void stopUserServer() {
-        if (_ptr_obj < 0) return;
-        _stopUserServer(_ptr_obj);
-    }
-
-    public void startRtspServer() {
-        if (_ptr_obj < 0) return;
-        _startRtspServer(_ptr_obj);
-    }
-
-    public void stopRtspServer() {
-        if (_ptr_obj < 0) return;
-        _stopRtspServer(_ptr_obj);
-    }
-
     @Override
     public void notify(byte[] data, int size) {
         if (_ptr_obj < 0) return;
@@ -107,11 +87,31 @@ public class Fzebra implements INotify {
         _handle(_ptr_obj, type, data, size, params);
     }
 
-    public void javaNotifydata(byte[] data, int size) {
+    public void startUserServer() {
+        if (_ptr_obj < 0) return;
+        _startUserServer(_ptr_obj);
+    }
+
+    public void stopUserServer() {
+        if (_ptr_obj < 0) return;
+        _stopUserServer(_ptr_obj);
+    }
+
+    public void startRtspServer() {
+        if (_ptr_obj < 0) return;
+        _startRtspServer(_ptr_obj);
+    }
+
+    public void stopRtspServer() {
+        if (_ptr_obj < 0) return;
+        _stopRtspServer(_ptr_obj);
+    }
+
+    private void javaNotifydata(byte[] data, int size) {
         Notify.get().notifydata(data, size);
     }
 
-    public void javaHandleData(int type, byte[] data, int size, byte[] params) {
+    private void javaHandleData(int type, byte[] data, int size, byte[] params) {
         //Notify.get().handledata(type, data, size, params);
     }
 
