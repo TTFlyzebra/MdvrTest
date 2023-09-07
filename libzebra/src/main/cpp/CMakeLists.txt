@@ -4,8 +4,7 @@ project("zebra")
 
 include_directories(
         ${CMAKE_SOURCE_DIR}
-        ${CMAKE_SOURCE_DIR}/include
-)
+        ${CMAKE_SOURCE_DIR}/include)
 
 add_library(
         zebra
@@ -28,8 +27,7 @@ add_library(
         rtsp/RtspServer.cpp
         rtsp/RtspClient.cpp
         server/UserServer.cpp
-        server/UserClient.cpp
-)
+        server/UserClient.cpp)
 
 add_library(
         yuv

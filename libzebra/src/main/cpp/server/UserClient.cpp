@@ -145,6 +145,10 @@ void UserClient::handle(NofifyType type, const char* data, int32_t size, const c
 {
     switch (type) {
         case NOTI_SCREEN_SPS: {
+            {
+                std::lock_guard<std::mutex> lock_screen(mlock_screen);
+                if (screen_set.find(T->tid) == screen_set.end()) return;
+            }
             char screen_avc[sizeof(SCREEN_AVC)];
             memcpy(screen_avc, SCREEN_AVC, sizeof(SCREEN_AVC));
             int32_t dLen = size + sizeof(SCREEN_AVC) - 8;
@@ -161,6 +165,10 @@ void UserClient::handle(NofifyType type, const char* data, int32_t size, const c
             break;
         }
         case NOTI_SCREEN_AVC: {
+            {
+                std::lock_guard<std::mutex> lock_screen(mlock_screen);
+                if (screen_set.find(T->tid) == screen_set.end()) return;
+            }
             char screen_avc[sizeof(SCREEN_AVC)];
             memcpy(screen_avc, SCREEN_AVC, sizeof(SCREEN_AVC));
             int32_t dLen = size + sizeof(SCREEN_AVC) - 8;
@@ -216,14 +224,12 @@ void UserClient::sendThread()
 {
     std::vector<char> sendData;
     while (!is_stop) {
-        int32_t sendSize = 0;
         {
             std::unique_lock<std::mutex> lock_send(mlock_send);
             while (!is_stop && sendBuf.empty()) {
                 mcond_send.wait(lock_send);
             }
             if (is_stop) break;
-            sendSize = sendBuf.size();
             if (sendBuf.size() > 0) {
                 sendData.insert(sendData.end(), sendBuf.begin(), sendBuf.begin() + sendBuf.size());
                 sendBuf.clear();
@@ -290,7 +296,7 @@ void UserClient::handleData()
         const NotifyData* notifyData = (NotifyData*)data;
         const int32_t size = handBuf.size();
         if (notifyData->type == TYPE_US_HEARTBEAT) {
-            //lastHeartBeat = TimeUtil::uptimeUsec();
+            lastHeartBeat = TimeUtil::uptimeUsec();
             char su_heartbeat[sizeof(SU_HEARTBEAT)];
             memcpy(su_heartbeat, SU_HEARTBEAT, 8);
             memcpy(su_heartbeat + 8, data + 8, 8);
@@ -445,7 +451,6 @@ void UserClient::disconnected()
 
 void UserClient::selfFixedThread()
 {
-    int32_t heart_count = 0;
     while (!is_stop) {
         for (int i = 0; i < 10; i++) {
 #if defined(WIN32)
