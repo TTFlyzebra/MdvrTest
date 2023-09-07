@@ -75,12 +75,11 @@ public class IDUtil {
             } else {
                 imei = tm.getDeviceId();
             }
-            if (TextUtils.isEmpty(imei))
-                imei = "";
         } catch (Exception e) {
             FlyLog.e(e.toString());
-            return "";
         }
+        if (TextUtils.isEmpty(imei))
+            imei = "1234567890";
         return imei.toUpperCase();
     }
 
@@ -117,6 +116,7 @@ public class IDUtil {
 
     /**
      * 获取设备AndroidID
+     *
      * @param context 上下文
      * @return AndroidID
      */
