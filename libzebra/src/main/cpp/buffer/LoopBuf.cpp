@@ -57,6 +57,15 @@ size_t LoopBuf::pushFlash(size_t size)
         FLOGE("[%s]LoopBuf pushFlash is full, [%zu][%zu]", _tag, size, _capacity-_size);
         return 0;
     }
+
+    //if (_epos < _itemsize) {
+    //    int32_t c_size = std::min(size, _itemsize - _epos);
+    //    memcpy(_data + _capacity + _epos, _data + _epos, c_size);
+    //}
+    //else if ((_epos + size) > _capacity) {
+    //    int32_t c_size = _epos + size - _capacity;
+    //    memcpy(_data, _data + _capacity, c_size);
+    //}
     _epos = (_epos + size) % _capacity;
     _size += size;
     return size;

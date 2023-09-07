@@ -424,16 +424,14 @@ void RtspClient::onDescribeRequest(const char *data, int32_t cseq) {
     //avc
     if (!is_hevc) {
         int spsLen = ptr_1 - 4;
-        const uint8_t *sps = reinterpret_cast<const uint8_t *>(videoHead + ptr_0 + 4);
+        const char *sps = reinterpret_cast<const char *>(videoHead + ptr_0 + 4);
         int ppsLen = videoHeadLen - ptr_1 - 4;
-        const uint8_t *pps = reinterpret_cast<const uint8_t *>(videoHead + ptr_1 + 4);
+        const char *pps = reinterpret_cast<const char *>(videoHead + ptr_1 + 4);
 
-        int outspsLen;
-        int outppsLen;
-        uint8_t outsps[1024]{0};
-        uint8_t outpps[1024]{0};
-        Base64::encode(sps, spsLen, outsps, &outspsLen);
-        Base64::encode(pps, ppsLen, outpps, &outppsLen);
+        char outsps[1024]{0};
+        char outpps[1024]{0};
+        int outspsLen = Base64::encrypt(sps, spsLen, outsps, 1024);
+        int outppsLen = Base64::encrypt(pps, ppsLen, outpps, 1024);
 
         memset(temp, 0, strlen(temp));
         sdp.append("m=video 0 RTP/AVP 96\r\n");
@@ -445,21 +443,18 @@ void RtspClient::onDescribeRequest(const char *data, int32_t cseq) {
         //hevc
     else {
         int vpsLen = ptr_1 - 4;
-        const uint8_t *vps = reinterpret_cast<const uint8_t *>(videoHead + ptr_0 + 4);
+        const char *vps = reinterpret_cast<const char *>(videoHead + ptr_0 + 4);
         int spsLen = ptr_2 - ptr_1 - 4;
-        const uint8_t *sps = reinterpret_cast<const uint8_t *>(videoHead + ptr_1 + 4);
+        const char *sps = reinterpret_cast<const char *>(videoHead + ptr_1 + 4);
         int ppsLen = videoHeadLen - ptr_2 - 4;
-        const uint8_t *pps = reinterpret_cast<const uint8_t *>(videoHead + ptr_2 + 4);
+        const char *pps = reinterpret_cast<const char *>(videoHead + ptr_2 + 4);
 
-        int outvpsLen;
-        int outspsLen;
-        int outppsLen;
-        uint8_t outvps[1024]{0};
-        uint8_t outsps[1024]{0};
-        uint8_t outpps[1024]{0};
-        Base64::encode(vps, vpsLen, outvps, &outvpsLen);
-        Base64::encode(sps, spsLen, outsps, &outspsLen);
-        Base64::encode(pps, ppsLen, outpps, &outppsLen);
+        char outvps[1024]{0};
+        char outsps[1024]{0};
+        char outpps[1024]{0};
+        int outvpsLen = Base64::encrypt(vps, vpsLen, outvps, 1024);
+        int outspsLen = Base64::encrypt(sps, spsLen, outsps, 1024);
+        int outppsLen = Base64::encrypt(pps, ppsLen, outpps, 1024);
 
         memset(temp, 0, strlen(temp));
         sdp.append("m=video 0 RTP/AVP 96\r\n");

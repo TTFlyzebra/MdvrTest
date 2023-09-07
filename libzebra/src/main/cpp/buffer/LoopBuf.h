@@ -10,12 +10,12 @@ public:
     ~LoopBuf();
 
     size_t push(const char* data, size_t size);
-    char* pushTemp(size_t size);
-    size_t pushFlash(size_t size);
+    char* pushTemp(size_t size = 0);
+    size_t pushFlash(size_t size = 0);
 
     char* pop(size_t size);
-    char* popTemp(size_t size);
-    size_t popFlash(size_t size);
+    char* popTemp(size_t size = 0);
+    size_t popFlash(size_t size = 0);
 
     bool empty();
     size_t size();

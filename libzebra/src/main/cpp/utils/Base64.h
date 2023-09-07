@@ -11,10 +11,10 @@ class Base64 {
 public:
     Base64() {};
     ~Base64() {};
-    static void encode(const uint8_t* _data, int32_t size, uint8_t* text, int32_t* outLen);
-    static void decode(const uint8_t* _text, int32_t size, uint8_t* data, int32_t* outLen);
+    static size_t encrypt(const char* in_data, int32_t in_size, char* out_buffer, int32_t buf_size);
+    static size_t decrypt(const char* in_data, int32_t in_size, char* out_buffer, int32_t buf_size);
 private:
-    static uint8_t encode6Bit(unsigned x);
+    static char encrypt6Bit(unsigned x);
 };
 
 

@@ -1,7 +1,8 @@
 #include <stdint.h>
 #include "Base64.h"
+#include "utils/FlyLog.h"
 
-uint8_t Base64::encode6Bit(unsigned x) {
+char Base64::encrypt6Bit(unsigned x) {
     if (x <= 25) {
         return 'A' + x;
     }
@@ -12,83 +13,82 @@ uint8_t Base64::encode6Bit(unsigned x) {
         return '0' + x - 52;
     }
     else if (x == 62) {
-        return '+';
+        return '-';
     }
     else {
-        return '/';
+        return '_';
     }
 }
 
-void Base64::encode(const uint8_t* _data, int32_t size, uint8_t* text, int32_t* outLen)
+size_t Base64::encrypt(const char* in_data, int32_t in_size, char* out_buffer, int32_t buf_size)
 {
-    const uint8_t* data = (const uint8_t*)_data;
-    uint8_t* out = (uint8_t*)text;
+    const uint8_t* data = (const uint8_t*)in_data;
+    uint8_t* out = (uint8_t*)out_buffer;
 
     int i = 0;
     int n = 0;
-    for (i = 0; i < (size / 3) * 3; i += 3) {
+    for (i = 0; i < (in_size / 3) * 3; i += 3) {
         uint8_t x1 = data[i];
         uint8_t x2 = data[i + 1];
         uint8_t x3 = data[i + 2];
-
-        out[n++] = (encode6Bit(x1 >> 2));
-        out[n++] = (encode6Bit((x1 << 4 | x2 >> 4) & 0x3f));
-        out[n++] = (encode6Bit((x2 << 2 | x3 >> 6) & 0x3f));
-        out[n++] = (encode6Bit(x3 & 0x3f));
+        out[n++] = (encrypt6Bit(x1 >> 2));
+        out[n++] = (encrypt6Bit((x1 << 4 | x2 >> 4) & 0x3f));
+        out[n++] = (encrypt6Bit((x2 << 2 | x3 >> 6) & 0x3f));
+        out[n++] = (encrypt6Bit(x3 & 0x3f));
     }
-    switch (size % 3) {
+    switch (in_size % 3) {
     case 0:
         break;
     case 2:
     {
         uint8_t x1 = data[i];
         uint8_t x2 = data[i + 1];
-        out[n++] = (encode6Bit(x1 >> 2));
-        out[n++] = (encode6Bit((x1 << 4 | x2 >> 4) & 0x3f));
-        out[n++] = (encode6Bit((x2 << 2) & 0x3f));
+        out[n++] = (encrypt6Bit(x1 >> 2));
+        out[n++] = (encrypt6Bit((x1 << 4 | x2 >> 4) & 0x3f));
+        out[n++] = (encrypt6Bit((x2 << 2) & 0x3f));
         out[n++] = ('=');
         break;
     }
     default:
     {
         uint8_t x1 = data[i];
-        out[n++] = (encode6Bit(x1 >> 2));
-        out[n++] = (encode6Bit((x1 << 4) & 0x3f));
+        out[n++] = (encrypt6Bit(x1 >> 2));
+        out[n++] = (encrypt6Bit((x1 << 4) & 0x3f));
         out[n++] = ('=');
         out[n++] = ('=');
         break;
     }
     }
-    *outLen = n;
+    return n;
 }
 
-void Base64::decode(const uint8_t* _text, int32_t size, uint8_t* data, int32_t* outLen)
+size_t Base64::decrypt(const char* in_data, int32_t in_size, char* out_buffer, int32_t buf_size)
 {
-    if ((size % 4) != 0) {
-        *outLen = -1;
-        return;
+    if ((in_size % 4) != 0) {
+        FLOGE("Base64 decrypt data size error.");
+        return 0;
     }
     int32_t padding = 0;
-    if (size >= 1 && _text[size - 1] == '=') {
+    if (in_size >= 1 && in_data[in_size - 1] == '=') {
         padding = 1;
 
-        if (size >= 2 && _text[size - 2] == '=') {
+        if (in_size >= 2 && in_data[in_size - 2] == '=') {
             padding = 2;
 
-            if (size >= 3 && _text[size - 3] == '=') {
+            if (in_size >= 3 && in_data[in_size - 3] == '=') {
                 padding = 3;
             }
         }
     }
-    size_t retLen = (size / 4) * 3 - padding;
-    if (*outLen < retLen) {
-        *outLen = -1;
-        return;
+    size_t retLen = (in_size / 4) * 3 - padding;
+    if (buf_size < retLen) {
+        FLOGE("Base64 decrypt buffer size is too small.");
+        return 0;
     }
     size_t j = 0;
     uint32_t accum = 0;
-    for (size_t i = 0; i < size; ++i) {
-        uint8_t c = _text[i];
+    for (size_t i = 0; i < in_size; ++i) {
+        char c = in_data[i];
         unsigned value;
         if (c >= 'A' && c <= 'Z') {
             value = c - 'A';
@@ -106,24 +106,22 @@ void Base64::decode(const uint8_t* _text, int32_t size, uint8_t* data, int32_t* 
             value = 63;
         }
         else if (c != '=') {
-            *outLen = -1;
-            return;
+            return 0;
         }
         else {
-            if (i < size - padding) {
-                *outLen = -1;
-                return;
+            if (i < in_size - padding) {
+                FLOGE("Base64 decrypt error.");
+                return 0;
             }
-
             value = 0;
         }
         accum = (accum << 6) | value;
         if (((i + 1) % 4) == 0) {
-            if (j < retLen) { data[j++] = (accum >> 16); }
-            if (j < retLen) { data[j++] = (accum >> 8) & 0xff; }
-            if (j < retLen) { data[j++] = accum & 0xff; }
+            if (j < retLen) { out_buffer[j++] = (accum >> 16); }
+            if (j < retLen) { out_buffer[j++] = (accum >> 8) & 0xff; }
+            if (j < retLen) { out_buffer[j++] = accum & 0xff; }
             accum = 0;
         }
     }
-    *outLen = j;
+    return j;
 }

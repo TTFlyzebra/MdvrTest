@@ -2,7 +2,6 @@
 // Created by FlyZebra on 2021/9/15 0015.
 //
 
-#include <unistd.h>
 #include "Notify.h"
 
 #include "Config.h"
@@ -11,13 +10,17 @@
 #include "utils/FlyLog.h"
 #include "utils/ByteUtil.h"
 #include "utils/SysUtil.h"
+#if defined(WIN32)
+#elif defined(__unix)
+#include <unistd.h>
+#endif
 
 Notify::Notify()
-    : is_stop(false)
-    , mlist_count(0)
+        : is_stop(false)
+        , mlist_count(0)
 {
     FLOGD("%s()", __func__);
-    dataBuf = BufferManager::get()->createBuffer(1024*1024*10, 1024, "Notify");
+    dataBuf = BufferManager::get()->createBuffer(10 * 1024 * 1024, 1024, "Notify");
     data_t = new std::thread(&Notify::updataThread, this);
     SysUtil::setThreadName(data_t, "Notify_data");
 }
@@ -39,30 +42,38 @@ Notify::~Notify()
     FLOGD("%s()", __func__);
 }
 
-void Notify::registerListener(INotify *notify)
+void Notify::registerListener(INotify* notify)
 {
     if (is_stop) return;
     while (mlist_count > 0) {
+#if defined(WIN32)
+        _sleep(100);
+#elif defined(__unix)
         usleep(100000);
+#endif
     }
     std::lock_guard<std::mutex> lock(mlock_list);
     notifyList.push_back(notify);
 }
 
-void Notify::unregisterListener(INotify *notify)
+void Notify::unregisterListener(INotify* notify)
 {
     if (is_stop) return;
     while (mlist_count > 0) {
+#if defined(WIN32)
+        _sleep(100);
+#elif defined(__unix)
         usleep(100000);
+#endif
     }
     std::lock_guard<std::mutex> lock(mlock_list);
     notifyList.remove(notify);
 }
 
-void Notify::notifydata(const char *data, int32_t size)
+void Notify::notifydata(const char* data, int32_t size)
 {
     mlist_count++;
-    for (auto &it: notifyList) {
+    for (auto& it : notifyList) {
         ((INotify*)it)->notify(data, size);
     }
     mlist_count--;
@@ -71,7 +82,7 @@ void Notify::notifydata(const char *data, int32_t size)
 void Notify::handledata(NofifyType type, const char* data, int32_t dsize, const char* params, int32_t psize)
 {
     mlist_count++;
-    for (auto &it: notifyList) {
+    for (auto& it : notifyList) {
         ((INotify*)it)->handle(type, data, dsize, params, psize);
     }
     mlist_count--;
@@ -128,14 +139,14 @@ void Notify::unlock()
 bool Notify::try_lock()
 {
     bool flag = mlock_all.try_lock();
-    if(flag) mlock_all.unlock();
+    if (flag) mlock_all.unlock();
     return flag;
 }
 
 bool Notify::tryLock(std::mutex* lock)
 {
     bool flag = lock->try_lock();
-    if(flag) lock->unlock();
+    if (flag) lock->unlock();
     return flag;
 }
 
