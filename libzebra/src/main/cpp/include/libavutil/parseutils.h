@@ -50,7 +50,7 @@ int av_parse_ratio(AVRational *q, const char *str, int max,
                    int log_offset, void *log_ctx);
 
 #define av_parse_ratio_quiet(rate, str, max) \
-    av_parse_ratio(rate, str, max, AV_LOG_MAX_OFFSET, NULL)
+    av_parse_ratio(rate, str, max, AV_LOG_MAX_OFFSET, nullptr)
 
 /**
  * Parse str and put in width_ptr and height_ptr the detected values.
@@ -106,8 +106,8 @@ int av_parse_color(uint8_t *rgba_color, const char *color_string, int slen,
  * av_parse_color().
  *
  * @param color_idx index of the requested color, starting from 0
- * @param rgbp      if not NULL, will point to a 3-elements array with the color value in RGB
- * @return the color name string or NULL if color_idx is not in the array
+ * @param rgbp      if not nullptr, will point to a 3-elements array with the color value in RGB
+ * @return the color name string or nullptr if color_idx is not in the array
  */
 const char *av_get_known_color_name(int color_idx, const uint8_t **rgb);
 
@@ -181,7 +181,7 @@ int av_find_info_tag(char *arg, int arg_size, const char *tag1, const char *info
  *         required by the format string the return value points right after
  *         the last consumed input character. In case the whole input string
  *         is consumed the return value points to the null byte at the end of
- *         the string. On failure NULL is returned.
+ *         the string. On failure nullptr is returned.
  */
 char *av_small_strptime(const char *p, const char *fmt, struct tm *dt);
 

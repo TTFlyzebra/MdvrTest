@@ -11,8 +11,9 @@ import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager.ActionListener;
 import android.net.wifi.p2p.WifiP2pManager.Channel;
 
+import com.flyzebra.core.Fzebra;
+import com.flyzebra.utils.ByteUtil;
 import com.flyzebra.utils.FlyLog;
-import com.flyzebra.utils.IDUtil;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -44,7 +45,7 @@ public class WifiP2PService {
             Class<?> clz = wifiP2pManager.getClass();
             Method method = clz.getMethod("setDeviceName", Channel.class, String.class, ActionListener.class);
             method.setAccessible(true);
-            String name = "MD201_" + IDUtil.getIMEI(mContext);
+            String name = "MD201_" + ByteUtil.longToSysId(Fzebra.get().getTid());
             method.invoke(wifiP2pManager, wifChannel, name, null);
         } catch (Exception e) {
             FlyLog.e(e.toString());

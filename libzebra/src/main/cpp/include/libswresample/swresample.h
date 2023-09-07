@@ -34,11 +34,11 @@
  * Audio resampling, sample format conversion and mixing library.
  *
  * Interaction with lswr is done through SwrContext, which is
- * allocated with swr_alloc() or swr_alloc_set_opts2(). It is opaque, so all parameters
+ * allocated with swr_alloc() or swr_alloc_set_opts(). It is opaque, so all parameters
  * must be set with the @ref avoptions API.
  *
  * The first thing you will need to do in order to use lswr is to allocate
- * SwrContext. This can be done with swr_alloc() or swr_alloc_set_opts2(). If you
+ * SwrContext. This can be done with swr_alloc() or swr_alloc_set_opts(). If you
  * are using the former, you must set options through the @ref avoptions API.
  * The latter function provides the same feature, but it allows you to set some
  * common options in the same statement.
@@ -57,24 +57,23 @@
  * av_opt_set_sample_fmt(swr, "out_sample_fmt", AV_SAMPLE_FMT_S16,  0);
  * @endcode
  *
- * The same job can be done using swr_alloc_set_opts2() as well:
+ * The same job can be done using swr_alloc_set_opts() as well:
  * @code
- * SwrContext *swr = NULL;
- * int ret = swr_alloc_set_opts2(&swr,         // we're allocating a new context
- *                       &(AVChannelLayout)AV_CHANNEL_LAYOUT_STEREO, // out_ch_layout
+ * SwrContext *swr = swr_alloc_set_opts(nullptr,  // we're allocating a new context
+ *                       AV_CH_LAYOUT_STEREO,  // out_ch_layout
  *                       AV_SAMPLE_FMT_S16,    // out_sample_fmt
  *                       44100,                // out_sample_rate
- *                       &(AVChannelLayout)AV_CHANNEL_LAYOUT_5POINT1, // in_ch_layout
+ *                       AV_CH_LAYOUT_5POINT1, // in_ch_layout
  *                       AV_SAMPLE_FMT_FLTP,   // in_sample_fmt
  *                       48000,                // in_sample_rate
  *                       0,                    // log_offset
- *                       NULL);                // log_ctx
+ *                       nullptr);                // log_ctx
  * @endcode
  *
  * Once all values have been set, it must be initialized with swr_init(). If
  * you need to change the conversion parameters, you can change the parameters
  * using @ref AVOptions, as described above in the first example; or by using
- * swr_alloc_set_opts2(), but with the first argument the allocated context.
+ * swr_alloc_set_opts(), but with the first argument the allocated context.
  * You must then call swr_init() again.
  *
  * The conversion itself is done by repeatedly calling swr_convert().
@@ -83,7 +82,7 @@
  * samples. Samples that do not require future input can be retrieved at any
  * time by using swr_convert() (in_count can be set to 0).
  * At the end of conversion the resampling buffer can be flushed by calling
- * swr_convert() with NULL in and 0 in_count.
+ * swr_convert() with nullptr in and 0 in_count.
  *
  * The samples used in the conversion process can be managed with the libavutil
  * @ref lavu_sampmanip "samples manipulation" API, including av_samples_alloc()
@@ -102,7 +101,7 @@
  *     uint8_t *output;
  *     int out_samples = av_rescale_rnd(swr_get_delay(swr, 48000) +
  *                                      in_samples, 44100, 48000, AV_ROUND_UP);
- *     av_samples_alloc(&output, NULL, 2, out_samples,
+ *     av_samples_alloc(&output, nullptr, 2, out_samples,
  *                      AV_SAMPLE_FMT_S16, 0);
  *     out_samples = swr_convert(swr, &output, out_samples,
  *                                      input, in_samples);
@@ -125,12 +124,10 @@
 #include "libavutil/frame.h"
 #include "libavutil/samplefmt.h"
 
-#include "libswresample/version_major.h"
-#ifndef HAVE_AV_CONFIG_H
-/* When included as part of the ffmpeg build, only include the major version
- * to avoid unnecessary rebuilds. When included externally, keep including
- * the full version information. */
 #include "libswresample/version.h"
+
+#if LIBSWRESAMPLE_VERSION_MAJOR < 1
+#define SWR_CH_MAX 32   ///< Maximum number of channels
 #endif
 
 /**
@@ -206,10 +203,10 @@ const AVClass *swr_get_class(void);
  * Allocate SwrContext.
  *
  * If you use this function you will need to set the parameters (manually or
- * with swr_alloc_set_opts2()) before calling swr_init().
+ * with swr_alloc_set_opts()) before calling swr_init().
  *
- * @see swr_alloc_set_opts2(), swr_init(), swr_free()
- * @return NULL on error, allocated context otherwise
+ * @see swr_alloc_set_opts(), swr_init(), swr_free()
+ * @return nullptr on error, allocated context otherwise
  */
 struct SwrContext *swr_alloc(void);
 
@@ -234,7 +231,6 @@ int swr_init(struct SwrContext *s);
  */
 int swr_is_initialized(struct SwrContext *s);
 
-#if FF_API_OLD_CHANNEL_LAYOUT
 /**
  * Allocate SwrContext if needed and set/reset common parameters.
  *
@@ -242,7 +238,7 @@ int swr_is_initialized(struct SwrContext *s);
  * other hand, swr_alloc() can use swr_alloc_set_opts() to set the parameters
  * on the allocated context.
  *
- * @param s               existing Swr context if available, or NULL if not
+ * @param s               existing Swr context if available, or nullptr if not
  * @param out_ch_layout   output channel layout (AV_CH_LAYOUT_*)
  * @param out_sample_fmt  output sample format (AV_SAMPLE_FMT_*).
  * @param out_sample_rate output sample rate (frequency in Hz)
@@ -250,45 +246,16 @@ int swr_is_initialized(struct SwrContext *s);
  * @param in_sample_fmt   input sample format (AV_SAMPLE_FMT_*).
  * @param in_sample_rate  input sample rate (frequency in Hz)
  * @param log_offset      logging level offset
- * @param log_ctx         parent logging context, can be NULL
+ * @param log_ctx         parent logging context, can be nullptr
  *
  * @see swr_init(), swr_free()
- * @return NULL on error, allocated context otherwise
- * @deprecated use @ref swr_alloc_set_opts2()
+ * @return nullptr on error, allocated context otherwise
  */
-attribute_deprecated
 struct SwrContext *swr_alloc_set_opts(struct SwrContext *s,
                                       int64_t out_ch_layout, enum AVSampleFormat out_sample_fmt, int out_sample_rate,
                                       int64_t  in_ch_layout, enum AVSampleFormat  in_sample_fmt, int  in_sample_rate,
                                       int log_offset, void *log_ctx);
-#endif
 
-/**
- * Allocate SwrContext if needed and set/reset common parameters.
- *
- * This function does not require *ps to be allocated with swr_alloc(). On the
- * other hand, swr_alloc() can use swr_alloc_set_opts2() to set the parameters
- * on the allocated context.
- *
- * @param ps              Pointer to an existing Swr context if available, or to NULL if not.
- *                        On success, *ps will be set to the allocated context.
- * @param out_ch_layout   output channel layout (e.g. AV_CHANNEL_LAYOUT_*)
- * @param out_sample_fmt  output sample format (AV_SAMPLE_FMT_*).
- * @param out_sample_rate output sample rate (frequency in Hz)
- * @param in_ch_layout    input channel layout (e.g. AV_CHANNEL_LAYOUT_*)
- * @param in_sample_fmt   input sample format (AV_SAMPLE_FMT_*).
- * @param in_sample_rate  input sample rate (frequency in Hz)
- * @param log_offset      logging level offset
- * @param log_ctx         parent logging context, can be NULL
- *
- * @see swr_init(), swr_free()
- * @return 0 on success, a negative AVERROR code on error.
- *         On error, the Swr context is freed and *ps set to NULL.
- */
-int swr_alloc_set_opts2(struct SwrContext **ps,
-                        AVChannelLayout *out_ch_layout, enum AVSampleFormat out_sample_fmt, int out_sample_rate,
-                        AVChannelLayout *in_ch_layout, enum AVSampleFormat  in_sample_fmt, int  in_sample_rate,
-                        int log_offset, void *log_ctx);
 /**
  * @}
  *
@@ -297,7 +264,7 @@ int swr_alloc_set_opts2(struct SwrContext **ps,
  */
 
 /**
- * Free the given SwrContext and set the pointer to NULL.
+ * Free the given SwrContext and set the pointer to nullptr.
  *
  * @param[in] s a pointer to a pointer to Swr context
  */
@@ -381,7 +348,7 @@ int64_t swr_next_pts(struct SwrContext *s, int64_t pts);
  * @param[in]     sample_delta  delta in PTS per sample
  * @param[in]     compensation_distance number of samples to compensate for
  * @return    >= 0 on success, AVERROR error codes if:
- *            @li @c s is NULL,
+ *            @li @c s is nullptr,
  *            @li @c compensation_distance is less than 0,
  *            @li @c compensation_distance is 0 but sample_delta is not,
  *            @li compensation unsupported by resampler, or
@@ -399,7 +366,6 @@ int swr_set_compensation(struct SwrContext *s, int sample_delta, int compensatio
  */
 int swr_set_channel_mapping(struct SwrContext *s, const int *channel_map);
 
-#if FF_API_OLD_CHANNEL_LAYOUT
 /**
  * Generate a channel mixing matrix.
  *
@@ -420,48 +386,15 @@ int swr_set_channel_mapping(struct SwrContext *s, const int *channel_map);
  * @param stride              distance between adjacent input channels in the
  *                            matrix array
  * @param matrix_encoding     matrixed stereo downmix mode (e.g. dplii)
- * @param log_ctx             parent logging context, can be NULL
+ * @param log_ctx             parent logging context, can be nullptr
  * @return                    0 on success, negative AVERROR code on failure
- * @deprecated                use @ref swr_build_matrix2()
  */
-attribute_deprecated
 int swr_build_matrix(uint64_t in_layout, uint64_t out_layout,
                      double center_mix_level, double surround_mix_level,
                      double lfe_mix_level, double rematrix_maxval,
                      double rematrix_volume, double *matrix,
                      int stride, enum AVMatrixEncoding matrix_encoding,
                      void *log_ctx);
-#endif
-
-/**
- * Generate a channel mixing matrix.
- *
- * This function is the one used internally by libswresample for building the
- * default mixing matrix. It is made public just as a utility function for
- * building custom matrices.
- *
- * @param in_layout           input channel layout
- * @param out_layout          output channel layout
- * @param center_mix_level    mix level for the center channel
- * @param surround_mix_level  mix level for the surround channel(s)
- * @param lfe_mix_level       mix level for the low-frequency effects channel
- * @param rematrix_maxval     if 1.0, coefficients will be normalized to prevent
- *                            overflow. if INT_MAX, coefficients will not be
- *                            normalized.
- * @param[out] matrix         mixing coefficients; matrix[i + stride * o] is
- *                            the weight of input channel i in output channel o.
- * @param stride              distance between adjacent input channels in the
- *                            matrix array
- * @param matrix_encoding     matrixed stereo downmix mode (e.g. dplii)
- * @param log_ctx             parent logging context, can be NULL
- * @return                    0 on success, negative AVERROR code on failure
- */
-int swr_build_matrix2(const AVChannelLayout *in_layout, const AVChannelLayout *out_layout,
-                      double center_mix_level, double surround_mix_level,
-                      double lfe_mix_level, double maxval,
-                      double rematrix_volume, double *matrix,
-                      ptrdiff_t stride, enum AVMatrixEncoding matrix_encoding,
-                      void *log_context);
 
 /**
  * Set a customized remix matrix.
@@ -598,7 +531,7 @@ const char *swresample_license(void);
  * field will be set using av_frame_get_buffer()
  * is called to allocate the frame.
  *
- * The output AVFrame can be NULL or have fewer allocated samples than required.
+ * The output AVFrame can be nullptr or have fewer allocated samples than required.
  * In this case, any remaining samples not written to the output will be added
  * to an internal FIFO buffer, to be returned at the next call to this function
  * or to swr_convert().
@@ -606,7 +539,7 @@ const char *swresample_license(void);
  * If converting sample rate, there may be data remaining in the internal
  * resampling delay buffer. swr_get_delay() tells the number of
  * remaining samples. To get this data as output, call this function or
- * swr_convert() with NULL input.
+ * swr_convert() with nullptr input.
  *
  * If the SwrContext configuration does not match the output and
  * input AVFrame settings the conversion does not take place and depending on

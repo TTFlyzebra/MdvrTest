@@ -27,7 +27,8 @@
 #ifndef AVUTIL_AUDIO_FIFO_H
 #define AVUTIL_AUDIO_FIFO_H
 
-#include "attributes.h"
+#include "avutil.h"
+#include "fifo.h"
 #include "samplefmt.h"
 
 /**
@@ -60,7 +61,7 @@ void av_audio_fifo_free(AVAudioFifo *af);
  * @param sample_fmt  sample format
  * @param channels    number of channels
  * @param nb_samples  initial allocation size, in samples
- * @return            newly allocated AVAudioFifo, or NULL on error
+ * @return            newly allocated AVAudioFifo, or nullptr on error
  */
 AVAudioFifo *av_audio_fifo_alloc(enum AVSampleFormat sample_fmt, int channels,
                                  int nb_samples);

@@ -5,3 +5,5 @@
 #include "Global.h"
 
 Terminal *T;
+
+User *U;

@@ -27,7 +27,6 @@
 #ifndef AVUTIL_HASH_H
 #define AVUTIL_HASH_H
 
-#include <stddef.h>
 #include <stdint.h>
 
 /**
@@ -56,9 +55,9 @@
  * A basic template for using the Generic Hashing API follows:
  *
  * @code
- * struct AVHashContext *ctx = NULL;
- * const char *hash_name = NULL;
- * uint8_t *output_buf = NULL;
+ * struct AVHashContext *ctx = nullptr;
+ * const char *hash_name = nullptr;
+ * uint8_t *output_buf = nullptr;
  *
  * // Select from a string returned by av_hash_names()
  * hash_name = ...;
@@ -130,7 +129,7 @@ int av_hash_alloc(struct AVHashContext **ctx, const char *name);
  * This function can be used to enumerate the algorithms.
  *
  * @param[in] i  Index of the hash algorithm, starting from 0
- * @return       Pointer to a static string or `NULL` if `i` is out of range
+ * @return       Pointer to a static string or `nullptr` if `i` is out of range
  */
 const char *av_hash_names(int i);
 
@@ -180,7 +179,7 @@ void av_hash_init(struct AVHashContext *ctx);
  * @param[in]     src Data to be added to the hash context
  * @param[in]     len Size of the additional data
  */
-void av_hash_update(struct AVHashContext *ctx, const uint8_t *src, size_t len);
+void av_hash_update(struct AVHashContext *ctx, const uint8_t *src, int len);
 
 /**
  * Finalize a hash context and compute the actual hash value.
@@ -250,7 +249,7 @@ void av_hash_final_hex(struct AVHashContext *ctx, uint8_t *dst, int size);
 void av_hash_final_b64(struct AVHashContext *ctx, uint8_t *dst, int size);
 
 /**
- * Free hash context and set hash context pointer to `NULL`.
+ * Free hash context and set hash context pointer to `nullptr`.
  *
  * @param[in,out] ctx  Pointer to hash context
  */

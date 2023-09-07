@@ -8,10 +8,17 @@
 
 #include "base/Notify.h"
 #include "FzebraCB.h"
+#include <map>
 
 class UserServer;
 
+class UserSession;
+
 class RtspServer;
+
+class SndOutService;
+
+class ScreenService;
 
 class Fzebra : public INotify {
 public:
@@ -29,20 +36,36 @@ public:
 
     static void setTid(int64_t tid);
 
+    static void setUid(int64_t uid);
+
     void startUserServer();
 
     void stopUserServer();
+
+    void startUserSession(int64_t uid, const char *sip);
+
+    void stopUserSession(const char *sip);
 
     void startRtspServer();
 
     void stopRtspServer();
 
+    void startScreenServer(int64_t tid);
+
+    void stopScreenServer(int64_t tid);
+
+    void startSndoutServer(int64_t tid);
+
+    void stopSndoutServer(int64_t tid);
+
 private:
     Notify *N;
     FzebraCB *cb;
-
-    UserServer *user;
-    RtspServer *rtsp;
+    UserServer *mUserServer;
+    RtspServer *mRtspServer;
+    std::map<uint32_t, UserSession *> mUserSessions;
+    std::map<int64_t, SndOutService *> mSndOuts;
+    std::map<int64_t, ScreenService *> mScreens;
 };
 
 

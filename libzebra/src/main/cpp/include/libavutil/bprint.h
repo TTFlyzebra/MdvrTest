@@ -169,7 +169,7 @@ void av_bprint_strftime(AVBPrint *buf, const char *fmt, const struct tm *tm);
  *                          can be larger or smaller than size
  */
 void av_bprint_get_buffer(AVBPrint *buf, unsigned size,
-                          unsigned char **mem, unsigned *actual_size);
+                          uint8_t **mem, unsigned *actual_size);
 
 /**
  * Reset the string to "" but keep internal allocated data.
@@ -193,9 +193,9 @@ static inline int av_bprint_is_complete(const AVBPrint *buf)
  * The print buffer can no longer be used afterwards,
  * but the len and size fields are still valid.
  *
- * @arg[out] ret_str  if not NULL, used to return a permanent copy of the
- *                    buffer contents, or NULL if memory allocation fails;
- *                    if NULL, the buffer is discarded and freed
+ * @arg[out] ret_str  if not nullptr, used to return a permanent copy of the
+ *                    buffer contents, or nullptr if memory allocation fails;
+ *                    if nullptr, the buffer is discarded and freed
  * @return  0 for success or error code (probably AVERROR(ENOMEM))
  */
 int av_bprint_finalize(AVBPrint *buf, char **ret_str);
@@ -206,7 +206,7 @@ int av_bprint_finalize(AVBPrint *buf, char **ret_str);
  * @param dstbuf        already inited destination bprint buffer
  * @param src           string containing the text to escape
  * @param special_chars string containing the special characters which
- *                      need to be escaped, can be NULL
+ *                      need to be escaped, can be nullptr
  * @param mode          escape mode to employ, see AV_ESCAPE_MODE_* macros.
  *                      Any unknown value for mode will be considered equivalent to
  *                      AV_ESCAPE_MODE_BACKSLASH, but this behaviour can change without

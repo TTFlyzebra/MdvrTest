@@ -32,6 +32,9 @@ typedef struct AVVorbisParseContext AVVorbisParseContext;
 
 /**
  * Allocate and initialize the Vorbis parser using headers in the extradata.
+ *
+ * @param avctx codec context
+ * @param s     Vorbis parser context
  */
 AVVorbisParseContext *av_vorbis_parse_init(const uint8_t *extradata,
                                            int extradata_size);
@@ -48,7 +51,7 @@ void av_vorbis_parse_free(AVVorbisParseContext **s);
 /**
  * Get the duration for a Vorbis packet.
  *
- * If @p flags is @c NULL,
+ * If @p flags is @c nullptr,
  * special frames are considered invalid.
  *
  * @param s        Vorbis parser context

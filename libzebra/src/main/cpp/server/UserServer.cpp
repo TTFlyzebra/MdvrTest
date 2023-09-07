@@ -44,7 +44,7 @@ UserServer::~UserServer()
     closesocket(server_socket);
 #elif defined(__unix)
     close(server_socket);
-#endif   
+#endif
     {
         std::lock_guard<std::mutex> lock_server(mlock_users);
         for (auto & users_client : users_clients) {
@@ -66,7 +66,6 @@ UserServer::~UserServer()
 void UserServer::serverSocket()
 {
     FLOGD("UserServer serverSocket start!");
-    is_running = true;
     struct sockaddr_in t_sockaddr{};
     memset(&t_sockaddr, 0, sizeof(t_sockaddr));
     t_sockaddr.sin_family = AF_INET;
@@ -109,7 +108,6 @@ void UserServer::serverSocket()
 #endif
         server_socket = -1;
     }
-    is_running = false;
     FLOGD("UserServer serverSocket exit!");
 }
 
@@ -121,8 +119,7 @@ void UserServer::removeClient()
             mcond_remove.wait(lock_remove);
         }
         if (is_stop) break;
-        for (auto it = remove_clients.begin(); it != remove_clients.end(); ++it) {
-            auto userClient = *it;
+        for (auto userClient : remove_clients) {
             char sn[16] = { 0 };
             ByteUtil::int64ToSysId(sn, userClient->getUid());
             FLOGD("[%s][U]->removed.", sn);

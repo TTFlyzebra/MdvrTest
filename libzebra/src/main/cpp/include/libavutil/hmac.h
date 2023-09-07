@@ -23,6 +23,7 @@
 
 #include <stdint.h>
 
+#include "version.h"
 /**
  * @defgroup lavu_hmac HMAC
  * @ingroup lavu_crypto
@@ -34,7 +35,7 @@ enum AVHMACType {
     AV_HMAC_SHA1,
     AV_HMAC_SHA224,
     AV_HMAC_SHA256,
-    AV_HMAC_SHA384,
+    AV_HMAC_SHA384 = 12,
     AV_HMAC_SHA512,
 };
 
@@ -48,7 +49,7 @@ AVHMAC *av_hmac_alloc(enum AVHMACType type);
 
 /**
  * Free an AVHMAC context.
- * @param ctx The context to free, may be NULL
+ * @param ctx The context to free, may be nullptr
  */
 void av_hmac_free(AVHMAC *ctx);
 

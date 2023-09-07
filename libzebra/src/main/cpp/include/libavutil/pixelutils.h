@@ -21,6 +21,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include "common.h"
 
 /**
  * Sum of abs(src1[x] - src2[x])
@@ -40,9 +41,9 @@ typedef int (*av_pixelutils_sad_fn)(const uint8_t *src1, ptrdiff_t stride1,
  *                aligned on the block size.
  *                If set to 0, the returned sad function assume no particular
  *                alignment.
- * @param log_ctx context used for logging, can be NULL
+ * @param log_ctx context used for logging, can be nullptr
  *
- * @return a pointer to the SAD function or NULL in case of error (because of
+ * @return a pointer to the SAD function or nullptr in case of error (because of
  *         invalid parameters)
  */
 av_pixelutils_sad_fn av_pixelutils_get_sad_fn(int w_bits, int h_bits,

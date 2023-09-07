@@ -53,8 +53,8 @@ int av_rc4_init(struct AVRC4 *d, const uint8_t *key, int key_bits, int decrypt);
  *
  * @param count number of bytes
  * @param dst destination array, can be equal to src
- * @param src source array, can be equal to dst, may be NULL
- * @param iv not (yet) used for RC4, should be NULL
+ * @param src source array, can be equal to dst, may be nullptr
+ * @param iv not (yet) used for RC4, should be nullptr
  * @param decrypt 0 for encryption, 1 for decryption, not (yet) used
  */
 void av_rc4_crypt(struct AVRC4 *d, uint8_t *dst, const uint8_t *src, int count, uint8_t *iv, int decrypt);

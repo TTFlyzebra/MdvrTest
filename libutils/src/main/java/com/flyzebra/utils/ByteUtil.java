@@ -118,26 +118,48 @@ public class ByteUtil {
         }
     }
 
+    public static String longToSysId(long tid) {
+        long num = tid;
+        int len = 0;
+        byte[] temp = new byte[16];
+        while (num > 36) {
+            byte ni = (byte) ((num % 36) & 0xFF);
+            if (ni < 10) {
+                temp[len++] = (byte) (ni + '0');
+            } else {
+                temp[len++] = (byte) (ni - 10 + 'A');
+            }
+            num = num / 36;
+        }
+        if (num < 10) {
+            temp[len] = (byte) (num + '0');
+        } else {
+            temp[len] = (byte) (num - 10 + 'A');
+        }
+        byte[] data = new byte[len + 1];
+        for (int i = 0; i <= len; i++) {
+            data[i] = temp[len - i];
+        }
+        return new String(data);
+    }
+
     public static long sysIdToInt64(String stid) {
         long tid = 0;
-        byte[] bytes = stid.getBytes();
-        for (int i = 0; i < bytes.length; i++) {
+        byte[] data = stid.getBytes();
+        for (int i = 0; i < data.length; i++) {
             long ret = 0;
-            byte x = (byte) (bytes[i] & 0xFF);
+            byte x = (byte) (data[i] & 0xFF);
             if (x >= '0' && x <= '9') {
                 ret = x - '0';
-            }
-            else if (x >= 'A' && x <= 'Z') {
+            } else if (x >= 'A' && x <= 'Z') {
                 ret = x - 'A' + 10;
-            }
-            else if (x >= 'a' && x <= 'z') {
+            } else if (x >= 'a' && x <= 'z') {
                 ret = x - 'a' + 10;
-            }
-            else {
+            } else {
                 continue;
             }
             long pow = 1;
-            int y = 9 - i;
+            int y = data.length - i;
             for (int j = 1; j < y; j++) {
                 pow = pow * 36;
             }

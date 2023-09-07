@@ -38,6 +38,12 @@ Java_com_flyzebra_core_Fzebra__1setTid(JNIEnv *env, jobject thiz, jlong tid) {
 
 extern "C"
 JNIEXPORT void JNICALL
+Java_com_flyzebra_core_Fzebra__1setUid(JNIEnv *env, jobject thiz, jlong uid) {
+    Fzebra::setUid(uid);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
 Java_com_flyzebra_core_Fzebra__1notify(JNIEnv *env, jobject thiz, jlong p_obj, jbyteArray jdata,
                                        jint size) {
     auto *data = (const char *) env->GetByteArrayElements(jdata, JNI_FALSE);
@@ -79,6 +85,26 @@ Java_com_flyzebra_core_Fzebra__1stopUserServer(JNIEnv *env, jobject thiz, jlong 
 
 extern "C"
 JNIEXPORT void JNICALL
+Java_com_flyzebra_core_Fzebra__1startUserSession(JNIEnv *env, jobject thiz, jlong p_obj, jlong uid,
+                                                 jstring jsip) {
+    auto *fzebra = reinterpret_cast<Fzebra *>(p_obj);
+    const char *sip = env->GetStringUTFChars(jsip, 0);
+    fzebra->startUserSession(uid, sip);
+    env->ReleaseStringUTFChars(jsip, sip);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_flyzebra_core_Fzebra__1stopUserSession(JNIEnv *env, jobject thiz, jlong p_obj,
+                                                jstring jsip) {
+    auto *fzebra = reinterpret_cast<Fzebra *>(p_obj);
+    const char *sip = env->GetStringUTFChars(jsip, 0);
+    fzebra->stopUserSession(sip);
+    env->ReleaseStringUTFChars(jsip, sip);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
 Java_com_flyzebra_core_Fzebra__1startRtspServer(JNIEnv *env, jobject thiz, jlong p_obj) {
     auto *fzebra = reinterpret_cast<Fzebra *>(p_obj);
     fzebra->startRtspServer();
@@ -89,4 +115,36 @@ JNIEXPORT void JNICALL
 Java_com_flyzebra_core_Fzebra__1stopRtspServer(JNIEnv *env, jobject thiz, jlong p_obj) {
     auto *fzebra = reinterpret_cast<Fzebra *>(p_obj);
     fzebra->stopRtspServer();
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_flyzebra_core_Fzebra__1startScreenServer(JNIEnv *env, jobject thiz, jlong p_obj,
+                                                  jlong tid) {
+    auto *fzebra = reinterpret_cast<Fzebra *>(p_obj);
+    fzebra->startScreenServer(tid);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_flyzebra_core_Fzebra__1stopScreenServer(JNIEnv *env, jobject thiz, jlong p_obj,
+                                                 jlong tid) {
+    auto *fzebra = reinterpret_cast<Fzebra *>(p_obj);
+    fzebra->stopScreenServer(tid);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_flyzebra_core_Fzebra__1startSndoutServer(JNIEnv *env, jobject thiz, jlong p_obj,
+                                                  jlong tid) {
+    auto *fzebra = reinterpret_cast<Fzebra *>(p_obj);
+    fzebra->startSndoutServer(tid);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_flyzebra_core_Fzebra__1stopSndoutServer(JNIEnv *env, jobject thiz, jlong p_obj,
+                                                 jlong tid) {
+    auto *fzebra = reinterpret_cast<Fzebra *>(p_obj);
+    fzebra->stopSndoutServer(tid);
 }

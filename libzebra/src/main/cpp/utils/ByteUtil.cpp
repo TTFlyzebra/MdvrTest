@@ -3,7 +3,7 @@
 //
 
 #include "ByteUtil.h"
-#include <string.h>
+#include <cstring>
 
 int64_t ByteUtil::sysIdToInt64(char *data, int len) {
     int64_t tid = 0;
@@ -100,6 +100,22 @@ int16_t ByteUtil::byte2int16(const char *data, int32_t offset, bool littleEndian
 void ByteUtil::int16ToBytes(int16_t value, char *data, int offset, bool littleEndian) {
     for (int count = 0; count < 2; ++count) {
         int shift = (littleEndian ? count : (1 - count)) << 3;
+        data[count + offset] = (char) (value >> shift & 0xFF);
+    }
+}
+
+int32_t ByteUtil::byte2int32(const char *data, int32_t offset, bool littleEndian) {
+    int32_t value = 0;
+    for (int count = 0; count < 4; ++count) {
+        int shift = (littleEndian ? count : (3 - count)) << 3;
+        value |= ((int32_t) 0xff << shift) & ((int32_t) data[offset + count] << shift);
+    }
+    return value;
+}
+
+void ByteUtil::int32ToBytes(int32_t value, char *data, int offset, bool littleEndian) {
+    for (int count = 0; count < 4; ++count) {
+        int shift = (littleEndian ? count : (3 - count)) << 3;
         data[count + offset] = (char) (value >> shift & 0xFF);
     }
 }

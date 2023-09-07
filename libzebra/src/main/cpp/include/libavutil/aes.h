@@ -24,6 +24,7 @@
 #include <stdint.h>
 
 #include "attributes.h"
+#include "version.h"
 
 /**
  * @defgroup lavu_aes AES
@@ -52,7 +53,7 @@ int av_aes_init(struct AVAES *a, const uint8_t *key, int key_bits, int decrypt);
  * @param count number of 16 byte blocks
  * @param dst destination array, can be equal to src
  * @param src source array, can be equal to dst
- * @param iv initialization vector for CBC mode, if NULL then ECB will be used
+ * @param iv initialization vector for CBC mode, if nullptr then ECB will be used
  * @param decrypt 0 for encryption, 1 for decryption
  */
 void av_aes_crypt(struct AVAES *a, uint8_t *dst, const uint8_t *src, int count, uint8_t *iv, int decrypt);

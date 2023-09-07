@@ -22,8 +22,6 @@ private:
 private:
     int32_t server_socket;
 
-    volatile bool is_running;
-
     std::thread* server_t;
     std::list<UserClient*> users_clients;
     std::mutex mlock_users;

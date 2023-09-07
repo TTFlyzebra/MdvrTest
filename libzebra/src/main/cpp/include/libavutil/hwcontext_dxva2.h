@@ -63,11 +63,8 @@ typedef struct AVDXVA2FramesContext {
      * To allow internally managed pools to work properly in such cases, this
      * field is provided.
      *
-     * If it is non-NULL, libavutil will call IDirectXVideoDecoder_Release() on
+     * If it is non-nullptr, libavutil will call IDirectXVideoDecoder_Release() on
      * it just before the internal surface pool is freed.
-     *
-     * This is for convenience only. Some code uses other methods to manage the
-     * decoder reference.
      */
     IDirectXVideoDecoder *decoder_to_release;
 } AVDXVA2FramesContext;

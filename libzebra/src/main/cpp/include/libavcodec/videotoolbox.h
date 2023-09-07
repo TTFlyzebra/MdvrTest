@@ -58,8 +58,7 @@ typedef struct AVVideotoolboxContext {
 
     /**
      * CVPixelBuffer Format Type that Videotoolbox will use for decoded frames.
-     * set by the caller. If this is set to 0, then no specific format is
-     * requested from the decoder, and its native format is output.
+     * set by the caller.
      */
     OSType cv_pix_fmt_type;
 
@@ -87,7 +86,7 @@ typedef struct AVVideotoolboxContext {
  * When decoding with Videotoolbox is finished, the caller must destroy the decoder
  * object and free the Videotoolbox context using av_free().
  *
- * @return the newly allocated context or NULL on failure
+ * @return the newly allocated context or nullptr on failure
  */
 AVVideotoolboxContext *av_videotoolbox_alloc_context(void);
 

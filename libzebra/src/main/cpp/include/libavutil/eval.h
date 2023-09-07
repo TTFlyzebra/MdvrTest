@@ -26,6 +26,8 @@
 #ifndef AVUTIL_EVAL_H
 #define AVUTIL_EVAL_H
 
+#include "avutil.h"
+
 typedef struct AVExpr AVExpr;
 
 /**
@@ -35,12 +37,12 @@ typedef struct AVExpr AVExpr;
  * @param res a pointer to a double where is put the result value of
  * the expression, or NAN in case of error
  * @param s expression as a zero terminated string, for example "1+2^3+5*5+sin(2/3)"
- * @param const_names NULL terminated array of zero terminated strings of constant identifiers, for example {"PI", "E", 0}
+ * @param const_names nullptr terminated array of zero terminated strings of constant identifiers, for example {"PI", "E", 0}
  * @param const_values a zero terminated array of values for the identifiers from const_names
- * @param func1_names NULL terminated array of zero terminated strings of funcs1 identifiers
- * @param funcs1 NULL terminated array of function pointers for functions which take 1 argument
- * @param func2_names NULL terminated array of zero terminated strings of funcs2 identifiers
- * @param funcs2 NULL terminated array of function pointers for functions which take 2 arguments
+ * @param func1_names nullptr terminated array of zero terminated strings of funcs1 identifiers
+ * @param funcs1 nullptr terminated array of function pointers for functions which take 1 argument
+ * @param func2_names nullptr terminated array of zero terminated strings of funcs2 identifiers
+ * @param funcs2 nullptr terminated array of function pointers for functions which take 2 arguments
  * @param opaque a pointer which will be passed to all functions from funcs1 and funcs2
  * @param log_ctx parent logging context
  * @return >= 0 in case of success, a negative value corresponding to an
@@ -56,15 +58,15 @@ int av_expr_parse_and_eval(double *res, const char *s,
  * Parse an expression.
  *
  * @param expr a pointer where is put an AVExpr containing the parsed
- * value in case of successful parsing, or NULL otherwise.
+ * value in case of successful parsing, or nullptr otherwise.
  * The pointed to AVExpr must be freed with av_expr_free() by the user
  * when it is not needed anymore.
  * @param s expression as a zero terminated string, for example "1+2^3+5*5+sin(2/3)"
- * @param const_names NULL terminated array of zero terminated strings of constant identifiers, for example {"PI", "E", 0}
- * @param func1_names NULL terminated array of zero terminated strings of funcs1 identifiers
- * @param funcs1 NULL terminated array of function pointers for functions which take 1 argument
- * @param func2_names NULL terminated array of zero terminated strings of funcs2 identifiers
- * @param funcs2 NULL terminated array of function pointers for functions which take 2 arguments
+ * @param const_names nullptr terminated array of zero terminated strings of constant identifiers, for example {"PI", "E", 0}
+ * @param func1_names nullptr terminated array of zero terminated strings of funcs1 identifiers
+ * @param funcs1 nullptr terminated array of function pointers for functions which take 1 argument
+ * @param func2_names nullptr terminated array of zero terminated strings of funcs2 identifiers
+ * @param funcs2 nullptr terminated array of function pointers for functions which take 2 arguments
  * @param log_ctx parent logging context
  * @return >= 0 in case of success, a negative value corresponding to an
  * AVERROR code otherwise
@@ -85,30 +87,6 @@ int av_expr_parse(AVExpr **expr, const char *s,
 double av_expr_eval(AVExpr *e, const double *const_values, void *opaque);
 
 /**
- * Track the presence of variables and their number of occurrences in a parsed expression
- *
- * @param counter a zero-initialized array where the count of each variable will be stored
- * @param size size of array
- * @return 0 on success, a negative value indicates that no expression or array was passed
- * or size was zero
- */
-int av_expr_count_vars(AVExpr *e, unsigned *counter, int size);
-
-/**
- * Track the presence of user provided functions and their number of occurrences
- * in a parsed expression.
- *
- * @param counter a zero-initialized array where the count of each function will be stored
- *                if you passed 5 functions with 2 arguments to av_expr_parse()
- *                then for arg=2 this will use upto 5 entries.
- * @param size size of array
- * @param arg number of arguments the counted functions have
- * @return 0 on success, a negative value indicates that no expression or array was passed
- * or size was zero
- */
-int av_expr_count_func(AVExpr *e, unsigned *counter, int size, int arg);
-
-/**
  * Free a parsed expression previously created with av_expr_parse().
  */
 void av_expr_free(AVExpr *e);
@@ -127,7 +105,7 @@ void av_expr_free(AVExpr *e);
  * instead of powers of 10. The 'B' postfix multiplies the value by
  * 8, and can be appended after another postfix or used alone. This
  * allows using for example 'KB', 'MiB', 'G' and 'B' as postfix.
- * @param tail if non-NULL puts here the pointer to the char next
+ * @param tail if non-nullptr puts here the pointer to the char next
  * after the last parsed character
  */
 double av_strtod(const char *numstr, char **tail);

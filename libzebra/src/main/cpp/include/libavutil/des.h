@@ -54,8 +54,8 @@ int av_des_init(struct AVDES *d, const uint8_t *key, int key_bits, int decrypt);
  *
  * @param count number of 8 byte blocks
  * @param dst destination array, can be equal to src, must be 8-byte aligned
- * @param src source array, can be equal to dst, must be 8-byte aligned, may be NULL
- * @param iv initialization vector for CBC mode, if NULL then ECB will be used,
+ * @param src source array, can be equal to dst, must be 8-byte aligned, may be nullptr
+ * @param iv initialization vector for CBC mode, if nullptr then ECB will be used,
  *           must be 8-byte aligned
  * @param decrypt 0 for encryption, 1 for decryption
  */
@@ -66,7 +66,7 @@ void av_des_crypt(struct AVDES *d, uint8_t *dst, const uint8_t *src, int count, 
  *
  * @param count number of 8 byte blocks
  * @param dst destination array, can be equal to src, must be 8-byte aligned
- * @param src source array, can be equal to dst, must be 8-byte aligned, may be NULL
+ * @param src source array, can be equal to dst, must be 8-byte aligned, may be nullptr
  */
 void av_des_mac(struct AVDES *d, uint8_t *dst, const uint8_t *src, int count);
 

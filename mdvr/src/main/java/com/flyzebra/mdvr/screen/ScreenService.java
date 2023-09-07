@@ -72,7 +72,7 @@ public class ScreenService implements INotify {
     }
 
     public void screenStart() {
-        FlyLog.d("screenStart");
+        FlyLog.d("screenStart %dx%d", width, height);
         isStop.set(false);
         workThread = new Thread(() -> {
             FlyLog.d("screen work thread start!");

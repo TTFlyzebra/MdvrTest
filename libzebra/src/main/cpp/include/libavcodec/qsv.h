@@ -35,7 +35,7 @@
  */
 typedef struct AVQSVContext {
     /**
-     * If non-NULL, the session to use for encoding or decoding.
+     * If non-nullptr, the session to use for encoding or decoding.
      * Otherwise, libavcodec will try to create an internal session.
      */
     mfxSession session;

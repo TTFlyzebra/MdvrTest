@@ -31,8 +31,8 @@
 #include <stdint.h>
 
 #include "attributes.h"
+#include "error.h"
 #include "avutil.h"
-#include "version.h"
 
 /**
  * @addtogroup lavu_mem
@@ -49,10 +49,6 @@
  * dealing with memory consistently possible on all platforms.
  *
  * @{
- */
-
-#if FF_API_DECLARE_ALIGNED
-/**
  *
  * @defgroup lavu_mem_macros Alignment Macros
  * Helper macros for declaring aligned variables.
@@ -78,19 +74,6 @@
  */
 
 /**
- * @def DECLARE_ASM_ALIGNED(n,t,v)
- * Declare an aligned variable appropriate for use in inline assembly code.
- *
- * @code{.c}
- * DECLARE_ASM_ALIGNED(16, uint64_t, pw_08) = UINT64_C(0x0008000800080008);
- * @endcode
- *
- * @param n Minimum alignment in bytes
- * @param t Type of the variable (or array element)
- * @param v Name of the variable
- */
-
-/**
  * @def DECLARE_ASM_CONST(n,t,v)
  * Declare a static constant aligned variable appropriate for use in inline
  * assembly code.
@@ -106,30 +89,28 @@
 
 #if defined(__INTEL_COMPILER) && __INTEL_COMPILER < 1110 || defined(__SUNPRO_C)
     #define DECLARE_ALIGNED(n,t,v)      t __attribute__ ((aligned (n))) v
-    #define DECLARE_ASM_ALIGNED(n,t,v)  t __attribute__ ((aligned (n))) v
     #define DECLARE_ASM_CONST(n,t,v)    const t __attribute__ ((aligned (n))) v
-#elif defined(__DJGPP__)
-    #define DECLARE_ALIGNED(n,t,v)      t __attribute__ ((aligned (FFMIN(n, 16)))) v
-    #define DECLARE_ASM_ALIGNED(n,t,v)  t av_used __attribute__ ((aligned (FFMIN(n, 16)))) v
-    #define DECLARE_ASM_CONST(n,t,v)    static const t av_used __attribute__ ((aligned (FFMIN(n, 16)))) v
-#elif defined(__GNUC__) || defined(__clang__)
+#elif defined(__TI_COMPILER_VERSION__)
+    #define DECLARE_ALIGNED(n,t,v)                      \
+        AV_PRAGMA(DATA_ALIGN(v,n))                      \
+        t __attribute__((aligned(n))) v
+    #define DECLARE_ASM_CONST(n,t,v)                    \
+        AV_PRAGMA(DATA_ALIGN(v,n))                      \
+        static const t __attribute__((aligned(n))) v
+#elif defined(__GNUC__)
     #define DECLARE_ALIGNED(n,t,v)      t __attribute__ ((aligned (n))) v
-    #define DECLARE_ASM_ALIGNED(n,t,v)  t av_used __attribute__ ((aligned (n))) v
     #define DECLARE_ASM_CONST(n,t,v)    static const t av_used __attribute__ ((aligned (n))) v
 #elif defined(_MSC_VER)
     #define DECLARE_ALIGNED(n,t,v)      __declspec(align(n)) t v
-    #define DECLARE_ASM_ALIGNED(n,t,v)  __declspec(align(n)) t v
     #define DECLARE_ASM_CONST(n,t,v)    __declspec(align(n)) static const t v
 #else
     #define DECLARE_ALIGNED(n,t,v)      t v
-    #define DECLARE_ASM_ALIGNED(n,t,v)  t v
     #define DECLARE_ASM_CONST(n,t,v)    static const t v
 #endif
 
 /**
  * @}
  */
-#endif
 
 /**
  * @defgroup lavu_mem_attrs Function Attributes
@@ -194,7 +175,7 @@
  * (including vectors if available on the CPU).
  *
  * @param size Size in bytes for the memory block to be allocated
- * @return Pointer to the allocated block, or `NULL` if the block cannot
+ * @return Pointer to the allocated block, or `nullptr` if the block cannot
  *         be allocated
  * @see av_mallocz()
  */
@@ -206,7 +187,7 @@ void *av_malloc(size_t size) av_malloc_attrib av_alloc_size(1);
  * block.
  *
  * @param size Size in bytes for the memory block to be allocated
- * @return Pointer to the allocated block, or `NULL` if it cannot be allocated
+ * @return Pointer to the allocated block, or `nullptr` if it cannot be allocated
  * @see av_malloc()
  */
 void *av_mallocz(size_t size) av_malloc_attrib av_alloc_size(1);
@@ -218,11 +199,16 @@ void *av_mallocz(size_t size) av_malloc_attrib av_alloc_size(1);
  *
  * @param nmemb Number of element
  * @param size  Size of a single element
- * @return Pointer to the allocated block, or `NULL` if the block cannot
+ * @return Pointer to the allocated block, or `nullptr` if the block cannot
  *         be allocated
  * @see av_malloc()
  */
-av_alloc_size(1, 2) void *av_malloc_array(size_t nmemb, size_t size);
+av_alloc_size(1, 2) static inline void *av_malloc_array(size_t nmemb, size_t size)
+{
+    if (!size || nmemb >= INT_MAX / size)
+        return nullptr;
+    return av_malloc(nmemb * size);
+}
 
 /**
  * Allocate a memory block for an array with av_mallocz().
@@ -231,39 +217,43 @@ av_alloc_size(1, 2) void *av_malloc_array(size_t nmemb, size_t size);
  *
  * @param nmemb Number of elements
  * @param size  Size of the single element
- * @return Pointer to the allocated block, or `NULL` if the block cannot
+ * @return Pointer to the allocated block, or `nullptr` if the block cannot
  *         be allocated
  *
  * @see av_mallocz()
  * @see av_malloc_array()
  */
-void *av_calloc(size_t nmemb, size_t size) av_malloc_attrib av_alloc_size(1, 2);
+av_alloc_size(1, 2) static inline void *av_mallocz_array(size_t nmemb, size_t size)
+{
+    if (!size || nmemb >= INT_MAX / size)
+        return nullptr;
+    return av_mallocz(nmemb * size);
+}
 
-#if FF_API_AV_MALLOCZ_ARRAY
 /**
- * @deprecated use av_calloc()
+ * Non-inlined equivalent of av_mallocz_array().
+ *
+ * Created for symmetry with the calloc() C function.
  */
-attribute_deprecated
-void *av_mallocz_array(size_t nmemb, size_t size) av_malloc_attrib av_alloc_size(1, 2);
-#endif
+void *av_calloc(size_t nmemb, size_t size) av_malloc_attrib;
 
 /**
  * Allocate, reallocate, or free a block of memory.
  *
- * If `ptr` is `NULL` and `size` > 0, allocate a new block. Otherwise, expand or
+ * If `ptr` is `nullptr` and `size` > 0, allocate a new block. If `size` is
+ * zero, free the memory block pointed to by `ptr`. Otherwise, expand or
  * shrink that block of memory according to `size`.
  *
  * @param ptr  Pointer to a memory block already allocated with
- *             av_realloc() or `NULL`
+ *             av_realloc() or `nullptr`
  * @param size Size in bytes of the memory block to be allocated or
  *             reallocated
  *
- * @return Pointer to a newly-reallocated block or `NULL` if the block
- *         cannot be reallocated
+ * @return Pointer to a newly-reallocated block or `nullptr` if the block
+ *         cannot be reallocated or the function is used to free the memory block
  *
  * @warning Unlike av_malloc(), the returned pointer is not guaranteed to be
- *          correctly aligned. The returned pointer must be freed after even
- *          if size is zero.
+ *          correctly aligned.
  * @see av_fast_realloc()
  * @see av_reallocp()
  */
@@ -273,12 +263,12 @@ void *av_realloc(void *ptr, size_t size) av_alloc_size(2);
  * Allocate, reallocate, or free a block of memory through a pointer to a
  * pointer.
  *
- * If `*ptr` is `NULL` and `size` > 0, allocate a new block. If `size` is
+ * If `*ptr` is `nullptr` and `size` > 0, allocate a new block. If `size` is
  * zero, free the memory block pointed to by `*ptr`. Otherwise, expand or
  * shrink that block of memory according to `size`.
  *
  * @param[in,out] ptr  Pointer to a pointer to a memory block already allocated
- *                     with av_realloc(), or a pointer to `NULL`. The pointer
+ *                     with av_realloc(), or a pointer to `nullptr`. The pointer
  *                     is updated on success, or freed on failure.
  * @param[in]     size Size in bytes for the memory block to be allocated or
  *                     reallocated
@@ -311,30 +301,31 @@ void *av_realloc_f(void *ptr, size_t nelem, size_t elsize);
 /**
  * Allocate, reallocate, or free an array.
  *
- * If `ptr` is `NULL` and `nmemb` > 0, allocate a new block.
+ * If `ptr` is `nullptr` and `nmemb` > 0, allocate a new block. If
+ * `nmemb` is zero, free the memory block pointed to by `ptr`.
  *
  * @param ptr   Pointer to a memory block already allocated with
- *              av_realloc() or `NULL`
+ *              av_realloc() or `nullptr`
  * @param nmemb Number of elements in the array
  * @param size  Size of the single element of the array
  *
- * @return Pointer to a newly-reallocated block or NULL if the block
- *         cannot be reallocated
+ * @return Pointer to a newly-reallocated block or nullptr if the block
+ *         cannot be reallocated or the function is used to free the memory block
  *
  * @warning Unlike av_malloc(), the allocated memory is not guaranteed to be
- *          correctly aligned. The returned pointer must be freed after even if
- *          nmemb is zero.
+ *          correctly aligned.
  * @see av_reallocp_array()
  */
 av_alloc_size(2, 3) void *av_realloc_array(void *ptr, size_t nmemb, size_t size);
 
 /**
- * Allocate, reallocate an array through a pointer to a pointer.
+ * Allocate, reallocate, or free an array through a pointer to a pointer.
  *
- * If `*ptr` is `NULL` and `nmemb` > 0, allocate a new block.
+ * If `*ptr` is `nullptr` and `nmemb` > 0, allocate a new block. If `nmemb` is
+ * zero, free the memory block pointed to by `*ptr`.
  *
  * @param[in,out] ptr   Pointer to a pointer to a memory block already
- *                      allocated with av_realloc(), or a pointer to `NULL`.
+ *                      allocated with av_realloc(), or a pointer to `nullptr`.
  *                      The pointer is updated on success, or freed on failure.
  * @param[in]     nmemb Number of elements
  * @param[in]     size  Size of the single element
@@ -342,16 +333,16 @@ av_alloc_size(2, 3) void *av_realloc_array(void *ptr, size_t nmemb, size_t size)
  * @return Zero on success, an AVERROR error code on failure
  *
  * @warning Unlike av_malloc(), the allocated memory is not guaranteed to be
- *          correctly aligned. *ptr must be freed after even if nmemb is zero.
+ *          correctly aligned.
  */
-int av_reallocp_array(void *ptr, size_t nmemb, size_t size);
+av_alloc_size(2, 3) int av_reallocp_array(void *ptr, size_t nmemb, size_t size);
 
 /**
  * Reallocate the given buffer if it is not large enough, otherwise do nothing.
  *
- * If the given buffer is `NULL`, then a new uninitialized buffer is allocated.
+ * If the given buffer is `nullptr`, then a new uninitialized buffer is allocated.
  *
- * If the given buffer is not large enough, and reallocation fails, `NULL` is
+ * If the given buffer is not large enough, and reallocation fails, `nullptr` is
  * returned and `*size` is set to 0, but the original buffer is not changed or
  * freed.
  *
@@ -367,13 +358,13 @@ int av_reallocp_array(void *ptr, size_t nmemb, size_t size);
  * }
  * @endcode
  *
- * @param[in,out] ptr      Already allocated buffer, or `NULL`
- * @param[in,out] size     Pointer to the size of buffer `ptr`. `*size` is
- *                         updated to the new allocated size, in particular 0
- *                         in case of failure.
- * @param[in]     min_size Desired minimal size of buffer `ptr`
+ * @param[in,out] ptr      Already allocated buffer, or `nullptr`
+ * @param[in,out] size     Pointer to current size of buffer `ptr`. `*size` is
+ *                         changed to `min_size` in case of success or 0 in
+ *                         case of failure
+ * @param[in]     min_size New size of buffer `ptr`
  * @return `ptr` if the buffer is large enough, a pointer to newly reallocated
- *         buffer if the buffer was not large enough, or `NULL` in case of
+ *         buffer if the buffer was not large enough, or `nullptr` in case of
  *         error
  * @see av_realloc()
  * @see av_fast_malloc()
@@ -387,7 +378,7 @@ void *av_fast_realloc(void *ptr, unsigned int *size, size_t min_size);
  * preserved and on error the old buffer is freed, thus no special handling to
  * avoid memleaks is necessary.
  *
- * `*ptr` is allowed to be `NULL`, in which case allocation always happens if
+ * `*ptr` is allowed to be `nullptr`, in which case allocation always happens if
  * `size_needed` is greater than 0.
  *
  * @code{.c}
@@ -401,11 +392,11 @@ void *av_fast_realloc(void *ptr, unsigned int *size, size_t min_size);
  *
  * @param[in,out] ptr      Pointer to pointer to an already allocated buffer.
  *                         `*ptr` will be overwritten with pointer to new
- *                         buffer on success or `NULL` on failure
- * @param[in,out] size     Pointer to the size of buffer `*ptr`. `*size` is
- *                         updated to the new allocated size, in particular 0
- *                         in case of failure.
- * @param[in]     min_size Desired minimal size of buffer `*ptr`
+ *                         buffer on success or `nullptr` on failure
+ * @param[in,out] size     Pointer to current size of buffer `*ptr`. `*size` is
+ *                         changed to `min_size` in case of success or 0 in
+ *                         case of failure
+ * @param[in]     min_size New size of buffer `*ptr`
  * @see av_realloc()
  * @see av_fast_mallocz()
  */
@@ -417,16 +408,16 @@ void av_fast_malloc(void *ptr, unsigned int *size, size_t min_size);
  * Like av_fast_malloc(), but all newly allocated space is initially cleared.
  * Reused buffer is not cleared.
  *
- * `*ptr` is allowed to be `NULL`, in which case allocation always happens if
+ * `*ptr` is allowed to be `nullptr`, in which case allocation always happens if
  * `size_needed` is greater than 0.
  *
  * @param[in,out] ptr      Pointer to pointer to an already allocated buffer.
  *                         `*ptr` will be overwritten with pointer to new
- *                         buffer on success or `NULL` on failure
- * @param[in,out] size     Pointer to the size of buffer `*ptr`. `*size` is
- *                         updated to the new allocated size, in particular 0
- *                         in case of failure.
- * @param[in]     min_size Desired minimal size of buffer `*ptr`
+ *                         buffer on success or `nullptr` on failure
+ * @param[in,out] size     Pointer to current size of buffer `*ptr`. `*size` is
+ *                         changed to `min_size` in case of success or 0 in
+ *                         case of failure
+ * @param[in]     min_size New size of buffer `*ptr`
  * @see av_fast_malloc()
  */
 void av_fast_mallocz(void *ptr, unsigned int *size, size_t min_size);
@@ -437,7 +428,7 @@ void av_fast_mallocz(void *ptr, unsigned int *size, size_t min_size);
  *
  * @param ptr Pointer to the memory block which should be freed.
  *
- * @note `ptr = NULL` is explicitly allowed.
+ * @note `ptr = nullptr` is explicitly allowed.
  * @note It is recommended that you use av_freep() instead, to prevent leaving
  *       behind dangling pointers.
  * @see av_freep()
@@ -446,7 +437,7 @@ void av_free(void *ptr);
 
 /**
  * Free a memory block which has been allocated with a function of av_malloc()
- * or av_realloc() family, and set the pointer pointing to it to `NULL`.
+ * or av_realloc() family, and set the pointer pointing to it to `nullptr`.
  *
  * @code{.c}
  * uint8_t *buf = av_malloc(16);
@@ -457,12 +448,12 @@ void av_free(void *ptr);
  *
  * uint8_t *buf = av_malloc(16);
  * av_freep(&buf);
- * // buf is now NULL, and accidental dereference will only result in a
- * // NULL-pointer dereference.
+ * // buf is now nullptr, and accidental dereference will only result in a
+ * // nullptr-pointer dereference.
  * @endcode
  *
  * @param ptr Pointer to the pointer to the memory block which should be freed
- * @note `*ptr = NULL` is safe and leads to no action.
+ * @note `*ptr = nullptr` is safe and leads to no action.
  * @see av_free()
  */
 void av_freep(void *ptr);
@@ -472,7 +463,7 @@ void av_freep(void *ptr);
  *
  * @param s String to be duplicated
  * @return Pointer to a newly-allocated string containing a
- *         copy of `s` or `NULL` if the string cannot be allocated
+ *         copy of `s` or `nullptr` if the string cannot be allocated
  * @see av_strndup()
  */
 char *av_strdup(const char *s) av_malloc_attrib;
@@ -484,7 +475,7 @@ char *av_strdup(const char *s) av_malloc_attrib;
  * @param len Maximum length of the resulting string (not counting the
  *            terminating byte)
  * @return Pointer to a newly-allocated string containing a
- *         substring of `s` or `NULL` if the string cannot be allocated
+ *         substring of `s` or `nullptr` if the string cannot be allocated
  */
 char *av_strndup(const char *s, size_t len) av_malloc_attrib;
 
@@ -494,7 +485,7 @@ char *av_strndup(const char *s, size_t len) av_malloc_attrib;
  * @param p    Buffer to be duplicated
  * @param size Size in bytes of the buffer copied
  * @return Pointer to a newly allocated buffer containing a
- *         copy of `p` or `NULL` if the buffer cannot be allocated
+ *         copy of `p` or `nullptr` if the buffer cannot be allocated
  */
 void *av_memdup(const void *p, size_t size);
 
@@ -535,7 +526,7 @@ void av_memcpy_backptr(uint8_t *dst, int back, int cnt);
  * av_dynarray_add_nofree() implement this system.
  *
  * @code
- * type **array = NULL; //< an array of pointers to values
+ * type **array = nullptr; //< an array of pointers to values
  * int    nb    = 0;    //< a variable to keep track of the length of the array
  *
  * type to_be_added  = ...;
@@ -562,13 +553,13 @@ void av_memcpy_backptr(uint8_t *dst, int back, int cnt);
  * implements this mechanism.
  *
  * @code
- * type *array = NULL; //< an array of values
+ * type *array = nullptr; //< an array of values
  * int   nb    = 0;    //< a variable to keep track of the length of the array
  *
  * type to_be_added  = ...;
  * type to_be_added2 = ...;
  *
- * type *addr = av_dynarray2_add((void **)&array, &nb, sizeof(*array), NULL);
+ * type *addr = av_dynarray2_add((void **)&array, &nb, sizeof(*array), nullptr);
  * if (!addr)
  *     return AVERROR(ENOMEM);
  * memcpy(addr, &to_be_added, sizeof(to_be_added));
@@ -603,7 +594,7 @@ void av_memcpy_backptr(uint8_t *dst, int back, int cnt);
  * In case of success, the pointer to the array is updated in order to
  * point to the new grown array, and the number pointed to by `nb_ptr`
  * is incremented.
- * In case of failure, the array is freed, `*tab_ptr` is set to `NULL` and
+ * In case of failure, the array is freed, `*tab_ptr` is set to `nullptr` and
  * `*nb_ptr` is set to 0.
  *
  * @param[in,out] tab_ptr Pointer to the array to grow
@@ -635,14 +626,14 @@ int av_dynarray_add_nofree(void *tab_ptr, int *nb_ptr, void *elem);
  * In case of success, the pointer to the array is updated in order to
  * point to the new grown array, and the number pointed to by `nb_ptr`
  * is incremented.
- * In case of failure, the array is freed, `*tab_ptr` is set to `NULL` and
+ * In case of failure, the array is freed, `*tab_ptr` is set to `nullptr` and
  * `*nb_ptr` is set to 0.
  *
  * @param[in,out] tab_ptr   Pointer to the array to grow
  * @param[in,out] nb_ptr    Pointer to the number of elements in the array
  * @param[in]     elem_size Size in bytes of an element in the array
  * @param[in]     elem_data Pointer to the data of the element to add. If
- *                          `NULL`, the space of the newly added element is
+ *                          `nullptr`, the space of the newly added element is
  *                          allocated but left uninitialized.
  *
  * @return Pointer to the data of the element to copy in the newly allocated
@@ -671,7 +662,16 @@ void *av_dynarray2_add(void **tab_ptr, int *nb_ptr, size_t elem_size,
  * @param[out] r   Pointer to the result of the operation
  * @return 0 on success, AVERROR(EINVAL) on overflow
  */
-int av_size_mult(size_t a, size_t b, size_t *r);
+static inline int av_size_mult(size_t a, size_t b, size_t *r)
+{
+    size_t t = a * b;
+    /* Hack inspired from glibc: don't try the division if nelem and elsize
+     * are both less than sqrt(SIZE_MAX). */
+    if ((a | b) >= ((size_t)1 << (sizeof(size_t) * 4)) && a && t / a != b)
+        return AVERROR(EINVAL);
+    *r = t;
+    return 0;
+}
 
 /**
  * Set the maximum size that may be allocated in one block.

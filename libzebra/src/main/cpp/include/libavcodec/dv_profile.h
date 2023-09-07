@@ -23,6 +23,7 @@
 
 #include "libavutil/pixfmt.h"
 #include "libavutil/rational.h"
+#include "avcodec.h"
 
 /* minimum number of bytes to read from a DV stream in order to
  * determine the profile */
@@ -60,10 +61,10 @@ typedef struct AVDVProfile {
 /**
  * Get a DV profile for the provided compressed frame.
  *
- * @param sys the profile used for the previous frame, may be NULL
+ * @param sys the profile used for the previous frame, may be nullptr
  * @param frame the compressed data buffer
  * @param buf_size size of the buffer in bytes
- * @return the DV profile for the supplied data or NULL on failure
+ * @return the DV profile for the supplied data or nullptr on failure
  */
 const AVDVProfile *av_dv_frame_profile(const AVDVProfile *sys,
                                        const uint8_t *frame, unsigned buf_size);

@@ -58,7 +58,7 @@ void av_tea_init(struct AVTEA *ctx, const uint8_t key[16], int rounds);
  * @param dst destination array, can be equal to src
  * @param src source array, can be equal to dst
  * @param count number of 8 byte blocks
- * @param iv initialization vector for CBC mode, if NULL then ECB will be used
+ * @param iv initialization vector for CBC mode, if nullptr then ECB will be used
  * @param decrypt 0 for encryption, 1 for decryption
  */
 void av_tea_crypt(struct AVTEA *ctx, uint8_t *dst, const uint8_t *src,

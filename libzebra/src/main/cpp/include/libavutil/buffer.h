@@ -25,7 +25,6 @@
 #ifndef AVUTIL_BUFFER_H
 #define AVUTIL_BUFFER_H
 
-#include <stddef.h>
 #include <stdint.h>
 
 /**
@@ -91,21 +90,21 @@ typedef struct AVBufferRef {
     /**
      * Size of data in bytes.
      */
-    size_t   size;
+    int      size;
 } AVBufferRef;
 
 /**
  * Allocate an AVBuffer of the given size using av_malloc().
  *
- * @return an AVBufferRef of given size or NULL when out of memory
+ * @return an AVBufferRef of given size or nullptr when out of memory
  */
-AVBufferRef *av_buffer_alloc(size_t size);
+AVBufferRef *av_buffer_alloc(int size);
 
 /**
  * Same as av_buffer_alloc(), except the returned buffer will be initialized
  * to zero.
  */
-AVBufferRef *av_buffer_allocz(size_t size);
+AVBufferRef *av_buffer_allocz(int size);
 
 /**
  * Always treat the buffer as read-only, even when it has only one
@@ -126,9 +125,9 @@ AVBufferRef *av_buffer_allocz(size_t size);
  * @param opaque parameter to be got for processing or passed to free
  * @param flags  a combination of AV_BUFFER_FLAG_*
  *
- * @return an AVBufferRef referring to data on success, NULL on failure.
+ * @return an AVBufferRef referring to data on success, nullptr on failure.
  */
-AVBufferRef *av_buffer_create(uint8_t *data, size_t size,
+AVBufferRef *av_buffer_create(uint8_t *data, int size,
                               void (*free)(void *opaque, uint8_t *data),
                               void *opaque, int flags);
 
@@ -142,16 +141,16 @@ void av_buffer_default_free(void *opaque, uint8_t *data);
 /**
  * Create a new reference to an AVBuffer.
  *
- * @return a new AVBufferRef referring to the same AVBuffer as buf or NULL on
+ * @return a new AVBufferRef referring to the same AVBuffer as buf or nullptr on
  * failure.
  */
-AVBufferRef *av_buffer_ref(const AVBufferRef *buf);
+AVBufferRef *av_buffer_ref(AVBufferRef *buf);
 
 /**
  * Free a given reference and automatically free the buffer if there are no more
  * references to it.
  *
- * @param buf the reference to be freed. The pointer is set to NULL on return.
+ * @param buf the reference to be freed. The pointer is set to nullptr on return.
  */
 void av_buffer_unref(AVBufferRef **buf);
 
@@ -187,32 +186,16 @@ int av_buffer_make_writable(AVBufferRef **buf);
  * @param buf  a buffer reference to reallocate. On success, buf will be
  *             unreferenced and a new reference with the required size will be
  *             written in its place. On failure buf will be left untouched. *buf
- *             may be NULL, then a new buffer is allocated.
+ *             may be nullptr, then a new buffer is allocated.
  * @param size required new buffer size.
  * @return 0 on success, a negative AVERROR on failure.
  *
  * @note the buffer is actually reallocated with av_realloc() only if it was
- * initially allocated through av_buffer_realloc(NULL) and there is only one
+ * initially allocated through av_buffer_realloc(nullptr) and there is only one
  * reference to it (i.e. the one passed to this function). In all other cases
  * a new buffer is allocated and the data is copied.
  */
-int av_buffer_realloc(AVBufferRef **buf, size_t size);
-
-/**
- * Ensure dst refers to the same data as src.
- *
- * When *dst is already equivalent to src, do nothing. Otherwise unreference dst
- * and replace it with a new reference to src.
- *
- * @param dst Pointer to either a valid buffer reference or NULL. On success,
- *            this will point to a buffer reference equivalent to src. On
- *            failure, dst will be left untouched.
- * @param src A buffer reference to replace dst with. May be NULL, then this
- *            function is equivalent to av_buffer_unref(dst).
- * @return 0 on success
- *         AVERROR(ENOMEM) on memory allocation failure.
- */
-int av_buffer_replace(AVBufferRef **dst, const AVBufferRef *src);
+int av_buffer_realloc(AVBufferRef **buf, int size);
 
 /**
  * @}
@@ -259,11 +242,11 @@ typedef struct AVBufferPool AVBufferPool;
  *
  * @param size size of each buffer in this pool
  * @param alloc a function that will be used to allocate new buffers when the
- * pool is empty. May be NULL, then the default allocator will be used
+ * pool is empty. May be nullptr, then the default allocator will be used
  * (av_buffer_alloc()).
- * @return newly created buffer pool on success, NULL on error.
+ * @return newly created buffer pool on success, nullptr on error.
  */
-AVBufferPool *av_buffer_pool_init(size_t size, AVBufferRef* (*alloc)(size_t size));
+AVBufferPool *av_buffer_pool_init(int size, AVBufferRef* (*alloc)(int size));
 
 /**
  * Allocate and initialize a buffer pool with a more complex allocator.
@@ -271,17 +254,15 @@ AVBufferPool *av_buffer_pool_init(size_t size, AVBufferRef* (*alloc)(size_t size
  * @param size size of each buffer in this pool
  * @param opaque arbitrary user data used by the allocator
  * @param alloc a function that will be used to allocate new buffers when the
- *              pool is empty. May be NULL, then the default allocator will be
- *              used (av_buffer_alloc()).
+ *              pool is empty.
  * @param pool_free a function that will be called immediately before the pool
- *                  is freed. I.e. after av_buffer_pool_uninit() is called
- *                  by the caller and all the frames are returned to the pool
- *                  and freed. It is intended to uninitialize the user opaque
- *                  data. May be NULL.
- * @return newly created buffer pool on success, NULL on error.
+ *                  is freed. I.e. after av_buffer_pool_can_uninit() is called
+ *                  by the pool and all the frames are returned to the pool and
+ *                  freed. It is intended to uninitialize the user opaque data.
+ * @return newly created buffer pool on success, nullptr on error.
  */
-AVBufferPool *av_buffer_pool_init2(size_t size, void *opaque,
-                                   AVBufferRef* (*alloc)(void *opaque, size_t size),
+AVBufferPool *av_buffer_pool_init2(int size, void *opaque,
+                                   AVBufferRef* (*alloc)(void *opaque, int size),
                                    void (*pool_free)(void *opaque));
 
 /**
@@ -290,7 +271,7 @@ AVBufferPool *av_buffer_pool_init2(size_t size, void *opaque,
  * is safe to call this function while some of the allocated buffers are still
  * in use.
  *
- * @param pool pointer to the pool to be freed. It will be set to NULL.
+ * @param pool pointer to the pool to be freed. It will be set to nullptr.
  */
 void av_buffer_pool_uninit(AVBufferPool **pool);
 
@@ -298,22 +279,9 @@ void av_buffer_pool_uninit(AVBufferPool **pool);
  * Allocate a new AVBuffer, reusing an old buffer from the pool when available.
  * This function may be called simultaneously from multiple threads.
  *
- * @return a reference to the new buffer on success, NULL on error.
+ * @return a reference to the new buffer on success, nullptr on error.
  */
 AVBufferRef *av_buffer_pool_get(AVBufferPool *pool);
-
-/**
- * Query the original opaque parameter of an allocated buffer in the pool.
- *
- * @param ref a buffer reference to a buffer returned by av_buffer_pool_get.
- * @return the opaque parameter set by the buffer allocator function of the
- *         buffer pool.
- *
- * @note the opaque parameter of ref is used by the buffer pool implementation,
- * therefore you have to use this function to access the original opaque
- * parameter of an allocated buffer.
- */
-void *av_buffer_pool_buffer_get_opaque(const AVBufferRef *ref);
 
 /**
  * @}

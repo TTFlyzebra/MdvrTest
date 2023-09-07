@@ -44,7 +44,7 @@ public class Notify {
 
     public void registerListener(INotify notify) {
         while (listCount.get() > 0) {
-            FlyLog.d("handled did not end ...");
+            FlyLog.d("registerListener did not end %d...", listCount.get());
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
@@ -58,7 +58,7 @@ public class Notify {
 
     public void unregisterListener(INotify notify) {
         while (listCount.get() > 0) {
-            FlyLog.d("handled did not end ...");
+            FlyLog.d("unregisterListener did not end %d...", listCount.get());
             try {
                 Thread.sleep(500);
             } catch (InterruptedException e) {

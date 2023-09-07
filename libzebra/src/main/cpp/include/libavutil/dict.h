@@ -32,6 +32,8 @@
 
 #include <stdint.h>
 
+#include "version.h"
+
 /**
  * @addtogroup lavu_dict AVDictionary
  * @ingroup lavu_data
@@ -40,16 +42,16 @@
  *
  * @{
  * Dictionaries are used for storing key:value pairs. To create
- * an AVDictionary, simply pass an address of a NULL pointer to
- * av_dict_set(). NULL can be used as an empty dictionary wherever
+ * an AVDictionary, simply pass an address of a nullptr pointer to
+ * av_dict_set(). nullptr can be used as an empty dictionary wherever
  * a pointer to an AVDictionary is required.
  * Use av_dict_get() to retrieve an entry or iterate over all
  * entries and finally av_dict_free() to free the dictionary
  * and all its contents.
  *
  @code
-   AVDictionary *d = NULL;           // "create" an empty dictionary
-   AVDictionaryEntry *t = NULL;
+   AVDictionary *d = nullptr;           // "create" an empty dictionary
+   AVDictionaryEntry *t = nullptr;
 
    av_dict_set(&d, "foo", "bar", 0); // add an entry
 
@@ -93,10 +95,10 @@ typedef struct AVDictionary AVDictionary;
  * to the null string "" and set the AV_DICT_IGNORE_SUFFIX flag.
  *
  * @param prev Set to the previous matching element to find the next.
- *             If set to NULL the first matching element is returned.
+ *             If set to nullptr the first matching element is returned.
  * @param key matching key
  * @param flags a collection of AV_DICT_* flags controlling how the entry is retrieved
- * @return found entry or NULL in case no matching entry was found in the dictionary
+ * @return found entry or nullptr in case no matching entry was found in the dictionary
  */
 AVDictionaryEntry *av_dict_get(const AVDictionary *m, const char *key,
                                const AVDictionaryEntry *prev, int flags);
@@ -118,11 +120,11 @@ int av_dict_count(const AVDictionary *m);
  * Warning: Adding a new entry to a dictionary invalidates all existing entries
  * previously returned with av_dict_get.
  *
- * @param pm pointer to a pointer to a dictionary struct. If *pm is NULL
+ * @param pm pointer to a pointer to a dictionary struct. If *pm is nullptr
  * a dictionary struct is allocated and put in *pm.
  * @param key entry key to add to *pm (will either be av_strduped or added as a new key depending on flags)
  * @param value entry value to add to *pm (will be av_strduped or added as a new key depending on flags).
- *        Passing a NULL value will cause an existing entry to be deleted.
+ *        Passing a nullptr value will cause an existing entry to be deleted.
  * @return >= 0 on success otherwise an error code <0
  */
 int av_dict_set(AVDictionary **pm, const char *key, const char *value, int flags);
@@ -157,7 +159,7 @@ int av_dict_parse_string(AVDictionary **pm, const char *str,
 
 /**
  * Copy entries from one AVDictionary struct into another.
- * @param dst pointer to a pointer to a AVDictionary struct. If *dst is NULL,
+ * @param dst pointer to a pointer to a AVDictionary struct. If *dst is nullptr,
  *            this function will allocate a struct for you and put it in *dst
  * @param src pointer to source AVDictionary struct
  * @param flags flags to use when setting entries in *dst

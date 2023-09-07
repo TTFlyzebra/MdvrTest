@@ -6,6 +6,9 @@
 #define F_ZEBRA_GLOBAL_H
 
 #include "Terminal.h"
+#include "User.h"
+
+extern User* U;
 
 extern Terminal* T;
 

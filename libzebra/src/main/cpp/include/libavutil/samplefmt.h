@@ -21,6 +21,9 @@
 
 #include <stdint.h>
 
+#include "avutil.h"
+#include "attributes.h"
+
 /**
  * @addtogroup lavu_audio
  * @{
@@ -72,7 +75,7 @@ enum AVSampleFormat {
 };
 
 /**
- * Return the name of sample_fmt, or NULL if sample_fmt is not
+ * Return the name of sample_fmt, or nullptr if sample_fmt is not
  * recognized.
  */
 const char *av_get_sample_fmt_name(enum AVSampleFormat sample_fmt);
@@ -122,7 +125,7 @@ enum AVSampleFormat av_get_planar_sample_fmt(enum AVSampleFormat sample_fmt);
  * @param sample_fmt the number of the sample format to print the
  * corresponding info string, or a negative value to print the
  * corresponding header.
- * @return the pointer to the filled buffer or NULL if sample_fmt is
+ * @return the pointer to the filled buffer or nullptr if sample_fmt is
  * unknown or in case of other errors
  */
 char *av_get_sample_fmt_string(char *buf, int buf_size, enum AVSampleFormat sample_fmt);
@@ -147,7 +150,7 @@ int av_sample_fmt_is_planar(enum AVSampleFormat sample_fmt);
 /**
  * Get the required buffer size for the given audio parameters.
  *
- * @param[out] linesize calculated linesize, may be NULL
+ * @param[out] linesize calculated linesize, may be nullptr
  * @param nb_channels   the number of channels
  * @param nb_samples    the number of samples in a single channel
  * @param sample_fmt    the sample format
@@ -186,14 +189,15 @@ int av_samples_get_buffer_size(int *linesize, int nb_channels, int nb_samples,
  * The documentation for AVSampleFormat describes the data layout.
  *
  * @param[out] audio_data  array to be filled with the pointer for each channel
- * @param[out] linesize    calculated linesize, may be NULL
+ * @param[out] linesize    calculated linesize, may be nullptr
  * @param buf              the pointer to a buffer containing the samples
  * @param nb_channels      the number of channels
  * @param nb_samples       the number of samples in a single channel
  * @param sample_fmt       the sample format
  * @param align            buffer size alignment (0 = default, 1 = no alignment)
- * @return                 minimum size in bytes required for the buffer on success,
- *                         or a negative error code on failure
+ * @return                 >=0 on success or a negative error code on failure
+ * @todo return minimum size in bytes required for the buffer in case
+ * of success at the next bump
  */
 int av_samples_fill_arrays(uint8_t **audio_data, int *linesize,
                            const uint8_t *buf,
@@ -210,7 +214,7 @@ int av_samples_fill_arrays(uint8_t **audio_data, int *linesize,
  * The documentation for AVSampleFormat describes the data layout.
  *
  * @param[out] audio_data  array to be filled with the pointer for each channel
- * @param[out] linesize    aligned size for audio buffer(s), may be NULL
+ * @param[out] linesize    aligned size for audio buffer(s), may be nullptr
  * @param nb_channels      number of audio channels
  * @param nb_samples       number of samples per channel
  * @param align            buffer size alignment (0 = default, 1 = no alignment)
