@@ -136,7 +136,7 @@ public class CamService1080P {
                 ByteUtil.shortToBytes((short) width, params, 2, true);
                 ByteUtil.shortToBytes((short) height, params, 4, true);
                 ByteUtil.longToBytes(ptsUsec, params, 6, true);
-                Notify.get().handledata(NotifyType.NOTI_CAMOUT_YUV, videoBuffer[channel].array(), size, params);
+                Notify.get().handledata(NotifyType.NOTI_CAMOUT_YUV, videoBuffer[channel].array(), size, params, params.length);
             }
         }
     }

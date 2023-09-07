@@ -96,13 +96,13 @@ RtspClient::~RtspClient() {
     FLOGD("%s()", __func__);
 }
 
-void RtspClient::handle(NofifyType type, const char *data, int32_t size, const char *params) {
+void RtspClient::handle(NofifyType type, const char *data, int32_t dsize, const char *params, int32_t psize) {
     switch (type) {
         case NOTI_CAMOUT_AVC: {
             int16_t channel = ByteUtil::byte2int16(params, 0, true);
             if (mChannel == channel) {
                 int64_t pts = ByteUtil::byte2int64(params, 2, true);
-                sendVFrame(data, size, pts);
+                sendVFrame(data, dsize, pts);
             }
             break;
         }
@@ -116,7 +116,7 @@ void RtspClient::handle(NofifyType type, const char *data, int32_t size, const c
                     is_send_audiohead = true;
                 }
                 int64_t pts = ByteUtil::byte2int64(params, 2, true);
-                sendAFrame(data, size, pts);
+                sendAFrame(data, dsize, pts);
             }
             break;
         }

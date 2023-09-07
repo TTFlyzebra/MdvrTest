@@ -86,11 +86,11 @@ public class Notify {
         }
     }
 
-    public void handledata(int type, byte[] data, int size, byte[] params) {
+    public void handledata(int type, byte[] data, int dsize, byte[] params, int psize) {
         long stime = SystemClock.uptimeMillis();
         listCount.incrementAndGet();
         for (INotify notify : notifys) {
-            notify.handle(type, data, size, params);
+            notify.handle(type, data, dsize, params, psize);
         }
         listCount.decrementAndGet();
         synchronized (listLock) {
@@ -98,7 +98,7 @@ public class Notify {
         }
         long utime = SystemClock.uptimeMillis() - stime;
         if (utime > 50) {
-            FlyLog.w("Notify handledata use type %d, time %d, size %d", type, utime, size);
+            FlyLog.w("Notify handledata use type %d, time %d, size %d", type, utime, dsize);
         }
     }
 

@@ -16,7 +16,7 @@ FzebraCB::FzebraCB(JavaVM *jvm, JNIEnv *env, jobject thiz) {
         return;
     }
     notifydata = mEnv->GetMethodID(cls, "javaNotifydata", "([BI)V");
-    handledata = mEnv->GetMethodID(cls, "javaHandleData", "(I[BI[B)V");
+    handledata = mEnv->GetMethodID(cls, "javaHandleData", "(I[BI[BI)V");
     mEnv->DeleteLocalRef(cls);
 }
 
@@ -59,7 +59,7 @@ void FzebraCB::javaNotifydata(const char *data, int32_t size) {
     }
 }
 
-void FzebraCB::javaHandledata(int32_t type, const char *data, int32_t dataLen, const char *parmas, int32_t parmasLen) {
+void FzebraCB::javaHandledata(int32_t type, const char *data, int32_t dsize, const char *parmas, int32_t psize) {
     std::lock_guard<std::mutex> lock(mlock_call);
     int status = mjvm->GetEnv((void **) &mEnv, JNI_VERSION_1_4);
     bool isAttacked = false;
@@ -71,11 +71,11 @@ void FzebraCB::javaHandledata(int32_t type, const char *data, int32_t dataLen, c
         }
         isAttacked = true;
     }
-    jbyteArray jdata = mEnv->NewByteArray(static_cast<jsize>(dataLen));
-    mEnv->SetByteArrayRegion(jdata, 0, dataLen, reinterpret_cast<const jbyte *>(data));
-    jbyteArray jparmas = mEnv->NewByteArray(static_cast<jsize>(parmasLen));
-    mEnv->SetByteArrayRegion(jparmas, 0, parmasLen, reinterpret_cast<const jbyte *>(parmas));
-    mEnv->CallVoidMethod(mThiz, handledata, type, jdata, dataLen, jparmas);
+    jbyteArray jdata = mEnv->NewByteArray(static_cast<jsize>(dsize));
+    mEnv->SetByteArrayRegion(jdata, 0, dsize, reinterpret_cast<const jbyte *>(data));
+    jbyteArray jparmas = mEnv->NewByteArray(static_cast<jsize>(psize));
+    mEnv->SetByteArrayRegion(jparmas, 0, psize, reinterpret_cast<const jbyte *>(parmas));
+    mEnv->CallVoidMethod(mThiz, handledata, type, jdata, dsize, jparmas, psize);
     mEnv->DeleteLocalRef(jdata);
     mEnv->DeleteLocalRef(jparmas);
     if (isAttacked) {

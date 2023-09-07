@@ -88,9 +88,9 @@ public class Fzebra implements INotify {
     }
 
     @Override
-    public void handle(int type, byte[] data, int size, byte[] params) {
+    public void handle(int type, byte[] data, int dsize, byte[] params, int psize) {
         if (_ptr_obj < 0) return;
-        _handle(_ptr_obj, type, data, size, params);
+        _handle(_ptr_obj, type, data, dsize, params, psize);
     }
 
     public void startUserServer() {
@@ -147,8 +147,8 @@ public class Fzebra implements INotify {
         Notify.get().notifydata(data, size);
     }
 
-    private void javaHandleData(int type, byte[] data, int size, byte[] params) {
-        Notify.get().handledata(type, data, size, params);
+    private void javaHandleData(int type, byte[] data, int dsize, byte[] params, int psize) {
+        Notify.get().handledata(type, data, dsize, params, psize);
     }
 
     private native long _init();
@@ -161,7 +161,7 @@ public class Fzebra implements INotify {
 
     private native void _notify(long p_obj, byte[] data, int size);
 
-    private native void _handle(long p_obj, int type, byte[] data, int size, byte[] params);
+    private native void _handle(long p_obj, int type, byte[] data, int dsize, byte[] params, int psize);
 
     private native void _startUserServer(long p_obj);
 

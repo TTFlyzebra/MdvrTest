@@ -20,7 +20,7 @@ void BaseNotify::notify(const char* data, int32_t size)
 
 }
 
-void BaseNotify::handle(NofifyType type, const char* data, int32_t size, const char* params)
+void BaseNotify::handle(NofifyType type, const char* data, int32_t dsize, const char* params, int32_t psize)
 {
 
 }

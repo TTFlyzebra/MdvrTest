@@ -28,11 +28,11 @@ public:
 
     void notify(const char *data, int32_t size) override;
 
-    void handle(NofifyType type, const char *data, int32_t size, const char *params) override;
+    void handle(NofifyType type, const char *data, int32_t dsize, const char *params, int32_t psize) override;
 
     void nativeNotifydata(const char *data, int32_t size);
 
-    void nativeHandledata(NofifyType type, const char *data, int32_t size, const char *params);
+    void nativeHandledata(NofifyType type, const char *data, int32_t dsize, const char *params, int32_t psize);
 
     static void setTid(int64_t tid);
 

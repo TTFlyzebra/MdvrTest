@@ -194,16 +194,16 @@ public class MdvrService extends Service implements INotify {
     }
 
     @Override
-    public void handle(int type, byte[] data, int size, byte[] params) {
+    public void handle(int type, byte[] data, int dsize, byte[] params, int psize) {
         if (NotifyType.NOTI_MICOUT_SPS == type) {
             short channel = ByteUtil.bytes2Short(params, 0, true);
-            byte[] audioHead = new byte[size];
-            System.arraycopy(data, 0, audioHead, 0, size);
+            byte[] audioHead = new byte[dsize];
+            System.arraycopy(data, 0, audioHead, 0, dsize);
             Global.audioHeadMap.put((int) channel, audioHead);
         } else if (NotifyType.NOTI_CAMOUT_SPS == type) {
             short channel = ByteUtil.bytes2Short(params, 0, true);
-            byte[] videoHead = new byte[size];
-            System.arraycopy(data, 0, videoHead, 0, size);
+            byte[] videoHead = new byte[dsize];
+            System.arraycopy(data, 0, videoHead, 0, dsize);
             Global.videoHeadMap.put((int) channel, videoHead);
         }
     }

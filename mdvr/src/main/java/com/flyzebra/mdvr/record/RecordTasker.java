@@ -121,23 +121,23 @@ public class RecordTasker implements INotify {
     }
 
     @Override
-    public void handle(int type, byte[] data, int size, byte[] params) {
+    public void handle(int type, byte[] data, int dsize, byte[] params, int psize) {
         long stime = SystemClock.uptimeMillis();
         if (NotifyType.NOTI_CAMOUT_AVC == type) {
             short channel = ByteUtil.bytes2Short(params, 0, true);
             if (mChannel != channel) return;
             long pts = ByteUtil.bytes2Long(params, 2, true);
             synchronized (saveLock) {
-                if (saveBuf.remaining() < size + videoHeadSize) {
+                if (saveBuf.remaining() < dsize + videoHeadSize) {
                     FlyLog.e("avc save buffer[%d] is full, clean all buffer!", mChannel);
                     saveBuf.clear();
                 }
                 byte[] head = new byte[videoHeadSize];
-                ByteUtil.intToBytes(size + videoHeadSize, head, 0, true);
+                ByteUtil.intToBytes(dsize + videoHeadSize, head, 0, true);
                 ByteUtil.intToBytes(ZebraMuxer.VIDEO_FRAME, head, 4, true);
                 ByteUtil.longToBytes(pts, head, 8, true);
                 saveBuf.put(head, 0, 8);
-                saveBuf.put(data, 0, size);
+                saveBuf.put(data, 0, dsize);
                 saveBuf.put(head, 8, 8);
                 saveLock.notify();
             }
@@ -146,23 +146,23 @@ public class RecordTasker implements INotify {
             if (mChannel != channel) return;
             long pts = ByteUtil.bytes2Long(params, 2, true);
             synchronized (saveLock) {
-                if (saveBuf.remaining() < size + audioHeadSize) {
+                if (saveBuf.remaining() < dsize + audioHeadSize) {
                     FlyLog.e("aac save buffer[%d] is full, clean all buffer!", mChannel);
                     saveBuf.clear();
                 }
                 byte[] head = new byte[audioHeadSize];
-                ByteUtil.intToBytes(size + audioHeadSize, head, 0, true);
+                ByteUtil.intToBytes(dsize + audioHeadSize, head, 0, true);
                 ByteUtil.intToBytes(ZebraMuxer.AUDIO_FRAME, head, 4, true);
                 ByteUtil.longToBytes(pts, head, 8, true);
                 saveBuf.put(head, 0, 8);
-                saveBuf.put(data, 0, size);
+                saveBuf.put(data, 0, dsize);
                 saveBuf.put(head, 8, 8);
                 saveLock.notify();
             }
         }
         long utime = SystemClock.uptimeMillis() - stime;
         if (utime > 50) {
-            FlyLog.e("RecordTasker handle use type %d, time %d, size %d", type, utime, size);
+            FlyLog.e("RecordTasker handle use type %d, time %d, size %d", type, utime, dsize);
         }
     }
 }

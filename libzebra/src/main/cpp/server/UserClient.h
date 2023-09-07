@@ -28,7 +28,7 @@ public:
     UserClient(UserServer* server, Notify* notify, int32_t socket);
     ~UserClient();
     void notify(const char* data, int32_t size) override;
-    void handle(NofifyType type, const char* data, int32_t size, const char* params) override;
+    void handle(NofifyType type, const char* data, int32_t dsize, const char* params, int32_t psize) override;
     int64_t getUid();
 
 private:

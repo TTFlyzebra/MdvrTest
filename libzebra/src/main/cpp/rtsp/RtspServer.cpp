@@ -50,15 +50,15 @@ RtspServer::~RtspServer() {
     FLOGD("%s()", __func__);
 }
 
-void RtspServer::handle(NofifyType type, const char *data, int32_t size, const char *params) {
+void RtspServer::handle(NofifyType type, const char *data, int32_t dsize, const char *params, int32_t psize) {
     if (type == NOTI_CAMOUT_SPS) {
         int16_t channel = ByteUtil::byte2int16(params, 0, true);
-        videoHeadLens[channel] = size;
-        memcpy(videoHeads + VIDEO_HEAD_MAX_SIZE * channel, data, size);
+        videoHeadLens[channel] = dsize;
+        memcpy(videoHeads + VIDEO_HEAD_MAX_SIZE * channel, data, dsize);
     } else if (type == NOTI_MICOUT_SPS) {
         int16_t channel = ByteUtil::byte2int16(params, 0, true);
-        audioHeadLens[channel] = size;
-        memcpy(audioHeads + AUDIO_HEAD_MAX_SIZE * channel, data, size);
+        audioHeadLens[channel] = dsize;
+        memcpy(audioHeads + AUDIO_HEAD_MAX_SIZE * channel, data, dsize);
     }
 }
 

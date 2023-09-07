@@ -141,7 +141,7 @@ void UserClient::notify(const char* data, int32_t size)
     }
 }
 
-void UserClient::handle(NofifyType type, const char* data, int32_t size, const char* params)
+void UserClient::handle(NofifyType type, const char* data, int32_t dsize, const char* params, int32_t psize)
 {
     switch (type) {
         case NOTI_SCREEN_SPS: {
@@ -151,7 +151,7 @@ void UserClient::handle(NofifyType type, const char* data, int32_t size, const c
             }
             char screen_avc[sizeof(SCREEN_AVC)];
             memcpy(screen_avc, SCREEN_AVC, sizeof(SCREEN_AVC));
-            int32_t dLen = size + sizeof(SCREEN_AVC) - 8;
+            int32_t dLen = dsize + sizeof(SCREEN_AVC) - 8;
             ByteUtil::int32ToData(screen_avc + 4, dLen);
             memcpy(screen_avc + 8, &T->tid, 8);
             std::lock_guard<std::mutex> lock(mlock_send);
@@ -160,7 +160,7 @@ void UserClient::handle(NofifyType type, const char* data, int32_t size, const c
                 sendBuf.clear();
             }
             sendBuf.insert(sendBuf.end(), screen_avc, screen_avc+sizeof(SCREEN_AVC));
-            sendBuf.insert(sendBuf.end(), data, data + size);
+            sendBuf.insert(sendBuf.end(), data, data + dsize);
             mcond_send.notify_one();
             break;
         }
@@ -171,7 +171,7 @@ void UserClient::handle(NofifyType type, const char* data, int32_t size, const c
             }
             char screen_avc[sizeof(SCREEN_AVC)];
             memcpy(screen_avc, SCREEN_AVC, sizeof(SCREEN_AVC));
-            int32_t dLen = size + sizeof(SCREEN_AVC) - 8;
+            int32_t dLen = dsize + sizeof(SCREEN_AVC) - 8;
             ByteUtil::int32ToData(screen_avc + 4, dLen);
             memcpy(screen_avc + 8, &T->tid, 8);
             std::lock_guard<std::mutex> lock(mlock_send);
@@ -180,7 +180,7 @@ void UserClient::handle(NofifyType type, const char* data, int32_t size, const c
                 sendBuf.clear();
             }
             sendBuf.insert(sendBuf.end(), screen_avc, screen_avc+sizeof(SCREEN_AVC));
-            sendBuf.insert(sendBuf.end(), data, data + size);
+            sendBuf.insert(sendBuf.end(), data, data + dsize);
             mcond_send.notify_one();
             break;
         }

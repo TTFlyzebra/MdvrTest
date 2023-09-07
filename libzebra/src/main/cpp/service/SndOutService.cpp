@@ -82,7 +82,7 @@ void SndOutService::notifyPcmData(const char* data, int32_t size, int32_t sample
         ByteUtil::int32ToBytes(channel,params, 12, true);
         ByteUtil::int32ToBytes(format,params, 16, true);
         ByteUtil::int64ToBytes(pts,params, 20, true);
-        N->handledata(NOTI_SNDOUT_PCM, data, size, params);
+        N->handledata(NOTI_SNDOUT_PCM, data, size, params, 28);
     }
 }
 

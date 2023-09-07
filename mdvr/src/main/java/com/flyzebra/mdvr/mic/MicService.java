@@ -80,13 +80,13 @@ public class MicService {
                 ByteUtil.longToBytes(System.nanoTime() / 1000, params, 12, true);
 
                 ByteUtil.shortToBytes((short) 0, params, 0, true);
-                Notify.get().handledata(NotifyType.NOTI_MICOUT_PCM, pcm_0, cPcmSize, params);
+                Notify.get().handledata(NotifyType.NOTI_MICOUT_PCM, pcm_0, cPcmSize, params, params.length);
                 ByteUtil.shortToBytes((short) 1, params, 0, true);
-                Notify.get().handledata(NotifyType.NOTI_MICOUT_PCM, pcm_1, cPcmSize, params);
+                Notify.get().handledata(NotifyType.NOTI_MICOUT_PCM, pcm_1, cPcmSize, params, params.length);
                 ByteUtil.shortToBytes((short) 2, params, 0, true);
-                Notify.get().handledata(NotifyType.NOTI_MICOUT_PCM, pcm_2, cPcmSize, params);
+                Notify.get().handledata(NotifyType.NOTI_MICOUT_PCM, pcm_2, cPcmSize, params, params.length);
                 ByteUtil.shortToBytes((short) 3, params, 0, true);
-                Notify.get().handledata(NotifyType.NOTI_MICOUT_PCM, pcm_3, cPcmSize, params);
+                Notify.get().handledata(NotifyType.NOTI_MICOUT_PCM, pcm_3, cPcmSize, params, params.length);
             }
             mAudioRecord.stop();
         }, "mic-pcm");

@@ -68,11 +68,11 @@ void Notify::notifydata(const char *data, int32_t size)
     mlist_count--;
 }
 
-void Notify::handledata(NofifyType type, const char* data, int32_t size, const char* params)
+void Notify::handledata(NofifyType type, const char* data, int32_t dsize, const char* params, int32_t psize)
 {
     mlist_count++;
     for (auto &it: notifyList) {
-        ((INotify*)it)->handle(type, data, size, params);
+        ((INotify*)it)->handle(type, data, dsize, params, psize);
     }
     mlist_count--;
 }

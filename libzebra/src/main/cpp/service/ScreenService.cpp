@@ -80,7 +80,7 @@ void ScreenService::notifyYuvData(const char* data, int32_t size, int32_t width,
         ByteUtil::int32ToBytes(width,params, 8, true);
         ByteUtil::int32ToBytes(height,params, 12, true);
         ByteUtil::int64ToBytes(pts,params, 16, true);
-        N->handledata(NOTI_SCREEN_YUV, data, size, params);
+        N->handledata(NOTI_SCREEN_YUV, data, size, params, 24);
     }
 }
 

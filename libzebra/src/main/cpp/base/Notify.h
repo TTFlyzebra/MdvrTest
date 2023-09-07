@@ -51,7 +51,7 @@ public:
 
     virtual void notify(const char *data, int32_t size) = 0;
 
-    virtual void handle(NofifyType type, const char *data, int32_t size, const char *params) = 0;
+    virtual void handle(NofifyType type, const char *data, int32_t dsize, const char *params, int32_t psize) = 0;
 };
 
 class Notify {
@@ -66,7 +66,7 @@ public:
 
     void notifydata(const char *data, int32_t size);
 
-    void handledata(NofifyType type, const char *data, int32_t size, const char *params);
+    void handledata(NofifyType type, const char *data, int32_t dsize, const char *params, int32_t psize);
 
     void miniNotify(const char *command, int32_t size, int64_t tid, int64_t uid = 0, const char *data = nullptr);
 

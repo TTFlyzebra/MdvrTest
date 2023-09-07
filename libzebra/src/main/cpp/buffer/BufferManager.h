@@ -19,7 +19,7 @@ public:
     void unregNotify(Notify* notify);
     ~BufferManager();
     void notify(const char* data, int32_t size) override;
-    void handle(NofifyType type, const char* data, int32_t size, const char* params) override;
+    void handle(NofifyType type, const char* data, int32_t dsize, const char* params, int32_t psize) override;
     LoopBuf* createBuffer(size_t capacity, size_t itemsize, const char* tag);
     void releaseBuffer(LoopBuf* buffer);
 

@@ -93,14 +93,14 @@ public class AvcTasker implements VideoCodecCB, INotify {
     public void notifySpsPps(int channel, byte[] data, int size) {
         byte[] params = new byte[4];
         ByteUtil.shortToBytes((short) channel, params, 0, true);
-        Notify.get().handledata(NotifyType.NOTI_CAMOUT_SPS, data, size, params);
+        Notify.get().handledata(NotifyType.NOTI_CAMOUT_SPS, data, size, params, params.length);
     }
 
     @Override
     public void notifyVpsSpsPps(int channel, byte[] data, int size) {
         byte[] params = new byte[4];
         ByteUtil.shortToBytes((short) channel, params, 0, true);
-        Notify.get().handledata(NotifyType.NOTI_CAMOUT_SPS, data, size, params);
+        Notify.get().handledata(NotifyType.NOTI_CAMOUT_SPS, data, size, params, params.length);
     }
 
     @Override
@@ -108,7 +108,7 @@ public class AvcTasker implements VideoCodecCB, INotify {
         byte[] params = new byte[10];
         ByteUtil.shortToBytes((short) channel, params, 0, true);
         ByteUtil.longToBytes(pts, params, 2, true);
-        Notify.get().handledata(NotifyType.NOTI_CAMOUT_AVC, data, size, params);
+        Notify.get().handledata(NotifyType.NOTI_CAMOUT_AVC, data, size, params, params.length);
     }
 
     @Override
@@ -116,7 +116,7 @@ public class AvcTasker implements VideoCodecCB, INotify {
         byte[] params = new byte[10];
         ByteUtil.shortToBytes((short) channel, params, 0, true);
         ByteUtil.longToBytes(pts, params, 2, true);
-        Notify.get().handledata(NotifyType.NOTI_CAMOUT_AVC, data, size, params);
+        Notify.get().handledata(NotifyType.NOTI_CAMOUT_AVC, data, size, params, params.length);
     }
 
     @Override
@@ -125,7 +125,7 @@ public class AvcTasker implements VideoCodecCB, INotify {
     }
 
     @Override
-    public void handle(int type, byte[] data, int size, byte[] params) {
+    public void handle(int type, byte[] data, int dsize, byte[] params, int psize) {
         if (NotifyType.NOTI_CAMOUT_YUV == type) {
             int channel = ByteUtil.bytes2Short(params, 0, true);
             if (this.mChannel != channel) return;

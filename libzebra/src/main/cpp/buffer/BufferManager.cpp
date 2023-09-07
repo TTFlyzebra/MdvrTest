@@ -48,7 +48,7 @@ void BufferManager::notify(const char *data, int32_t size) {
 
 }
 
-void BufferManager::handle(NofifyType type, const char *data, int32_t size, const char *params) {
+void BufferManager::handle(NofifyType type, const char *data, int32_t dsize, const char *params, int32_t psize) {
 
 }
 

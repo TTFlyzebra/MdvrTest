@@ -14,7 +14,7 @@ public:
     ~FzebraCB();
 
     void javaNotifydata(const char* data, int32_t size);
-    void javaHandledata(int32_t type, const char* data, int32_t size, const char* parmas, int32_t parmasLen);
+    void javaHandledata(int32_t type, const char* data, int32_t dsize, const char* parmas, int32_t psize);
 
 private:
     JavaVM* mjvm ;

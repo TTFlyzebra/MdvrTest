@@ -11,6 +11,6 @@ public interface INotify {
 
    void notify(byte[] data, int size);
 
-   void handle(int type, byte[] data, int size, byte[] params);
+   void handle(int type, byte[] data, int dsize, byte[] params, int psize);
 
 }

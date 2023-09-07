@@ -129,13 +129,16 @@ public class ScreenService implements INotify {
                         byte[] data = new byte[spsLen + ppsLen];
                         spsBuffer.get(data, 0, spsLen);
                         ppsBuffer.get(data, spsLen, ppsLen);
-                        Notify.get().handledata(NotifyType.NOTI_SCREEN_SPS, data, (spsLen + ppsLen), null);
+                        byte[] params = new byte[8];
+                        Notify.get().handledata(NotifyType.NOTI_SCREEN_SPS, data, (spsLen + ppsLen), params, params.length);
                     } else if (eobIndex >= 0) {
                         ByteBuffer data = codec.getOutputBuffer(eobIndex);
                         data.position(bufferInfo.offset);
                         data.limit(bufferInfo.offset + bufferInfo.size);
                         data.get(video_data, 0, bufferInfo.size);
-                        Notify.get().handledata(NotifyType.NOTI_SCREEN_AVC, video_data, bufferInfo.size, null);
+                        byte[] params = new byte[8];
+                        ByteUtil.longToBytes(bufferInfo.presentationTimeUs / 1000L, params, 0, true);
+                        Notify.get().handledata(NotifyType.NOTI_SCREEN_AVC, video_data, bufferInfo.size, params, params.length);
                         codec.releaseOutputBuffer(eobIndex, false);
                     }
                 }
@@ -177,7 +180,7 @@ public class ScreenService implements INotify {
     }
 
     @Override
-    public void handle(int type, byte[] data, int size, byte[] params) {
+    public void handle(int type, byte[] data, int dsize, byte[] params, int psize) {
 
     }
 

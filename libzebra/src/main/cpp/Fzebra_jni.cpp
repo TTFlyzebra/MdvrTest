@@ -55,14 +55,15 @@ Java_com_flyzebra_core_Fzebra__1notify(JNIEnv *env, jobject thiz, jlong p_obj, j
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_flyzebra_core_Fzebra__1handle(JNIEnv *env, jobject thiz, jlong p_obj, jint type,
-                                       jbyteArray jdata, jint size, jbyteArray jparams) {
+                                       jbyteArray jdata, jint dsize, jbyteArray jparams,
+                                       jint psize) {
     auto *data = (const char *) env->GetByteArrayElements(jdata, JNI_FALSE);
     const char *params = nullptr;
     if (jparams != nullptr) {
         params = (const char *) env->GetByteArrayElements(jparams, JNI_FALSE);
     }
     auto *fzebra = reinterpret_cast<Fzebra *>(p_obj);
-    fzebra->nativeHandledata(static_cast<NofifyType>(type), data, size, params);
+    fzebra->nativeHandledata(static_cast<NofifyType>(type), data, dsize, params, psize);
     env->ReleaseByteArrayElements(jdata, (jbyte *) data, JNI_ABORT);
     if (jparams != nullptr) {
         env->ReleaseByteArrayElements(jparams, (jbyte *) params, JNI_ABORT);

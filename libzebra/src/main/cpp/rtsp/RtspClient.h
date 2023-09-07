@@ -14,7 +14,7 @@ class RtspClient:public BaseNotify {
 public:
     RtspClient(RtspServer* server, Notify* notify, int32_t socket);
     ~RtspClient();
-    void handle(NofifyType type, const char* data, int32_t size, const char* params) override;
+    void handle(NofifyType type, const char* data, int32_t dsize, const char* params, int32_t psize) override;
 
 private:
     void recvThread();

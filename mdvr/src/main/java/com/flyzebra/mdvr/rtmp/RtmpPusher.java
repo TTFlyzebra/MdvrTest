@@ -167,19 +167,19 @@ public class RtmpPusher implements INotify {
     }
 
     @Override
-    public void handle(int type, byte[] data, int size, byte[] params) {
+    public void handle(int type, byte[] data, int dsize, byte[] params, int psize) {
         if (NotifyType.NOTI_MICOUT_AAC == type || NotifyType.NOTI_CAMOUT_AVC == type) {
             short channel = ByteUtil.bytes2Short(params, 0, true);
             if (mChannel != channel) return;
             if (!is_rtmp.get()) return;
             synchronized (sendLock) {
-                if (sendBuf.remaining() < (4 + 4 + size + params.length)) {
+                if (sendBuf.remaining() < (4 + 4 + dsize + params.length)) {
                     FlyLog.e("rtmp send buffer[%d] is full, clean all buffer!", mChannel);
                     sendBuf.clear();
                 }
                 sendBuf.putInt(type);
-                sendBuf.putInt(size);
-                sendBuf.put(data, 0, size);
+                sendBuf.putInt(dsize);
+                sendBuf.put(data, 0, dsize);
                 sendBuf.putInt(params.length);
                 sendBuf.put(params);
                 sendLock.notify();

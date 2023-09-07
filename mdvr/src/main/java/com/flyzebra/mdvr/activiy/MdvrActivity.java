@@ -127,15 +127,15 @@ public class MdvrActivity extends AppCompatActivity implements INotify {
     }
 
     @Override
-    public void handle(int type, byte[] data, int size, byte[] params) {
+    public void handle(int type, byte[] data, int dsize, byte[] params, int psize) {
         if (type == NotifyType.NOTI_CAMOUT_YUV) {
             int channel = ByteUtil.bytes2Short(params, 0, true);
             int width = ByteUtil.bytes2Short(params, 2, true);
             int height = ByteUtil.bytes2Short(params, 4, true);
             if (mSelectChannel == -1) {
-                mGlVideoViews[channel].upFrame(data, size, width, height);
+                mGlVideoViews[channel].upFrame(data, dsize, width, height);
             } else if (mSelectChannel == channel) {
-                glVideoView.upFrame(data, size, width, height);
+                glVideoView.upFrame(data, dsize, width, height);
             }
         }
     }

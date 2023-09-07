@@ -16,7 +16,8 @@
 #include "base/Global.h"
 
 Fzebra::Fzebra(JavaVM *jvm, JNIEnv *env, jobject thiz)
-        : mUserServer(nullptr), mRtspServer(nullptr) {
+: mUserServer(nullptr)
+, mRtspServer(nullptr) {
     cb = new FzebraCB(jvm, env, thiz);
     BufferManager::get()->init();
     T = new Terminal();
@@ -47,7 +48,7 @@ Fzebra::~Fzebra() {
     N->unregisterListener(this);
     delete cb;
     delete T;
-	delete U;
+    delete U;
     delete N;
     //Notify使用了BufferMangaer,所以要在Notify后面释放
     BufferManager::get()->release();
@@ -76,7 +77,7 @@ void Fzebra::notify(const char *data, int32_t size) {
     }
 }
 
-void Fzebra::handle(NofifyType type, const char *data, int32_t size, const char *params) {
+void Fzebra::handle(NofifyType type, const char *data, int32_t dsize, const char *params, int32_t psize) {
     switch (type) {
         break;
     }
@@ -86,8 +87,8 @@ void Fzebra::nativeNotifydata(const char *data, int32_t size) {
     N->notifydata(data, size);
 }
 
-void Fzebra::nativeHandledata(NofifyType type, const char *data, int32_t size, const char *parmas) {
-    N->handledata(type, data, size, parmas);
+void Fzebra::nativeHandledata(NofifyType type, const char *data, int32_t dsize, const char *parmas, int32_t psize) {
+    N->handledata(type, data, dsize, parmas, psize);
 }
 
 void Fzebra::setTid(int64_t tid) {

@@ -81,7 +81,7 @@ public class AacTasker implements AudioCodecCB, INotify {
     public void notifyAacHead(int channel, byte[] head, int headLen) {
         byte[] params = new byte[2];
         ByteUtil.shortToBytes((short) channel, params, 0, true);
-        Notify.get().handledata(NotifyType.NOTI_MICOUT_SPS, head, headLen, params);
+        Notify.get().handledata(NotifyType.NOTI_MICOUT_SPS, head, headLen, params, params.length);
     }
 
     @Override
@@ -89,7 +89,7 @@ public class AacTasker implements AudioCodecCB, INotify {
         byte[] params = new byte[10];
         ByteUtil.shortToBytes((short) channel, params, 0, true);
         ByteUtil.longToBytes(pts, params, 2, true);
-        Notify.get().handledata(NotifyType.NOTI_MICOUT_AAC, data, size, params);
+        Notify.get().handledata(NotifyType.NOTI_MICOUT_AAC, data, size, params, params.length);
     }
 
     @Override
@@ -98,7 +98,7 @@ public class AacTasker implements AudioCodecCB, INotify {
     }
 
     @Override
-    public void handle(int type, byte[] data, int size, byte[] params) {
+    public void handle(int type, byte[] data, int dsize, byte[] params, int psize) {
         if (NotifyType.NOTI_MICOUT_PCM == type) {
             int channel = ByteUtil.bytes2Short(params, 0, true);
             long ptsUsec = ByteUtil.bytes2Long(params, 12, true);

@@ -16,7 +16,7 @@ public:
 
     ~RtspServer();
 
-    void handle(NofifyType type, const char *data, int32_t size, const char *params) override;
+    void handle(NofifyType type, const char *data, int32_t dsize, const char *params, int32_t psize) override;
 
     void disconnectClient(RtspClient *client);
 
