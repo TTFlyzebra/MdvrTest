@@ -7,7 +7,7 @@
     android:orientation="vertical"
     android:weightSum="2"
     android:keepScreenOn="true"
-    tools:context=".MdvrActivity">
+    tools:context=".activiy.LauncherActivity">
 
     <LinearLayout
         android:layout_width="match_parent"

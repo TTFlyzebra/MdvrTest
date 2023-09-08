@@ -98,7 +98,7 @@ public class AdasService {
             if (arcSoftAdas == null) {
                 arcSoftAdas = new ArcSoftAdas(mContext);
             }
-            if (!arcSoftAdas.initAdas()) {
+            if (!arcSoftAdas.initAdas(Global.calibInfo)) {
                 FlyLog.i("AdasService isn't active!");
                 return;
             }

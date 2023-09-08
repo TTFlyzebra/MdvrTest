@@ -41,7 +41,7 @@ public class ArcSoftAdas {
         }
     }
 
-    public boolean initAdas() {
+    public boolean initAdas(ArcADASCalibInfo calibInfo) {
         ArcADASInitParam initParam = new ArcADASInitParam();
         initParam.detectMask = ArcADASDetectMaskType.MOD_ADAS_LDW |
                 ArcADASDetectMaskType.MOD_ADAS_FCW |
@@ -70,14 +70,6 @@ public class ArcSoftAdas {
         intrinsicParam.fisheye = false;
         initParam.arcADASIntrinsicParam = intrinsicParam;
 
-        ArcADASCalibInfo calibInfo = new ArcADASCalibInfo();
-        calibInfo.horizon = 380;
-        calibInfo.carMiddle = 35;
-        calibInfo.cameraToAxle = 73;
-        calibInfo.cameraToBumper = 120;
-        calibInfo.cameraHeight = 135;
-        calibInfo.carWidth = 192;
-        calibInfo.cameraToLeftWheel = 91;
         initParam.arcADASCalibInfo = calibInfo;
 
         ArcADASCalibResult calibResult = new ArcADASCalibResult();

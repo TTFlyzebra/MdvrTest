@@ -21,6 +21,7 @@ import com.flyzebra.core.Fzebra;
 import com.flyzebra.core.notify.INotify;
 import com.flyzebra.core.notify.Notify;
 import com.flyzebra.core.notify.NotifyType;
+import com.flyzebra.mdvr.activiy.LauncherActivity;
 import com.flyzebra.mdvr.arcsoft.AdasService;
 import com.flyzebra.mdvr.arcsoft.DmsService;
 import com.flyzebra.mdvr.camera.CamService;
@@ -92,7 +93,7 @@ public class MdvrService extends Service implements INotify {
     public void onCreate() {
         FlyLog.i("#####MdvrService start!#####");
         Notification.Builder builder = new Notification.Builder(this.getApplicationContext());
-        Intent nfIntent = new Intent(this, MdvrActivity.class);
+        Intent nfIntent = new Intent(this, LauncherActivity.class);
         builder.setContentIntent(PendingIntent.getActivity(this, 0, nfIntent, 0))
                 .setLargeIcon(BitmapFactory.decodeResource(this.getResources(), R.mipmap.ic_launcher))
                 .setContentTitle("Meitrack MDVR")

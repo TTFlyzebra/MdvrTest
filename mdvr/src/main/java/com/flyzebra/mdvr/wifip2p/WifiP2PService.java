@@ -10,6 +10,7 @@ import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager.ActionListener;
 import android.net.wifi.p2p.WifiP2pManager.Channel;
+import android.os.Build;
 
 import com.flyzebra.core.Fzebra;
 import com.flyzebra.utils.ByteUtil;
@@ -40,6 +41,20 @@ public class WifiP2PService {
 
         wifiP2pManager = (WifiP2pManager) mContext.getSystemService(Context.WIFI_P2P_SERVICE);
         wifChannel = wifiP2pManager.initialize(mContext, getMainLooper(), null);
+        wifiP2pManager.removeGroup(wifChannel, new ActionListener() {
+            @Override
+            public void onSuccess() {
+                FlyLog.d("wifi removeGroup success");
+            }
+            @Override
+            public void onFailure(int i) {
+                FlyLog.e("wifi removeGroup failure %d", i);
+            }
+        });
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            wifChannel.close();
+        }
+        wifChannel = wifiP2pManager.initialize(mContext, getMainLooper(), null);
 
         try {
             Class<?> clz = wifiP2pManager.getClass();
@@ -60,31 +75,34 @@ public class WifiP2PService {
         myRecevier = new MyRecevier();
         mContext.registerReceiver(myRecevier, intentFilter);
 
-        //wifiP2pManager.createGroup(wifChannel, new ActionListener() {
-        //    @Override
-        //    public void onSuccess() {
-        //        FlyLog.d("wifi createGroup success");
-        //    }
-        //    @Override
-        //    public void onFailure(int i) {
-        //        FlyLog.e("wifi createGroup failure %d", i);
-        //    }
-        //});
+        wifiP2pManager.createGroup(wifChannel, new ActionListener() {
+            @Override
+            public void onSuccess() {
+                FlyLog.d("wifi createGroup success");
+            }
+            @Override
+            public void onFailure(int i) {
+                FlyLog.e("wifi createGroup failure %d", i);
+            }
+        });
     }
 
     public void stop() {
         is_stop.set(true);
         mContext.unregisterReceiver(myRecevier);
-        //wifiP2pManager.removeGroup(wifChannel, new ActionListener() {
-        //    @Override
-        //    public void onSuccess() {
-        //        FlyLog.d("wifi removeGroup success");
-        //    }
-        //    @Override
-        //    public void onFailure(int i) {
-        //        FlyLog.e("wifi removeGroup failure %d", i);
-        //    }
-        //});
+        wifiP2pManager.removeGroup(wifChannel, new ActionListener() {
+            @Override
+            public void onSuccess() {
+                FlyLog.d("wifi removeGroup success");
+            }
+            @Override
+            public void onFailure(int i) {
+                FlyLog.e("wifi removeGroup failure %d", i);
+            }
+        });
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            wifChannel.close();
+        }
         FlyLog.d("WifiP2PService stop!");
     }
 

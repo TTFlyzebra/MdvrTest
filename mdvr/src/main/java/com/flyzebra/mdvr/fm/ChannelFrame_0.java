@@ -12,13 +12,17 @@ import androidx.fragment.app.Fragment;
 import com.flyzebra.core.notify.INotify;
 import com.flyzebra.core.notify.Notify;
 import com.flyzebra.core.notify.NotifyType;
+import com.flyzebra.mdvr.Global;
 import com.flyzebra.mdvr.R;
+import com.flyzebra.mdvr.view.AdasSetView;
 import com.flyzebra.mdvr.view.GlVideoView;
 import com.flyzebra.utils.ByteUtil;
+import com.flyzebra.utils.FlyLog;
 
-public class ChannelFrame_0 extends Fragment  implements INotify {
+public class ChannelFrame_0 extends Fragment  implements INotify, AdasSetView.MoveLisenter {
 
     private GlVideoView glVideoView;
+    private AdasSetView adasSetView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -29,6 +33,10 @@ public class ChannelFrame_0 extends Fragment  implements INotify {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         glVideoView = view.findViewById(R.id.full_sv);
+        adasSetView = view.findViewById(R.id.adas_set_view);
+        adasSetView.setMoveLisenter(this);
+
+        adasSetView.upCalibInfo(Global.calibInfo);
     }
 
     @Override
@@ -58,5 +66,15 @@ public class ChannelFrame_0 extends Fragment  implements INotify {
                 glVideoView.upFrame(data, dsize, width, height);
             }
         }
+    }
+
+    @Override
+    public void notifyHorizon(int horizo) {
+        FlyLog.d("notifyHorizon %d", horizo);
+    }
+
+    @Override
+    public void notiryCarMiddle(int carMiddle) {
+        FlyLog.d("notiryCarMiddle %d", carMiddle);
     }
 }

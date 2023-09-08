@@ -1,4 +1,4 @@
-package com.flyzebra.mdvr;
+package com.flyzebra.mdvr.activiy;
 
 import android.os.Bundle;
 import android.view.View;
@@ -13,13 +13,16 @@ import androidx.fragment.app.FragmentTransaction;
 import com.flyzebra.core.Fzebra;
 import com.flyzebra.core.notify.Notify;
 import com.flyzebra.core.notify.Protocol;
+import com.flyzebra.mdvr.MdvrService;
+import com.flyzebra.mdvr.MyApp;
+import com.flyzebra.mdvr.R;
 import com.flyzebra.utils.FlyLog;
 import com.flyzebra.utils.PropUtil;
 import com.flyzebra.utils.ShellUtil;
 
 import java.util.Objects;
 
-public class MdvrActivity extends AppCompatActivity {
+public class LauncherActivity extends AppCompatActivity {
     private RadioGroup radioGroup;
     public String[] fragmentName = {"ChannelFrame_0", "ChannelFrame_1", "ChannelFrame_2", "ChannelFrame_3", "ChannelFrame_All"};
     private int cerrent_fragment = 0;
@@ -31,7 +34,7 @@ public class MdvrActivity extends AppCompatActivity {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_main1);
 
-        PropUtil.set("ctl.stop", "MonitorHobotApk");
+        PropUtil.set("ctl.start", "MonitorHobotApk");
         ShellUtil.exec("am force-stop com.hobot.sample.app");
 
         MdvrService.startSelfService(this);
