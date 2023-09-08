@@ -115,7 +115,7 @@ public class Notify {
             start += 8;
         }
         if (params != null) {
-            System.arraycopy(sendcmd, start, params, 0, size - start);
+            System.arraycopy(params, 0, sendcmd, start, size - start);
         }
         tHandler.post(() -> notifydata(sendcmd, size));
     }

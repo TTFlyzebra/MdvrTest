@@ -60,13 +60,31 @@ public class WifiP2PService {
         myRecevier = new MyRecevier();
         mContext.registerReceiver(myRecevier, intentFilter);
 
-        wifiP2pManager.createGroup(wifChannel, null);
+        //wifiP2pManager.createGroup(wifChannel, new ActionListener() {
+        //    @Override
+        //    public void onSuccess() {
+        //        FlyLog.d("wifi createGroup success");
+        //    }
+        //    @Override
+        //    public void onFailure(int i) {
+        //        FlyLog.e("wifi createGroup failure %d", i);
+        //    }
+        //});
     }
 
     public void stop() {
         is_stop.set(true);
         mContext.unregisterReceiver(myRecevier);
-        wifiP2pManager.removeGroup(wifChannel, null);
+        //wifiP2pManager.removeGroup(wifChannel, new ActionListener() {
+        //    @Override
+        //    public void onSuccess() {
+        //        FlyLog.d("wifi removeGroup success");
+        //    }
+        //    @Override
+        //    public void onFailure(int i) {
+        //        FlyLog.e("wifi removeGroup failure %d", i);
+        //    }
+        //});
         FlyLog.d("WifiP2PService stop!");
     }
 

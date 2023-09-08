@@ -8,7 +8,6 @@ import android.util.Log;
 
 import com.flyzebra.core.notify.Notify;
 import com.flyzebra.core.notify.NotifyType;
-import com.flyzebra.core.notify.Protocol;
 import com.flyzebra.mdvr.Config;
 import com.flyzebra.mdvr.Global;
 import com.flyzebra.utils.ByteUtil;
@@ -49,8 +48,6 @@ public class CamService {
 
         Global.qCarCameras.put(1, qCarCamera);
         FlyLog.d("QCarCamera open success!");
-
-        Notify.get().miniNotify(Protocol.QCAMER_OPENED, Protocol.QCAMER_OPENED.length, 0x01, 0, null);
 
         //添加水印
         QCarOsd osd = new QCarOsd();

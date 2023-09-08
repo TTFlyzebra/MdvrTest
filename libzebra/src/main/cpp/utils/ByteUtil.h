@@ -9,7 +9,7 @@
 
 class ByteUtil {
 public:
-    static int64_t sysIdToInt64(char* data, int len);
+    static int64_t sysIdToInt64(char* data, int32_t len);
     static void int64ToSysId(char* data, int64_t tid);
 
     static int16_t getInt16(const char* data);

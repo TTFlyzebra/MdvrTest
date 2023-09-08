@@ -21,7 +21,6 @@ import com.flyzebra.core.Fzebra;
 import com.flyzebra.core.notify.INotify;
 import com.flyzebra.core.notify.Notify;
 import com.flyzebra.core.notify.NotifyType;
-import com.flyzebra.mdvr.activiy.MdvrActivity;
 import com.flyzebra.mdvr.arcsoft.AdasService;
 import com.flyzebra.mdvr.arcsoft.DmsService;
 import com.flyzebra.mdvr.camera.CamService;
@@ -64,7 +63,7 @@ public class MdvrService extends Service implements INotify {
     private final ScreenService screenService = new ScreenService(this);
     private final InputService inputService = new InputService(this);
 
-    public static void startService(AppCompatActivity activity) {
+    public static void startSelfService(AppCompatActivity activity) {
         if (!isApplyScreen.get()) {
             MediaProjectionManager mpManager = (MediaProjectionManager) activity.getSystemService(MEDIA_PROJECTION_SERVICE);
             activity.registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {

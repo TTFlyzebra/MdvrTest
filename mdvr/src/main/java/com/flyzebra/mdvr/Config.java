@@ -8,7 +8,7 @@ public class Config {
     public static int CAM_WIDTH = 1280;
     public static int CAM_HEIGHT = 720;
     public static int MAX_CAM = 4;
-    public static int FRAME_RATE = 25;
+    public static int FRAME_RATE = 16;
     public static int I_FRAME_INTERVAL = 5;
     public static int BIT_RATE = 2048;
     public static int BITRATE_MODE = 1; //BITRATE_MODE_VBR = 1, BITRATE_MODE_CBR = 2;

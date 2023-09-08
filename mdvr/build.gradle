@@ -2,6 +2,21 @@ plugins {
     id 'com.android.application'
 }
 
+static def getCreateTime() {
+    def createTime = new Date().format("yyyyMMddHHmm", TimeZone.getTimeZone("GMT+08:00")).trim()
+    return createTime
+}
+
+static def getGitSHA() {
+    def gitSHA = 'git rev-parse --short HEAD'.execute().text.trim()
+    return gitSHA
+}
+
+static def getGitCommitCount() {
+    def gitCommitCount = 'git rev-list --count HEAD'.execute().text.trim();
+    return gitCommitCount;
+}
+
 android {
     namespace 'com.flyzebra.mdvr'
     compileSdk rootProject.ext.compileSdk
@@ -10,8 +25,8 @@ android {
         applicationId "com.flyzebra.mdvr"
         minSdk rootProject.ext.minSdk
         targetSdk rootProject.ext.targetSdk
-        versionCode 1
-        versionName "1.0"
+        versionCode gitCommitCount.toInteger()
+        versionName "v1.0." + gitSHA + "." + createTime
         flavorDimensions "versionCode"
     }
 
@@ -95,6 +110,18 @@ android {
             ndk {
                 abiFilters "arm64-v8a"
             }
+        }
+    }
+
+    applicationVariants.all { variant ->
+        variant.outputs.all {
+            def fileName
+            if (variant.buildType.name.equals('release')) {
+                fileName = "${applicationId}_release_${versionName}_${gitCommitCount}.apk"
+            } else if (variant.buildType.name.equals('debug')) {
+                fileName = "${applicationId}_debug_${versionName}_${gitCommitCount}.apk"
+            }
+            outputFileName = fileName;
         }
     }
 }

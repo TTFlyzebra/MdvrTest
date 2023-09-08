@@ -1108,6 +1108,18 @@ public class Protocol {
     };
     public final static int TYPE_INPUT_MULTI_S_STOP = 0x2403;
 
+    //u-->t
+    //home back
+    //2byte header EEAA
+    //2byte 0331
+    //4byte data length
+    //8byte TID
+    public final static byte HOME_BACK[] = {
+            (byte) 0xEE, (byte) 0xAA, (byte) 0x03, (byte) 0x31, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x08,
+            (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00
+    };
+    public final static int TYPE_HOME_BACK = 0x3103;
+
     //-----------------OTHER------------------
 
     //u-->t

@@ -75,7 +75,6 @@ public class ScreenService implements INotify {
         FlyLog.d("screenStart %dx%d", width, height);
         isStop.set(false);
         workThread = new Thread(() -> {
-            FlyLog.d("screen work thread start!");
             MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
             MediaCodec codec = null;
             MediaProjection mMediaProjection = null;
@@ -156,12 +155,12 @@ public class ScreenService implements INotify {
                     mMediaProjection.stop();
                 }
             }
-            FlyLog.d("screen work thread exit!");
         }, "screen_encoder");
         workThread.start();
     }
 
     public void screenStop() {
+        if(isStop.get()) return;
         isStop.set(true);
         try {
             if (workThread != null) {
@@ -206,6 +205,8 @@ public class ScreenService implements INotify {
             }
             case Protocol.TYPE_SCREEN_U_READY: {
                 long uid = ByteUtil.bytes2Long(data, 16, true);
+                width = ByteUtil.bytes2Short(data,24, false);
+                height = width * 720 / 1280 * 2 / 2;
                 mScreenUsers.put(uid, SystemClock.uptimeMillis());
                 Notify.get().miniNotify(Protocol.SCREEN_T_START, Protocol.SCREEN_T_START.length, Fzebra.get().getTid(), 0, null);
                 break;

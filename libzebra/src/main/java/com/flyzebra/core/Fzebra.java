@@ -82,6 +82,7 @@ public class Fzebra implements INotify {
             case Protocol.TYPE_CAMERA_CLOSE:
             case Protocol.TYPE_INPUT_MULTI_S_READY:
             case Protocol.TYPE_INPUT_MULTI_S_STOP:
+            case Protocol.TYPE_HOME_BACK:
                 _notify(_ptr_obj, data, size);
                 break;
         }

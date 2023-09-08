@@ -2,67 +2,15 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#7FFFFFFF"
+    android:background="#000"
     android:keepScreenOn="true">
 
-    <com.flyzebra.mdvr.view.GlVideoView
-        android:id="@+id/full_sv"
+    <FrameLayout
+        android:id="@+id/fm_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="#000"
         android:visibility="visible" />
-
-    <LinearLayout
-        android:id="@+id/ll_svs"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:visibility="gone"
-        android:weightSum="2">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:orientation="horizontal"
-            android:weightSum="2">
-
-            <com.flyzebra.mdvr.view.GlVideoView
-                android:id="@+id/sv01"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_margin="1dp"
-                android:layout_weight="1" />
-
-            <com.flyzebra.mdvr.view.GlVideoView
-                android:id="@+id/sv02"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_margin="1dp"
-                android:layout_weight="1" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:orientation="horizontal"
-            android:weightSum="2">
-
-            <com.flyzebra.mdvr.view.GlVideoView
-                android:id="@+id/sv03"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_margin="1dp"
-                android:layout_weight="1" />
-
-            <com.flyzebra.mdvr.view.GlVideoView
-                android:id="@+id/sv04"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_margin="1dp"
-                android:layout_weight="1" />
-        </LinearLayout>
-    </LinearLayout>
 
     <RadioGroup
         android:id="@+id/radio_group"
@@ -76,6 +24,7 @@
             android:id="@+id/radio_bt01"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:checked="true"
             android:text="1" />
 
         <RadioButton

@@ -5,7 +5,7 @@
 #include "ByteUtil.h"
 #include <cstring>
 
-int64_t ByteUtil::sysIdToInt64(char *data, int len) {
+int64_t ByteUtil::sysIdToInt64(char *data, int32_t len) {
     int64_t tid = 0;
     for (int i = 0; i < len; i++) {
         int64_t ret = 0;
@@ -124,7 +124,7 @@ int64_t ByteUtil::byte2int64(const char *data, int32_t offset, bool littleEndian
     int64_t value = 0;
     for (int count = 0; count < 8; ++count) {
         int shift = (littleEndian ? count : (7 - count)) << 3;
-        value |= ((long) 0xff << shift) & ((long) data[offset + count] << shift);
+        value |= ((int64_t) 0xff << shift) & ((int64_t) data[offset + count] << shift);
     }
     return value;
 }
