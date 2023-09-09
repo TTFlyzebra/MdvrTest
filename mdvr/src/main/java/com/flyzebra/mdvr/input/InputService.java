@@ -20,19 +20,22 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class InputService implements INotify {
-    private Context mContext;
-    private ByteBuffer eventBuf = ByteBuffer.allocate(1024);
+    private final Context mContext;
+    private final ByteBuffer eventBuf = ByteBuffer.allocate(1024);
     private final Object eventLock = new Object();
     private int screen_w;
     private int screen_h;
-    private AtomicBoolean is_stop = new AtomicBoolean(true);
+    private final AtomicBoolean is_stop = new AtomicBoolean(true);
     private long verityTime;
     private long lastDownTime;
     private static final int MAX_POINTERS = 8;
-    private MotionEvent.PointerProperties[] pointerProperties = new MotionEvent.PointerProperties[MAX_POINTERS];
-    private MotionEvent.PointerCoords[] pointerCoords = new MotionEvent.PointerCoords[MAX_POINTERS];
+    private final MotionEvent.PointerProperties[] pointerProperties = new MotionEvent.PointerProperties[MAX_POINTERS];
+    private final MotionEvent.PointerCoords[] pointerCoords = new MotionEvent.PointerCoords[MAX_POINTERS];
     private PowerManager powerManager = null;
-    private static final byte INPUT_KEYCODE_POWER[] = {(byte) 0xEE, (byte) 0xAA, (byte) 0x03, (byte) 0x02, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x1A, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00};
+    private static final byte[] INPUT_KEYCODE_POWER = {
+            (byte) 0xEE, (byte) 0xAA, (byte) 0x03, (byte) 0x02, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x10,
+            (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+            (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x1A, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00};
     private Thread eventThread = null;
     private final ServiceManager serviceManager = new ServiceManager();
 

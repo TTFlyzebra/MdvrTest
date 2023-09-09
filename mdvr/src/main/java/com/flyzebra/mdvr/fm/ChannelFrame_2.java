@@ -25,7 +25,6 @@ public class ChannelFrame_2 extends Fragment  implements INotify {
         return inflater.inflate(R.layout.fragment_channel2, container, false);
     }
 
-
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         glVideoView = view.findViewById(R.id.full_sv);

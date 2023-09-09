@@ -12,7 +12,6 @@ import androidx.fragment.app.Fragment;
 import com.flyzebra.core.notify.INotify;
 import com.flyzebra.core.notify.Notify;
 import com.flyzebra.core.notify.NotifyType;
-import com.flyzebra.mdvr.Global;
 import com.flyzebra.mdvr.R;
 import com.flyzebra.mdvr.view.AdasSetView;
 import com.flyzebra.mdvr.view.GlVideoView;
@@ -20,23 +19,16 @@ import com.flyzebra.utils.ByteUtil;
 import com.flyzebra.utils.FlyLog;
 
 public class ChannelFrame_0 extends Fragment  implements INotify, AdasSetView.MoveLisenter {
-
     private GlVideoView glVideoView;
-    private AdasSetView adasSetView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_channel0, container, false);
     }
 
-
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         glVideoView = view.findViewById(R.id.full_sv);
-        adasSetView = view.findViewById(R.id.adas_set_view);
-        adasSetView.setMoveLisenter(this);
-
-        adasSetView.upCalibInfo(Global.calibInfo);
     }
 
     @Override

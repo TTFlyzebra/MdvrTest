@@ -1,4 +1,4 @@
-package com.flyzebra.mdvr.activiy;
+package com.flyzebra.mdvr.activity;
 
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -24,7 +24,7 @@ import com.flyzebra.utils.PropUtil;
 import com.flyzebra.utils.ShellUtil;
 import com.quectel.qcarapi.stream.QCarCamera;
 
-public class MdvrActivity2 extends AppCompatActivity {
+public class QCameraActivity extends AppCompatActivity {
     private Handler mHandler = new Handler(Looper.getMainLooper());
     private final SurfaceView[] mSurfaceViews = new SurfaceView[Config.MAX_CAM];
     private final int[] mSurfaceViewIds = new int[]{R.id.sv01, R.id.sv02, R.id.sv03, R.id.sv04};
@@ -91,7 +91,7 @@ public class MdvrActivity2 extends AppCompatActivity {
                 starPreviewCamera(i);
             }
         } else {
-            mHandler.postDelayed(MdvrActivity2.this.cameraTasker, 1000);
+            mHandler.postDelayed(QCameraActivity.this.cameraTasker, 1000);
         }
     };
 

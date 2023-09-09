@@ -17,24 +17,20 @@ import com.flyzebra.mdvr.R;
 import com.flyzebra.mdvr.view.GlVideoView;
 import com.flyzebra.utils.ByteUtil;
 
-public class ChannelFrame_All extends Fragment implements INotify {
+public class ChannelFrame_all extends Fragment implements INotify {
     private final GlVideoView[] mGlVideoViews = new GlVideoView[Config.MAX_CAM];
     private final int[] mGlVideoViewIds = new int[]{R.id.sv01, R.id.sv02, R.id.sv03, R.id.sv04};
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_channelall, container, false);
     }
 
-
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-
         for (int i = 0; i < Config.MAX_CAM; i++) {
             mGlVideoViews[i] = view.findViewById(mGlVideoViewIds[i]);
         }
-
     }
 
     @Override

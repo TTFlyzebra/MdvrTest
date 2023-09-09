@@ -41,7 +41,7 @@ public class ArcSoftAdas {
         }
     }
 
-    public boolean initAdas(ArcADASCalibInfo calibInfo) {
+    public boolean initAdas(ArcADASCalibInfo calibInfo, ArcADASCalibResult calibResult) {
         ArcADASInitParam initParam = new ArcADASInitParam();
         initParam.detectMask = ArcADASDetectMaskType.MOD_ADAS_LDW |
                 ArcADASDetectMaskType.MOD_ADAS_FCW |
@@ -72,16 +72,6 @@ public class ArcSoftAdas {
 
         initParam.arcADASCalibInfo = calibInfo;
 
-        ArcADASCalibResult calibResult = new ArcADASCalibResult();
-        calibResult.r1 = -1.179168;
-        calibResult.r2 = 1.1453419;
-        calibResult.r3 = -1.214212;
-        calibResult.t1 = 0.0;
-        calibResult.t2 = 0.0;
-        calibResult.t3 = 1350.0;
-        calibResult.pitch = 3.3437219;
-        calibResult.yaw = -1.6674138;
-        calibResult.roll = 0.0;
         initParam.arcADASCalibResult = calibResult;
 
         ArcInitParamInfoDetail initParamDetail = new ArcInitParamInfoDetail();

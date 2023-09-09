@@ -24,7 +24,7 @@ import com.flyzebra.core.Fzebra;
 import com.flyzebra.core.notify.INotify;
 import com.flyzebra.core.notify.Notify;
 import com.flyzebra.core.notify.NotifyType;
-import com.flyzebra.mdvr.activiy.LauncherActivity;
+import com.flyzebra.mdvr.activity.LauncherActivity;
 import com.flyzebra.mdvr.arcsoft.AdasService;
 import com.flyzebra.mdvr.arcsoft.DmsService;
 import com.flyzebra.mdvr.camera.CamService;
@@ -59,8 +59,8 @@ public class MdvrService extends Service implements INotify {
     private final AvcService avcService = new AvcService(this);
     private final AacService aacService = new AacService(this);
 
-    private final AdasService adasService = new AdasService(this);
-    private final DmsService dmsService = new DmsService(this);
+    private final AdasService adasService = AdasService.get();
+    private final DmsService dmsService = DmsService.get();
 
     public static AtomicBoolean isApplyScreen = new AtomicBoolean(false);
     private final ScreenService screenService = new ScreenService(this);

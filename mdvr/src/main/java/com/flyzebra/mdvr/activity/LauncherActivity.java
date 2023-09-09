@@ -1,6 +1,7 @@
-package com.flyzebra.mdvr.activiy;
+package com.flyzebra.mdvr.activity;
 
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -23,16 +24,16 @@ import com.flyzebra.utils.ShellUtil;
 import java.util.Objects;
 
 public class LauncherActivity extends AppCompatActivity {
-    private RadioGroup radioGroup;
-    public String[] fragmentName = {"ChannelFrame_0", "ChannelFrame_1", "ChannelFrame_2", "ChannelFrame_3", "ChannelFrame_All"};
-    private int cerrent_fragment = 0;
+    public RadioGroup radioGroup;
+    private String current_fm1 = "";
+    private String current_fm2 = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        setContentView(R.layout.activity_main1);
+        setContentView(R.layout.activity_mdvr);
 
         PropUtil.set("ctl.start", "MonitorHobotApk");
         ShellUtil.exec("am force-stop com.hobot.sample.app");
@@ -41,25 +42,29 @@ public class LauncherActivity extends AppCompatActivity {
 
         radioGroup = findViewById(R.id.radio_group);
         radioGroup.setOnCheckedChangeListener((group, checkedId) -> {
-            if (checkedId == R.id.radio_btall) {
-                replaceFragment(fragmentName[4], R.id.fm_layout);
-                cerrent_fragment = 4;
-            } else if (checkedId == R.id.radio_bt01) {
-                replaceFragment(fragmentName[0], R.id.fm_layout);
-                cerrent_fragment = 0;
+            if (checkedId == R.id.radio_bt01) {
+                replaceFragment1("ChannelFrame_0");
+                replaceFragment2("ChannelFrame_empty");
             } else if (checkedId == R.id.radio_bt02) {
-                replaceFragment(fragmentName[1], R.id.fm_layout);
-                cerrent_fragment = 1;
+                replaceFragment1("ChannelFrame_1");
+                replaceFragment2("ChannelFrame_empty");
             } else if (checkedId == R.id.radio_bt03) {
-                replaceFragment(fragmentName[2], R.id.fm_layout);
-                cerrent_fragment = 2;
+                replaceFragment1("ChannelFrame_2");
+                replaceFragment2("ChannelFrame_empty");
             } else if (checkedId == R.id.radio_bt04) {
-                replaceFragment(fragmentName[3], R.id.fm_layout);
-                cerrent_fragment = 3;
+                replaceFragment1("ChannelFrame_3");
+                replaceFragment2("ChannelFrame_empty");
+            } else if (checkedId == R.id.radio_btall) {
+                replaceFragment1("ChannelFrame_all");
+                replaceFragment2("ChannelFrame_empty");
+            } else if (checkedId == R.id.radio_adas) {
+                replaceFragment1("ChannelFrame_0");
+                replaceFragment2("ChannelFrame_adas");
             }
         });
 
-        replaceFragment(fragmentName[0], R.id.fm_layout);
+        replaceFragment1("ChannelFrame_0");
+        replaceFragment2("ChannelFrame_empty");
     }
 
     @Override
@@ -88,18 +93,29 @@ public class LauncherActivity extends AppCompatActivity {
         //stopService(new Intent(this, MdvrService.class));
     }
 
-    public void replaceFragment(String classname, int resId) {
+    public void replaceFragment1(String classname) {
         try {
+            if (TextUtils.isEmpty(classname) || current_fm1.equals(classname)) return;
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             Class<?> c1 = Class.forName(Objects.requireNonNull(MyApp.class.getPackage()).getName() + ".fm." + classname);
             Fragment fragmentRe = (Fragment) c1.newInstance();
-            if (fragmentName[cerrent_fragment].equals(classname)) {
-                Class<?> c2 = Class.forName(Objects.requireNonNull(MyApp.class.getPackage()).getName() + ".fm." + fragmentName[cerrent_fragment]);
-                Fragment fragmentRm = (Fragment) c2.newInstance();
-                transaction.remove(fragmentRm);
-            }
-            transaction.replace(resId, fragmentRe, classname);
+            transaction.replace(R.id.fm_layout1, fragmentRe, classname);
             transaction.commit();
+            current_fm1 = classname;
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+            FlyLog.e(e.toString());
+        }
+    }
+
+    public void replaceFragment2(String classname) {
+        try {
+            if (TextUtils.isEmpty(classname) || current_fm2.equals(classname)) return;
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            Class<?> c1 = Class.forName(Objects.requireNonNull(MyApp.class.getPackage()).getName() + ".fm." + classname);
+            Fragment fragmentRe = (Fragment) c1.newInstance();
+            transaction.replace(R.id.fm_layout2, fragmentRe, classname);
+            transaction.commit();
+            current_fm2 = classname;
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
             FlyLog.e(e.toString());
         }

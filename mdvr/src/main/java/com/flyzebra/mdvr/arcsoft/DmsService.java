@@ -20,7 +20,18 @@ public class DmsService {
     private ArcSoftDms arcSoftDms = null;
     private AtomicBoolean is_stop = new AtomicBoolean(true);
 
-    public DmsService(Context context) {
+    private DmsService(){
+    }
+
+    private static class DmsServiceHolder {
+        public static final DmsService sInstance = new DmsService();
+    }
+
+    public static DmsService get() {
+        return DmsService.DmsServiceHolder.sInstance;
+    }
+
+    public void init(Context context) {
         mContext = context;
     }
 

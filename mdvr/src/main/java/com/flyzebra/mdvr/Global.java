@@ -1,6 +1,7 @@
 package com.flyzebra.mdvr;
 
 import com.arcsoft.visdrive.sdk.model.adas.ArcADASCalibInfo;
+import com.arcsoft.visdrive.sdk.model.adas.ArcADASCalibResult;
 import com.quectel.qcarapi.stream.QCarCamera;
 
 import java.util.Hashtable;
@@ -11,12 +12,5 @@ public class Global {
     public static final Hashtable<Integer, QCarCamera> qCarCameras = new Hashtable<>();
 
     public static ArcADASCalibInfo calibInfo = new ArcADASCalibInfo();
-    static {
-        calibInfo.horizon = 380;
-        calibInfo.carMiddle = 35;
-        calibInfo.cameraToAxle = 73;
-        calibInfo.cameraToBumper = 120;
-        calibInfo.cameraHeight = 135;
-        calibInfo.carWidth = 192;
-    }
+    public static ArcADASCalibResult calibResult = new ArcADASCalibResult();
 }

@@ -3,6 +3,8 @@ package com.flyzebra.mdvr.arcsoft;
 import android.content.Context;
 import android.os.SystemClock;
 
+import com.arcsoft.visdrive.sdk.model.adas.ArcADASCalibInfo;
+import com.arcsoft.visdrive.sdk.model.adas.ArcADASCalibResult;
 import com.flyzebra.arcsoft.ArcSoftActive;
 import com.flyzebra.arcsoft.ArcSoftAdas;
 import com.flyzebra.mdvr.Config;
@@ -20,7 +22,18 @@ public class AdasService {
     private ArcSoftAdas arcSoftAdas = null;
     private AtomicBoolean is_stop = new AtomicBoolean(true);
 
-    public AdasService(Context context) {
+    private AdasService() {
+    }
+
+    private static class AdasServiceHolder {
+        public static final AdasService sInstance = new AdasService();
+    }
+
+    public static AdasService get() {
+        return AdasService.AdasServiceHolder.sInstance;
+    }
+
+    public void init(Context context) {
         mContext = context;
     }
 
@@ -42,6 +55,14 @@ public class AdasService {
             adasThread = null;
         }
         FlyLog.d("AdasService stop!");
+    }
+
+    public ArcADASCalibResult setCalibInfo(ArcADASCalibInfo calibInfo) {
+        if (arcSoftAdas != null) {
+            return arcSoftAdas.setAdasCalibInfo(calibInfo);
+        } else {
+            return null;
+        }
     }
 
     private class AdasThread extends Thread implements Runnable {
@@ -75,7 +96,7 @@ public class AdasService {
                     ArcSoftActive.get().active(mContext.getApplicationContext(), Config.appId, Config.appSecret);
                     try {
                         for (int i = 0; i < 15; i++) {
-                            if(is_stop.get()) return;
+                            if (is_stop.get()) return;
                             Thread.sleep(200);
                         }
                     } catch (InterruptedException e) {
@@ -98,7 +119,7 @@ public class AdasService {
             if (arcSoftAdas == null) {
                 arcSoftAdas = new ArcSoftAdas(mContext);
             }
-            if (!arcSoftAdas.initAdas(Global.calibInfo)) {
+            if (!arcSoftAdas.initAdas(Global.calibInfo, Global.calibResult)) {
                 FlyLog.i("AdasService isn't active!");
                 return;
             }

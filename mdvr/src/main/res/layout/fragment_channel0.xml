@@ -2,17 +2,11 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000"
-    android:orientation="vertical">
+    android:background="#000">
 
     <com.flyzebra.mdvr.view.GlVideoView
         android:id="@+id/full_sv"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="visible" />
-
-    <com.flyzebra.mdvr.view.AdasSetView
-        android:id="@+id/adas_set_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
 </RelativeLayout>
