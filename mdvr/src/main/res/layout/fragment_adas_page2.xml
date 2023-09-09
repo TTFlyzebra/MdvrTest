@@ -2,373 +2,399 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/adas_page2"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:visibility="invisible">
+    android:layout_height="match_parent">
 
     <LinearLayout
+        android:layout_margin="40dp"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_margin="20dp"
-        android:background="#3F000000"
-        android:orientation="vertical"
-        android:padding="10dp">
-
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <!--horizon-->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/rectangle_01"
-            android:orientation="vertical">
+            android:layout_height="40dp"
+            android:layout_marginStart="12dp"
+            android:background="@drawable/item_rectangle"
+            android:orientation="horizontal">
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="30dp"
-                android:gravity="start|bottom"
-                android:text="@string/horizon"
-                android:textColor="@color/white" />
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="30dp">
-
-                <ImageView
-                    android:id="@+id/adas_set_iv01_left"
-                    android:layout_width="30dp"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:src="@drawable/ic_keyboard_arrow_left" />
-
-                <SeekBar
-                    android:id="@+id/adas_set_sk01"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_toStartOf="@+id/adas_set_iv01_right"
-                    android:layout_toEndOf="@+id/adas_set_iv01_left"
-                    android:progressDrawable="@drawable/media_seekbar_style"
-                    android:splitTrack="false"
-                    android:thumb="@drawable/media_seekbar_thumb" />
-
-                <ImageView
-                    android:id="@+id/adas_set_iv01_right"
-                    android:layout_width="30dp"
-                    android:layout_height="wrap_content"
-                    android:layout_toStartOf="@+id/adas_set_tv01"
-                    android:src="@drawable/ic_keyboard_arrow_right" />
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="4"
+                android:orientation="horizontal">
 
                 <TextView
-                    android:id="@+id/adas_set_tv01"
-                    android:layout_width="100dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:layout_alignParentEnd="true"
-                    android:gravity="end|center"
-                    android:textColor="@color/white" />
-            </RelativeLayout>
+                    android:gravity="center_vertical"
+                    android:text="@string/horizontal_line"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:text=" ----- "
+                    android:textColor="#FF0000"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:text=")"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/adas_cali_horizon_text"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="12dp"
+                android:layout_weight="2"
+                android:gravity="center"
+                android:text="200" />
+
+            <ImageButton
+                android:id="@+id/adas_cali_horizont_up"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="6dp"
+                android:layout_weight="1"
+                android:background="#00000000"
+                android:src="@drawable/ic_keyboard_arrow_up" />
+
+            <ImageButton
+                android:id="@+id/adas_cali_horizont_down"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="6dp"
+                android:layout_marginRight="6dp"
+                android:layout_weight="1"
+                android:background="#00000000"
+                android:src="@drawable/ic_keyboard_arrow_down" />
+
         </LinearLayout>
 
+        <!--carMiddle-->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/rectangle_01"
-            android:orientation="vertical">
+            android:layout_height="40dp"
+            android:layout_marginStart="12dp"
+            android:background="@drawable/item_rectangle"
+            android:orientation="horizontal">
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="30dp"
-                android:gravity="start|bottom"
-                android:text="@string/horizon"
-                android:textColor="@color/white" />
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="30dp">
-
-                <ImageView
-                    android:id="@+id/adas_set_iv02_left"
-                    android:layout_width="30dp"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:src="@drawable/ic_keyboard_arrow_left" />
-
-                <SeekBar
-                    android:id="@+id/adas_set_sk02"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_toStartOf="@+id/adas_set_iv02_right"
-                    android:layout_toEndOf="@+id/adas_set_iv02_left"
-                    android:progressDrawable="@drawable/media_seekbar_style"
-                    android:splitTrack="false"
-                    android:thumb="@drawable/media_seekbar_thumb" />
-
-                <ImageView
-                    android:id="@+id/adas_set_iv02_right"
-                    android:layout_width="30dp"
-                    android:layout_height="wrap_content"
-                    android:layout_toStartOf="@+id/adas_set_tv02"
-                    android:src="@drawable/ic_keyboard_arrow_right" />
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="4"
+                android:orientation="horizontal">
 
                 <TextView
-                    android:id="@+id/adas_set_tv02"
-                    android:layout_width="100dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:layout_alignParentEnd="true"
-                    android:gravity="end|center"
-                    android:textColor="@color/white" />
-            </RelativeLayout>
+                    android:gravity="center_vertical"
+                    android:text="@string/car_central_line"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:text="  |  "
+                    android:textColor="#FFFF00"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:text=")"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/adas_cali_carMiddle_text"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="12dp"
+                android:layout_weight="2"
+                android:gravity="center"
+                android:text="200" />
+
+            <ImageButton
+                android:id="@+id/adas_cali_carMiddle_left"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="6dp"
+                android:layout_weight="1"
+                android:background="#00000000"
+                android:src="@drawable/ic_keyboard_arrow_left" />
+
+            <ImageButton
+                android:id="@+id/adas_cali_carMiddle_right"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="6dp"
+                android:layout_marginRight="6dp"
+                android:layout_weight="1"
+                android:background="#00000000"
+                android:src="@drawable/ic_keyboard_arrow_right" />
         </LinearLayout>
 
+        <!--cameraHeight-->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/rectangle_01"
-            android:orientation="vertical">
+            android:layout_height="40dp"
+            android:layout_marginStart="12dp"
+            android:background="@drawable/item_rectangle"
+            android:orientation="horizontal">
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="30dp"
-                android:gravity="start|bottom"
-                android:text="@string/horizon"
-                android:textColor="@color/white" />
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="30dp">
-
-                <ImageView
-                    android:id="@+id/adas_set_iv03_left"
-                    android:layout_width="30dp"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:src="@drawable/ic_keyboard_arrow_left" />
-
-                <SeekBar
-                    android:id="@+id/adas_set_sk03"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_toStartOf="@+id/adas_set_iv03_right"
-                    android:layout_toEndOf="@+id/adas_set_iv03_left"
-                    android:progressDrawable="@drawable/media_seekbar_style"
-                    android:splitTrack="false"
-                    android:thumb="@drawable/media_seekbar_thumb" />
-
-                <ImageView
-                    android:id="@+id/adas_set_iv03_right"
-                    android:layout_width="30dp"
-                    android:layout_height="wrap_content"
-                    android:layout_toStartOf="@+id/adas_set_tv03"
-                    android:src="@drawable/ic_keyboard_arrow_right" />
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="4"
+                android:orientation="horizontal">
 
                 <TextView
-                    android:id="@+id/adas_set_tv03"
-                    android:layout_width="100dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:layout_alignParentEnd="true"
-                    android:gravity="end|center"
-                    android:textColor="@color/white" />
-            </RelativeLayout>
+                    android:gravity="center_vertical"
+                    android:text="@string/camera_height"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/adas_cali_cameraHeight_text"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="12dp"
+                android:layout_weight="2"
+                android:gravity="center"
+                android:text="200" />
+
+            <ImageButton
+                android:id="@+id/adas_cali_cameraHeight_left"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="6dp"
+                android:layout_weight="1"
+                android:background="#00000000"
+                android:src="@drawable/ic_keyboard_arrow_left" />
+
+            <ImageButton
+                android:id="@+id/adas_cali_cameraHeight_right"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="6dp"
+                android:layout_marginRight="6dp"
+                android:layout_weight="1"
+                android:background="#00000000"
+                android:src="@drawable/ic_keyboard_arrow_right" />
         </LinearLayout>
 
+        <!--cameraToAxle-->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/rectangle_01"
-            android:orientation="vertical">
+            android:layout_height="40dp"
+            android:layout_marginStart="12dp"
+            android:background="@drawable/item_rectangle"
+            android:orientation="horizontal">
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="30dp"
-                android:gravity="start|bottom"
-                android:text="@string/horizon"
-                android:textColor="@color/white" />
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="30dp">
-
-                <ImageView
-                    android:id="@+id/adas_set_iv04_left"
-                    android:layout_width="30dp"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:src="@drawable/ic_keyboard_arrow_left" />
-
-                <SeekBar
-                    android:id="@+id/adas_set_sk04"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_toStartOf="@+id/adas_set_iv04_right"
-                    android:layout_toEndOf="@+id/adas_set_iv04_left"
-                    android:progressDrawable="@drawable/media_seekbar_style"
-                    android:splitTrack="false"
-                    android:thumb="@drawable/media_seekbar_thumb" />
-
-                <ImageView
-                    android:id="@+id/adas_set_iv04_right"
-                    android:layout_width="30dp"
-                    android:layout_height="wrap_content"
-                    android:layout_toStartOf="@+id/adas_set_tv04"
-                    android:src="@drawable/ic_keyboard_arrow_right" />
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="4"
+                android:orientation="horizontal">
 
                 <TextView
-                    android:id="@+id/adas_set_tv04"
-                    android:layout_width="100dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:layout_alignParentEnd="true"
-                    android:gravity="end|center"
-                    android:textColor="@color/white" />
-            </RelativeLayout>
+                    android:gravity="center_vertical"
+                    android:text="@string/camera_to_axle"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/adas_cali_cameraToAxle_text"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="12dp"
+                android:layout_weight="2"
+                android:gravity="center"
+                android:text="200" />
+
+            <ImageButton
+                android:id="@+id/adas_cali_cameraToAxle_left"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="6dp"
+                android:layout_weight="1"
+                android:background="#00000000"
+                android:src="@drawable/ic_keyboard_arrow_left" />
+
+            <ImageButton
+                android:id="@+id/adas_cali_cameraToAxle_right"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="6dp"
+                android:layout_marginRight="6dp"
+                android:layout_weight="1"
+                android:background="#00000000"
+                android:src="@drawable/ic_keyboard_arrow_right" />
         </LinearLayout>
 
+        <!--carWidth-->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/rectangle_01"
-            android:orientation="vertical">
+            android:layout_height="40dp"
+            android:layout_marginStart="12dp"
+            android:background="@drawable/item_rectangle"
+            android:orientation="horizontal">
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="30dp"
-                android:gravity="start|bottom"
-                android:text="@string/horizon"
-                android:textColor="@color/white" />
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="30dp">
-
-                <ImageView
-                    android:id="@+id/adas_set_iv05_left"
-                    android:layout_width="30dp"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:src="@drawable/ic_keyboard_arrow_left" />
-
-                <SeekBar
-                    android:id="@+id/adas_set_sk05"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_toStartOf="@+id/adas_set_iv05_right"
-                    android:layout_toEndOf="@+id/adas_set_iv05_left"
-                    android:progressDrawable="@drawable/media_seekbar_style"
-                    android:splitTrack="false"
-                    android:thumb="@drawable/media_seekbar_thumb" />
-
-                <ImageView
-                    android:id="@+id/adas_set_iv05_right"
-                    android:layout_width="30dp"
-                    android:layout_height="wrap_content"
-                    android:layout_toStartOf="@+id/adas_set_tv05"
-                    android:src="@drawable/ic_keyboard_arrow_right" />
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="4"
+                android:orientation="horizontal">
 
                 <TextView
-                    android:id="@+id/adas_set_tv05"
-                    android:layout_width="100dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:layout_alignParentEnd="true"
-                    android:gravity="end|center"
-                    android:textColor="@color/white" />
-            </RelativeLayout>
+                    android:gravity="center_vertical"
+                    android:text="@string/car_width"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/adas_cali_carWidth_text"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="12dp"
+                android:layout_weight="2"
+                android:gravity="center"
+                android:text="200" />
+
+            <ImageButton
+                android:id="@+id/adas_cali_carWidth_left"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="6dp"
+                android:layout_weight="1"
+                android:background="#00000000"
+                android:src="@drawable/ic_keyboard_arrow_left" />
+
+            <ImageButton
+                android:id="@+id/adas_cali_carWidth_right"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="6dp"
+                android:layout_marginRight="6dp"
+                android:layout_weight="1"
+                android:background="#00000000"
+                android:src="@drawable/ic_keyboard_arrow_right" />
         </LinearLayout>
 
+        <!--cameraToBumper-->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/rectangle_01"
-            android:orientation="vertical">
+            android:layout_height="40dp"
+            android:layout_marginStart="12dp"
+            android:background="@drawable/item_rectangle"
+            android:orientation="horizontal">
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="30dp"
-                android:gravity="start|bottom"
-                android:text="@string/horizon"
-                android:textColor="@color/white" />
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="30dp">
-
-                <ImageView
-                    android:id="@+id/adas_set_iv06_left"
-                    android:layout_width="30dp"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:src="@drawable/ic_keyboard_arrow_left" />
-
-                <SeekBar
-                    android:id="@+id/adas_set_sk06"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_toStartOf="@+id/adas_set_iv06_right"
-                    android:layout_toEndOf="@+id/adas_set_iv06_left"
-                    android:progressDrawable="@drawable/media_seekbar_style"
-                    android:splitTrack="false"
-                    android:thumb="@drawable/media_seekbar_thumb" />
-
-                <ImageView
-                    android:id="@+id/adas_set_iv06_right"
-                    android:layout_width="30dp"
-                    android:layout_height="wrap_content"
-                    android:layout_toStartOf="@+id/adas_set_tv06"
-                    android:src="@drawable/ic_keyboard_arrow_right" />
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="4"
+                android:orientation="horizontal">
 
                 <TextView
-                    android:id="@+id/adas_set_tv06"
-                    android:layout_width="100dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:layout_alignParentEnd="true"
-                    android:gravity="end|center"
-                    android:textColor="@color/white" />
-            </RelativeLayout>
+                    android:gravity="center_vertical"
+                    android:text="@string/camera_to_bumper"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/adas_cali_cameraToBumper_text"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="12dp"
+                android:layout_weight="2"
+                android:gravity="center"
+                android:text="200" />
+
+            <ImageButton
+                android:id="@+id/adas_cali_cameraToBumper_left"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="6dp"
+                android:layout_weight="1"
+                android:background="#00000000"
+                android:src="@drawable/ic_keyboard_arrow_left" />
+
+            <ImageButton
+                android:id="@+id/adas_cali_cameraToBumper_right"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="6dp"
+                android:layout_marginRight="6dp"
+                android:layout_weight="1"
+                android:background="#00000000"
+                android:src="@drawable/ic_keyboard_arrow_right" />
         </LinearLayout>
 
+        <!--cameraToLeftWheel-->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/rectangle_01"
-            android:orientation="vertical">
+            android:layout_height="40dp"
+            android:layout_marginStart="12dp"
+            android:background="@drawable/item_rectangle"
+            android:orientation="horizontal">
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="30dp"
-                android:gravity="start|bottom"
-                android:text="@string/horizon"
-                android:textColor="@color/white" />
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="30dp">
-
-                <ImageView
-                    android:id="@+id/adas_set_iv07_left"
-                    android:layout_width="30dp"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:src="@drawable/ic_keyboard_arrow_left" />
-
-                <SeekBar
-                    android:id="@+id/adas_set_sk07"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_toStartOf="@+id/adas_set_iv07_right"
-                    android:layout_toEndOf="@+id/adas_set_iv07_left"
-                    android:progressDrawable="@drawable/media_seekbar_style"
-                    android:splitTrack="false"
-                    android:thumb="@drawable/media_seekbar_thumb" />
-
-                <ImageView
-                    android:id="@+id/adas_set_iv07_right"
-                    android:layout_width="30dp"
-                    android:layout_height="wrap_content"
-                    android:layout_toStartOf="@+id/adas_set_tv07"
-                    android:src="@drawable/ic_keyboard_arrow_right" />
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="4"
+                android:orientation="horizontal">
 
                 <TextView
-                    android:id="@+id/adas_set_tv07"
-                    android:layout_width="100dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:layout_alignParentEnd="true"
-                    android:gravity="end|center"
-                    android:textColor="@color/white" />
-            </RelativeLayout>
+                    android:gravity="center_vertical"
+                    android:text="@string/camera_to_left_wheel"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/adas_cali_cameraToLeftWheel_text"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="12dp"
+                android:layout_weight="2"
+                android:gravity="center"
+                android:text="200" />
+
+            <ImageButton
+                android:id="@+id/adas_cali_cameraToLeftWheel_left"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="6dp"
+                android:layout_weight="1"
+                android:background="#00000000"
+                android:src="@drawable/ic_keyboard_arrow_left" />
+
+            <ImageButton
+                android:id="@+id/adas_cali_cameraToLeftWheel_right"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="6dp"
+                android:layout_marginRight="6dp"
+                android:layout_weight="1"
+                android:background="#00000000"
+                android:src="@drawable/ic_keyboard_arrow_right" />
         </LinearLayout>
     </LinearLayout>
 
@@ -379,6 +405,16 @@
         android:layout_marginBottom="5dp"
         android:gravity="center"
         android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/bt_adas_cancel"
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/text_button"
+            android:gravity="center"
+            android:padding="2dp"
+            android:text="取消"
+            android:textColor="@color/white" />
 
         <TextView
             android:id="@+id/bt_front_page"

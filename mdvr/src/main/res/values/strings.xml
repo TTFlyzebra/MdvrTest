@@ -1,10 +1,374 @@
 <resources>
     <string name="app_name">MdvrTest</string>
-    <string name="horizon">horizon</string>
-    <string name="carMiddle">carMiddle</string>
-    <string name="cameraHeight">cameraHeight</string>
-    <string name="cameraToAxle">cameraToAxle</string>
-    <string name="carWidth">carWidth</string>
-    <string name="cameraToBumper">cameraToBumper</string>
-    <string name="cameraToLeftWheel">cameraToLeftWheel</string>
+    <string name="dms_calibration">标定</string>
+    <string name="dms_calibration2">视频功能设置</string>
+    <string name="start_calibration">开始标定</string>
+    <string name="bsd_calibration">BSD标定</string>
+    <string name="start_dms_calibration">DMS标定</string>
+    <string name="settings">设置</string>
+    <string name="configuration">配置</string>
+    <string name="settings2">部标功能设置</string>
+    <string name="steering_wheel">方向盘</string>
+    <string name="adas_configuration">ADAS 配置</string>
+    <string name="dms_configuration">DMS 配置</string>
+    <string name="app_exit_toast">再按一次退出.</string>
+    <string name="virtual_speed">实时速度模拟输入</string>
+    <string name="real_speed">实时速度(km/h)</string>
+    <string name="virtual_speed_hint">实时速度模拟输入(0–255):</string>
+    <string name="login_name">用户名:</string>
+    <string name="login_password">密码:</string>
+    <string name="login_ok">登录</string>
+
+    <string name="horizontal_line">"地平线:   ("</string>
+    <string name="engine_line">"引擎盖线:   ("</string>
+    <string name="car_central_line">"车辆中线:   ("</string>
+    <string name="camera_height">摄像头高度:cm</string>
+    <string name="camera_central">摄像头中心:cm</string>
+    <string name="camera_to_wheel">摄像头到前车轴距离:cm</string>
+    <string name="camera_to_axle">摄像头到后车轴距离:cm</string>
+    <string name="target_to_camera">标靶距离摄像头距离:cm</string>
+    <string name="target_to_ground">标靶底部距离地面距离:cm</string>
+    <string name="camera_to_wheel_hint">当前车轮在相机后方时，输入值为负值</string>
+    <string name="car_width">车身宽度:cm</string>
+    <string name="camera_to_bumper">摄像头到车头距离:cm</string>
+    <string name="camera_to_left_wheel">摄像头到左前轮距离:cm</string>
+    <string name="param_reset">重置</string>
+    <string name="camera_switch">切换</string>
+
+    <string name="horizontal_line2">"地平线"</string>
+    <string name="engine_line2">"引擎盖线"</string>
+    <string name="car_central_line2">"车辆中线"</string>
+
+    <string name="adas_warning_enable">主动抓拍事件</string>
+    <string name="lane_shifting_speed_enable">车道偏移激活速度(km/h):</string>
+    <string name="front_car_collide_speed">向前碰撞预警</string>
+    <string name="lane_shift_warning">车道偏离报警</string>
+    <string name="car_too_close_warning">车距过近报警</string>
+    <string name="people_too_close">行人过近报警</string>
+    <string name="frequency_change_lane">频繁变道报警</string>
+    <string name="frequency_change_lane_sens">检测时间段</string>
+    <string name="adas_auto_capture">主动抓拍事件</string>
+    <string name="lane_left_shift_sens">车道偏移左侧灵敏度(cm):</string>
+    <string name="lane_right_shift_sens">车道偏移右侧灵敏度(cm):</string>
+    <string name="car_distance_keep_sens">保持车距灵敏度(s):</string>
+    <string name="front_car_collide_sens">前车碰撞灵敏度(s):</string>
+    <string name="gps_detecting_interval">GPS定位时间间隔(s):</string>
+
+    <string name="sensitivity">灵敏度(s)</string>
+    <string name="sensitivity_low">低</string>
+    <string name="sensitivity_middle">中</string>
+    <string name="sensitivity_high">高</string>
+    <string name="presicion">允许间隔误差(ms)</string>
+    <string name="presicion2">检测次数(次)</string>
+    <string name="warnging_time">报警间隔(s)</string>
+
+    <string name="time_counter">次数</string>
+
+    <string name="eye_close_warn">闭眼 报警灵敏度(s)</string>
+    <string name="yawn_warn">打哈欠 报警灵敏度(s)</string>
+    <string name="phone_call_warn">打电话 报警灵敏度(s)</string>
+    <string name="smoking_warn">抽烟 报警灵敏度(s)</string>
+    <string name="look_around_warn">左顾右盼 报警灵敏度(s)</string>
+    <string name="low_head_warn">低头 报警灵敏度(s)</string>
+    <string name="not_in_position_warn">离岗 报警灵敏度(s)</string>
+    <string name="occlusion_lens_warn">遮挡镜头 报警灵敏度(s)</string>
+    <string name="dms_auto_capture">主动抓拍 报警灵敏度(s)</string>
+    <string name="driver_changed_warn">驾驶员变更 检测间隔(s)</string>
+    <string name="infrared_blocking_warn">红外阻断 报警灵敏度(s)</string>
+    <string name="hands_no_in_position_warn">方向盘脱手 报警灵敏度(s)</string>
+    <string name="no_belts_warn">安全带 检测间隔(s)</string>
+    <string name="driver_identify_warn">驾驶员识别 报警灵敏度(s)</string>
+
+    <string name="dms_cali_success_toast">DMS 标定成功</string>
+    <string name="dms_cali_failure_toast">DMS 标定失败</string>
+
+    <string name="dms_cali_hint">驾驶员正常坐在驾驶位，目视驾驶方向，调整摄像头位置，确保人脸位置位于人脸框，点击标定按钮开始标定</string>
+    <string name="bsd_cali_hint">还请通过拖动标定线进行标定，并通过右上角保存按钮进行保存</string>
+    <string name="bsd_cali_hint2">1、用手机连接MDVR的WIFI热点，确保已经连上MDVR设备的WIFI热点；\n2、点击开始标定按钮后，通过拖动标定线进行标定，并通过右上角保存按钮进行保存。</string>
+    <string name="bsd_cali_hint3">还请点击开始标定按钮后，通过拖动标定框左上或者右下点进行标定框缩放，并通过拖动标定框中间位置进行位置变换，并通过右上角保存按钮进行保存</string>
+    <string name="reboot_adas_hint">设备正在重启，请等待…</string>
+    <string name="reboot_adas_success_hint">重启成功.</string>
+    <string name="uvc_disconnect_hint">设备未连接</string>
+    <string name="write_params_hint">保存成功.</string>
+
+    <string name="dialog_save">保存</string>
+    <string name="dialog_ok">确定</string>
+    <string name="dialog_cancel">取消</string>
+    <string name="reboot_hint">重启设备大概需要40s时间，还请确定是否重启?</string>
+
+    <string name="restore_default_hint">恢复默认参数</string>
+    <string name="restore_default_hint2">还请确认是否把ADAS/DMS配置参数恢复成默认值?</string>
+    <string name="restore_default">还原全部配置</string>
+    <string name="dms_rotate_set">DMS标定转屏设置</string>
+    <string name="dms_rotate_set_hint">DMS标定转屏成功，重启AP后生效</string>
+    <string name="virtual_speed_dispatch">模拟速度实时发送</string>
+    <string name="virtual_speed_dispatch_hint">模拟速度实时发送生效</string>
+    <string name="virtual_speed_dispatch_hint2">模拟速度实时发送关闭</string>
+
+    <string name="steering_wheel_horizontal_size">方向盘(水平)大小</string>
+    <string name="steering_wheel_vertical_size">方向盘(垂直)大小</string>
+    <string name="steering_wheel_horizontal_position">方向盘位置 (水平移动)</string>
+    <string name="steering_wheel_vertical_position">方向盘位置 (垂直移动)</string>
+
+    <string name="no_num_format_hint">非法数字</string>
+    <string name="not_valid_value">输入值不在允许范围内，默认采用边界值</string>
+
+    <string name="version_info">版本信息查询</string>
+    <string name="volume_adjust">音量调节</string>
+    <string name="basic_setting_params">基本功能配置</string>
+    <string name="speed_adjust">速度阈值调节</string>
+    <string name="mode_adjust">模式设置</string>
+    <string name="mode_adjust_1">正常模式</string>
+    <string name="mode_adjust_2">演示模式</string>
+    <string name="mode_adjust_3">自定义模式</string>
+    <string name="function_adjust">功能选择</string>
+    <string name="function_adjust_1">玩手机</string>
+    <string name="function_adjust_2">前BSD</string>
+    <string name="function_adjust_3">右BSD</string>
+
+    <string name="adas_mode_manual">手动标定</string>
+    <string name="adas_mode_semiautomatic">半自动</string>
+    <string name="adas_mode_automatic">自动标定</string>
+    <string name="adas_mode_automatic_panel">标定板</string>
+
+    <string name="dvr_reboot_settings">重启 DVR</string>
+    <string name="mcu_reboot_settings">重启 MCU</string>
+
+    <string name="device_301">TD301</string>
+    <string name="device_202">VD202</string>
+
+    <string name="ai_config_adjust">AI功能配置</string>
+    <string name="ai_config_adjust_enable">AI功能使能开关</string>
+    <string name="dms_distract_adjust">DMS分心范围设置</string>
+    <string name="setting_dms_cali_params">DMS 标定数值</string>
+    <string name="setting_rated_params">额定参数设置</string>
+    <string name="setting_rated_load">额定载重(t)</string>
+    <string name="setting_rated_height">额定载高(m)</string>
+    <string name="setting_dms_cali_pitch">DMS Pitch:</string>
+    <string name="setting_dms_cali_yaw">DMS Yaw:</string>
+    <string name="setting_ip_config">IP 配置</string>
+    <string name="setting_save_configs">导出所有参数到文件</string>
+    <string name="setting_language">语言设置</string>
+    <string name="setting_ip_host">主机IP地址</string>
+    <string name="setting_ip_device">设备IP地址</string>
+    <string name="setting_ip_server">服务器IP</string>
+    <string name="setting_ip_config_hint">注意:重启后生效，确定后请按右上重启按钮重启应用</string>
+    <string name="setting_save_config_hint">保存参数文件成功.</string>
+    <string name="setting_detect_show_hint">显示检测信息</string>
+    <string name="setting_log_enable">开启设备日志功能</string>
+    <string name="setting_sdcard">SD卡设置</string>
+    <string name="setting_device_info">设备参数</string>
+    <string name="setting_driver_info">司机卡参数</string>
+    <string name="setting_ic_info">IC卡信息</string>
+    <string name="setting_driver_name">司机姓名</string>
+    <string name="setting_driver_id">身份证号</string>
+    <string name="setting_driver_licence">司机驾驶证(运营证)</string>
+    <string name="setting_driver_licence_authority">发证机关</string>
+    <string name="setting_sdcard_format">格式化SD卡</string>
+    <string name="setting_sdcard_format_hint2">将会删除存储卡数据，确定是否格式化？</string>
+    <string name="sdcard_flag_exist">SD卡是否存在标识位</string>
+    <string name="sdcard_package_flag_exist">SD卡是否存在固件升级包标识位</string>
+    <string name="sdcard_app_flag_exist">SD卡是否存在APP升级包标识位</string>
+    <string name="update_success_flag">设备升级状态</string>
+    <string name="communi_method">协议库通信方式设置</string>
+    <string name="setting_device_mode">设备模式设置</string>
+    <string name="device_camera_mode">录像模式:</string>
+    <string name="device_camera_start">开始录像</string>
+    <string name="device_camera_stop">结束录像</string>
+    <string name="setting_808_param">808相关参数</string>
+    <string name="network_param_setting">网络参数配置</string>
+
+    <string name="setting_vehicle_param">车辆参数配置</string>
+    <string name="vehicle_num">车牌号</string>
+    <string name="province_id">省域ID</string>
+    <string name="city_id">市域ID</string>
+    <string name="vin_id">VIN码</string>
+    <string name="vin_id_hint">请输入VIN码</string>
+    <string name="vehicle_color">车牌颜色</string>
+    <string name="vehicle_type">车辆类型</string>
+    <string name="apn">接入点APN</string>
+    <string name="device_id">本机号</string>
+    <string name="second_device_id">副本机号</string>
+    <string name="third_device_id">第三服务器号</string>
+    <string name="forth_device_id">第四服务器号</string>
+    <string name="fifth_device_id">第五服务器号</string>
+    <string name="sixth_device_id">第六服务器号</string>
+    <string name="terminal_id">终端号</string>
+    <string name="apn_hint">请输入接入点APN</string>
+    <string name="phone_number_hint">请输入11位本机号</string>
+    <string name="terminal_id_hint">请输入7位终端号</string>
+    <string name="server_ip_hint">服务器地址长度越界(>64)</string>
+    <string name="server_port_hint">服务器端口号数值越界(0–65535)</string>
+    <string name="car_number_hint">车牌号(>16)</string>
+    <string name="driver_id_hint">请输入18位身份证号</string>
+    <string name="setting_status_info">状态参数查询</string>
+
+
+    <string name="device_open">开</string>
+    <string name="device_close">关</string>
+    <string name="device_server_ip">终端IP</string>
+    <string name="device_server_port">端口号</string>
+    <string name="device_server_jtver">主连接版本</string>
+    <string name="second_setting_ip_server">副服务器IP</string>
+    <string name="second_device_server_port">副端口号</string>
+    <string name="second_device_server_jtver">副连接版本</string>
+    <string name="third_setting_ip_server">第三服务器IP</string>
+    <string name="third_device_server_port">第三服务器端口号</string>
+    <string name="third_device_server_jtver">第三服务器连接版本</string>
+    <string name="forth_setting_ip_server">第四服务器IP</string>
+    <string name="forth_device_server_port">第四服务器端口号</string>
+    <string name="forth_device_server_jtver">第四服务器连接版本</string>
+    <string name="fifth_setting_ip_server">第五服务器IP</string>
+    <string name="fifth_device_server_port">第五服务器端口号</string>
+    <string name="fifth_device_server_jtver">第五服务器连接版本</string>
+    <string name="sixth_setting_ip_server">第六服务器IP</string>
+    <string name="sixth_device_server_port">第六服务器端口号</string>
+    <string name="sixth_device_server_jtver">第六服务器连接版本</string>
+    <string name="device_server_prototype">主服务器协议类型</string>
+    <string name="second_device_server_prototype">副服务器协议类型</string>
+    <string name="third_device_server_prototype">第三服务器协议类型</string>
+    <string name="forth_device_server_prototype">第四服务器协议类型</string>
+    <string name="fifth_device_server_prototype">第五服务器协议类型</string>
+    <string name="sixth_device_server_prototype">第六服务器协议类型</string>
+
+    <string name="exist">存在</string>
+    <string name="no_exist">不存在</string>
+
+    <string name="adas_traffic_limit_sign_recog">交通限制标志识别</string>
+    <string name="adas_traffic_limit_sign_exceed">交通标志超限</string>
+
+    <string name="network_not_connect">网络未连接，请检查url或者网络配置</string>
+    <string name="optimist_hint">切换过快</string>
+
+    <string name="channel_name">通道名 </string>
+    <string name="channel_name_hint">(修改后请按右上角按钮保存)</string>
+    <string name="channel_name_1">通道 </string>
+    <string name="channel_switch">录像开关</string>
+    <string name="channel_switch_hint">(关闭后不进行该通道录像)</string>
+    <string name="channel_switch_hint2">关闭录像后不能录音</string>
+    <string name="channel_switch_verical">上下翻转</string>
+    <string name="channel_switch_horizontal">左右翻转</string>
+    <string name="channel_mike">录音开关</string>
+    <string name="channel_mike_hint">(关闭后不进行该通道录音)</string>
+    <string name="channel_preview_quality">图像品质</string>
+
+    <string name="bsd_calib_direction">摄像头方向</string>
+
+    <string name="ai_config_dms">DMS功能开关</string>
+    <string name="ai_config_hint">(仅量产模式下可配置)</string>
+    <string name="ai_config_drowsy">疲劳</string>
+    <string name="ai_config_drowsy_type1">疲劳（闭眼）</string>
+    <string name="ai_config_drowsy_type2">疲劳（眨眼）</string>
+    <string name="ai_config_drowsy_type3">疲劳（打哈欠）</string>
+    <string name="ai_config_distraction">分心</string>
+    <string name="ai_config_smoking">抽烟</string>
+    <string name="ai_config_calling">打电话</string>
+    <string name="ai_config_infrared_blocking">红外阻断墨镜</string>
+    <string name="ai_config_driver_abnormal">驾驶员异常</string>
+    <string name="ai_config_lens_occlusion">镜头遮挡</string>
+    <string name="ai_config_adas">ADAS功能开关</string>
+    <string name="ai_config_front_collision">前向碰撞</string>
+    <string name="ai_config_car_too_close">车距过近</string>
+    <string name="ai_config_lane_shift">车道偏离</string>
+
+    <string name="ai_config_swms">SWMS功能开关</string>
+    <string name="ai_config_phone_playing">玩手机</string>
+    <string name="ai_config_no_safebelt">未系安全带</string>
+    <string name="ai_config_no_hands">双手脱离方向盘</string>
+
+    <string name="login_error_1">用户名错误</string>
+    <string name="login_error_2">IP或端口号错误,并请检测网络连接</string>
+    <string name="login_error_3">密码错误</string>
+    <string name="login_error_4">用户名或者密码错误</string>
+    <string name="request_error">请求指令失败，请检查设备版本</string>
+    <string name="device_202_error">202设备未连接，请检查设备间连接</string>
+    <string name="invalid_ip">非法 IP</string>
+    <string name="null_info_hint">保存参数中存在空值，还请确认是否继续保存?</string>
+
+    <string name="mode_adjust_2_hint">当前处于演示模式，相关功能无法保存</string>
+    <string name="advance_setting">高级设置</string>
+
+    <string name="dsm_settings">DSM设置</string>
+    <string name="bsd_settings">BSD设置</string>
+    <string name="bsd1_settings">BSD1设置</string>
+    <string name="bsd2_settings">BSD2设置</string>
+    <string name="bsd3_settings">BSD3设置</string>
+    <string name="feature_switch">功能选择</string>
+    <string name="dsm_trigger_speed_settings">报警触发速度阀值(Km/h),范围（0–120Km/h）</string>
+    <string name="save">保存</string>
+
+    <string name="feature_bsd1_calibration">ISP1:盲区行人检测,ISP2:盲区行人检测</string>
+    <string name="feature_loading1_calibration">ISP1:空载满载检测,ISP2:盲区行人检测</string>
+    <string name="feature_bsd2_calibration">ISP1:盲区行人检测,ISP2:空载满载检测</string>
+    <string name="feature_loading2_calibration">ISP1:空载满载检测,ISP2:空载满载检测</string>
+
+    <string name="resolution_ratio_switch">分辨率选择</string>
+    <string name="resolution_ratio_1080">1920x1080</string>
+    <string name="resolution_ratio_720">1280x720</string>
+
+    <string name="connect_confirm_msg">请确认是否连接设备!</string>
+    <string name="yes">确定</string>
+    <string name="no">取消</string>
+    <string name="Success">成功!</string>
+    <string name="Error">失败!</string>
+    <string name="retry">重试</string>
+    <string name="finish">完成</string>
+    <string name="close">关闭</string>
+    <string name="wifi_disconnected_hint">Socket连接已断开, 请退出并重启应用程序!</string>
+
+    <string name="dsm_trigger_speed_settings_error">报警触发速度阀值超出范围（0–120Km/h）</string>
+    <string name="dsm_trigger_time_settings_error">报警触发时间阀值超出范围（0–600s）</string>
+
+    <string name="connect_failed_hint">网络异常</string>
+    <string name="connect_setting">去设置</string>
+    <string name="preview_hint">标定数据仅在视频流开启时保存</string>
+
+    <string name="write_params_hint2">保存成功,设备重启大概需要30s,请等待…</string>
+    <string name="channel_quality_hint">图像品质数据异常 </string>
+
+    <string name="volume">音量</string>
+    <string name="company_name">公司名称 (视频画面叠加信息)</string>
+    <string name="sd_card_number">SD卡数目</string>
+
+    <string name="ic_state">插卡状态： </string>
+    <string name="ic_card_insert">已插卡</string>
+    <string name="no_ic_card">无IC卡</string>
+    <string name="ic_card_hint">请重新插入IC卡验证</string>
+
+    <string name="dms_speed_threshold">DMS 速度阈值</string>
+    <string name="recommended_20_80">(建议 20–80)</string>
+    <string name="adas_speed_threshold">ADAS 速度阈值</string>
+    <string name="recommended_40_100">(建议 40–100)</string>
+
+    <string name="swms">SWMS</string>
+    <string name="left_rear_bsd">左后BSD</string>
+    <string name="right_rear_bsd">右后BSD</string>
+    <string name="front_bsd">前BSD</string>
+    <string name="left_front_bsd">左前BSD</string>
+    <string name="right_front_bsd">右前BSD</string>
+
+    <string name="mcu_restart_success_and_login">MCU重启成功，请重新登录！</string>
+    <string name="select_channel_channel_success_and_login">通道功能切换成功，请重新登录！</string>
+
+    <string name="adas_set_ok">参数设置成功!</string>
+    <string name="adas_set_json_error">参数设置失败，参数错误！</string>
+    <string name="adas_set_error_network">参数设置失败，网络错误！</string>
+    <string name="adas_note_wifi_connected">请先连接至MDVR设备WIFI热点再进行标定!</string>
+
+    <string name="power_key">电源键</string>
+    <string name="back_key">后退键</string>
+    <string name="volumn_add">音量键+</string>
+    <string name="volumn_del">音量键-</string>
+    <string name="home_key">显示桌面</string>
+    <string name="reconnect">断线重连</string>
+    <string name="system_reboot">重启手机</string>
+    <string name="screen_dpi">高清显示</string>
+    <string name="exit_full">退出全屏</string>
+    <string name="fullctl">开始控制云手机</string>
+    <string name="fullmsg">注意：云手机进入全屏控制界面后，点击悬浮窗选择退出按钮方可退出全屏控制界面。</string>
+    <string name="confirm">确定</string>
+    <string name="cancle">取消</string>
+    <string name="wait_p2p_network">"正在创建网络连接，请稍候......\n如一直连接不上，可尝试开关飞行模式，点击右上角刷新列表按钮后再重新连接!"</string>
+    <string name="loading_home">正在加载…</string>
+    <string name="refresh">刷新</string>
 </resources>

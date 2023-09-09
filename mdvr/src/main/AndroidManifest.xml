@@ -47,6 +47,7 @@
         tools:targetApi="s">
         <activity
             android:name=".activity.LauncherActivity"
+            android:configChanges="keyboard|keyboardHidden|mcc|mnc|navigation|orientation|screenSize|screenLayout|smallestScreenSize"
             android:exported="true"
             android:screenOrientation="reverseLandscape">
             <intent-filter>
