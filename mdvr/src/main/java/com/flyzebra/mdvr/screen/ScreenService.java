@@ -32,18 +32,18 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ScreenService implements INotify {
-    private Context mContext;
+    private final Context mContext;
     private MediaProjectionManager mpManager = null;
     private int width = 1280;
     private int height = 720;
-    private int mBitRate = 4000000;
+    private final int mBitRate = 2048 * 1024;
     private static final String MIME_TYPE = "video/avc"; // H.264 Advanced Video Coding
     private static final int FRAME_RATE = 25; // 30 fps
     private static final int IFRAME_INTERVAL = 5; // 2 seconds between I-frames
-    private byte[] video_data = new byte[720 * 1440 * 3 / 2];
+    private final byte[] video_data = new byte[width * height * 3 / 2];
     private Thread workThread = null;
-    private AtomicBoolean isStop = new AtomicBoolean(true);
-    private Hashtable<Long, Long> mScreenUsers = new Hashtable<>();
+    private final AtomicBoolean isStop = new AtomicBoolean(true);
+    private final Hashtable<Long, Long> mScreenUsers = new Hashtable<>();
     private int mResultCode;
     private Intent mResultData;
 
@@ -60,6 +60,7 @@ public class ScreenService implements INotify {
     }
 
     public void start(int resultCode, Intent resultData) {
+        FlyLog.d("ScreenService start!");
         mResultCode = resultCode;
         mResultData = resultData;
         mpManager = (MediaProjectionManager) mContext.getSystemService(MEDIA_PROJECTION_SERVICE);
@@ -67,8 +68,10 @@ public class ScreenService implements INotify {
     }
 
     public void stop() {
+        screenStop();
         mCmdHandler.removeCallbacksAndMessages(null);
         Notify.get().unregisterListener(this);
+        FlyLog.d("ScreenService stop!");
     }
 
     public void screenStart() {
@@ -160,7 +163,7 @@ public class ScreenService implements INotify {
     }
 
     public void screenStop() {
-        if(isStop.get()) return;
+        if (isStop.get()) return;
         isStop.set(true);
         try {
             if (workThread != null) {
@@ -205,7 +208,7 @@ public class ScreenService implements INotify {
             }
             case Protocol.TYPE_SCREEN_U_READY: {
                 long uid = ByteUtil.bytes2Long(data, 16, true);
-                width = ByteUtil.bytes2Short(data,24, false);
+                width = ByteUtil.bytes2Short(data, 24, false);
                 height = width * 720 / 1280 * 2 / 2;
                 mScreenUsers.put(uid, SystemClock.uptimeMillis());
                 Notify.get().miniNotify(Protocol.SCREEN_T_START, Protocol.SCREEN_T_START.length, Fzebra.get().getTid(), 0, null);

@@ -79,7 +79,7 @@ public class IDUtil {
             FlyLog.e(e.toString());
         }
         if (TextUtils.isEmpty(imei))
-            imei = "1234567890";
+            imei = "";
         return imei.toUpperCase();
     }
 

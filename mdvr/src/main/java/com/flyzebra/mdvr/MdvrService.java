@@ -11,7 +11,10 @@ import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.media.projection.MediaProjectionManager;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
+import android.text.TextUtils;
 
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
@@ -35,6 +38,7 @@ import com.flyzebra.mdvr.wifi.WifiService;
 import com.flyzebra.mdvr.wifip2p.WifiP2PService;
 import com.flyzebra.utils.ByteUtil;
 import com.flyzebra.utils.FlyLog;
+import com.flyzebra.utils.IDUtil;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -59,10 +63,20 @@ public class MdvrService extends Service implements INotify {
     private final DmsService dmsService = new DmsService(this);
 
     public static AtomicBoolean isApplyScreen = new AtomicBoolean(false);
-    private int mResultCode;
-    private Intent mResultData;
     private final ScreenService screenService = new ScreenService(this);
     private final InputService inputService = new InputService(this);
+    private static final Handler mHandler = new Handler(Looper.getMainLooper());
+
+    private final Runnable checkImei = new Runnable() {
+        @Override
+        public void run() {
+            if (!TextUtils.isEmpty(IDUtil.getIMEI(MdvrService.this))) {
+                startServices();
+            } else {
+                mHandler.postDelayed(this, 1000);
+            }
+        }
+    };
 
     public static void startSelfService(AppCompatActivity activity) {
         if (!isApplyScreen.get()) {
@@ -91,7 +105,14 @@ public class MdvrService extends Service implements INotify {
 
     @Override
     public void onCreate() {
-        FlyLog.i("#####MdvrService start!#####");
+        FlyLog.i("onCreate");
+
+        Notify.get().registerListener(this);
+
+        Fzebra.get().init(this.getApplicationContext());
+        Fzebra.get().startUserServer();
+        Fzebra.get().startRtspServer();
+
         Notification.Builder builder = new Notification.Builder(this.getApplicationContext());
         Intent nfIntent = new Intent(this, LauncherActivity.class);
         builder.setContentIntent(PendingIntent.getActivity(this, 0, nfIntent, 0))
@@ -113,16 +134,17 @@ public class MdvrService extends Service implements INotify {
         startForeground(1001, notification);
 
         isApplyScreen.set(false);
-        AlarmManager mAlarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+        AlarmManager mAlarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         mAlarmManager.setTimeZone("Asia/Shanghai");
-
-        Notify.get().registerListener(this);
 
         Global.qCarCameras.clear();
         Global.audioHeadMap.clear();
         Global.videoHeadMap.clear();
 
-        Fzebra.get().startRtspServer();
+        mHandler.post(checkImei);
+    }
+
+    public void startServices() {
         recordService.start();
         wifiService.start();
         wifiP2PService.start();
@@ -143,19 +165,19 @@ public class MdvrService extends Service implements INotify {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent != null) {
-            try {
+        try {
+            if (intent != null) {
                 boolean flag = intent.getBooleanExtra("screen", false);
                 if (flag) {
-                    mResultCode = intent.getIntExtra("code", -1);
-                    mResultData = intent.getParcelableExtra("data");
-                    isApplyScreen.set(true);
+                    FlyLog.d("onStartCommand from Activity");
+                    int mResultCode = intent.getIntExtra("code", -1);
+                    Intent mResultData = intent.getParcelableExtra("data");
                     screenService.start(mResultCode, mResultData);
-                    Fzebra.get().startUserServer();
+                    isApplyScreen.set(true);
                 }
-            } catch (Exception e) {
-                FlyLog.e(e.toString());
             }
+        } catch (Exception e) {
+            FlyLog.e(e.toString());
         }
         return super.onStartCommand(intent, flags, startId);
     }
@@ -185,7 +207,7 @@ public class MdvrService extends Service implements INotify {
 
         Fzebra.get().stopUserServer();
         Fzebra.get().release();
-        FlyLog.i("#####MdvrService exit!#####");
+        FlyLog.i("onDestroy");
     }
 
     @Override

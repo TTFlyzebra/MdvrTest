@@ -77,7 +77,7 @@ public class LauncherActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        //super.onBackPressed();
+        super.onBackPressed();
         Notify.get().miniNotify(Protocol.HOME_BACK, Protocol.HOME_BACK.length, Fzebra.get().getTid(), 0, null);
     }
 
