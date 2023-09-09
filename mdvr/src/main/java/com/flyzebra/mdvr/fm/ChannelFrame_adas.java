@@ -4,7 +4,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -23,6 +24,9 @@ import com.flyzebra.utils.SPUtil;
 public class ChannelFrame_adas extends Fragment implements AdasSetView.MoveLisenter {
     private final ArcADASCalibInfo calibInfo = new ArcADASCalibInfo();
 
+    private RelativeLayout adas_page1;
+    private RelativeLayout adas_page2;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_adas, container, false);
@@ -30,6 +34,12 @@ public class ChannelFrame_adas extends Fragment implements AdasSetView.MoveLisen
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        adas_page1 = view.findViewById(R.id.adas_page1);
+        adas_page2 = view.findViewById(R.id.adas_page2);
+
+        adas_page1.setVisibility(View.VISIBLE);
+        adas_page2.setVisibility(View.INVISIBLE);
+
         AdasSetView adasSetView = view.findViewById(R.id.adas_set_view);
         adasSetView.setMoveLisenter(this);
         calibInfo.horizon = Global.calibInfo.horizon;
@@ -41,7 +51,7 @@ public class ChannelFrame_adas extends Fragment implements AdasSetView.MoveLisen
         calibInfo.cameraToLeftWheel = Global.calibInfo.cameraToLeftWheel;
         adasSetView.upCalibInfo(calibInfo);
 
-        ImageButton bt_adas_save = view.findViewById(R.id.bt_adas_save);
+        TextView bt_adas_save = view.findViewById(R.id.bt_adas_save);
         bt_adas_save.setOnClickListener(v -> {
             try {
                 ArcADASCalibResult calibResult = AdasService.get().setCalibInfo(calibInfo);
@@ -81,6 +91,17 @@ public class ChannelFrame_adas extends Fragment implements AdasSetView.MoveLisen
             } catch (Exception e) {
                 FlyLog.e(e.toString());
             }
+        });
+
+        TextView bt_next_page = view.findViewById(R.id.bt_next_page);
+        bt_next_page.setOnClickListener(v -> {
+            adas_page1.setVisibility(View.INVISIBLE);
+            adas_page2.setVisibility(View.VISIBLE);
+        });
+        TextView bt_front_page = view.findViewById(R.id.bt_front_page);
+        bt_front_page.setOnClickListener(v -> {
+            adas_page1.setVisibility(View.VISIBLE);
+            adas_page2.setVisibility(View.INVISIBLE);
         });
     }
 

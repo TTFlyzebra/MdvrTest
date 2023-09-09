@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">MdvrTest</string>
+    <string name="horizon">horizon</string>
+    <string name="carMiddle">carMiddle</string>
+    <string name="cameraHeight">cameraHeight</string>
+    <string name="cameraToAxle">cameraToAxle</string>
+    <string name="carWidth">carWidth</string>
+    <string name="cameraToBumper">cameraToBumper</string>
+    <string name="cameraToLeftWheel">cameraToLeftWheel</string>
 </resources>
