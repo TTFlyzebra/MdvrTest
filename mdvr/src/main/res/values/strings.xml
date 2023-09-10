@@ -39,6 +39,9 @@
     <string name="engine_line2">"引擎盖线"</string>
     <string name="car_central_line2">"车辆中线"</string>
 
+    <string name="horizontal_line3">"地平线："</string>
+    <string name="car_central_line3">"车辆中线："</string>
+
     <string name="adas_warning_enable">主动抓拍事件</string>
     <string name="lane_shifting_speed_enable">车道偏移激活速度(km/h):</string>
     <string name="front_car_collide_speed">向前碰撞预警</string>

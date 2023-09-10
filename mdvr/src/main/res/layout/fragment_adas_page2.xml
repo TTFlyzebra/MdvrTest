@@ -5,9 +5,10 @@
     android:layout_height="match_parent">
 
     <LinearLayout
-        android:layout_margin="40dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="40dp"
+        android:background="#7F000000"
         android:orientation="vertical">
         <!--horizon-->
         <LinearLayout
@@ -28,6 +29,7 @@
                     android:layout_height="match_parent"
                     android:gravity="center_vertical"
                     android:text="@string/horizontal_line"
+                    android:textColor="@color/white"
                     android:textSize="16sp" />
 
                 <TextView
@@ -43,37 +45,36 @@
                     android:layout_height="match_parent"
                     android:gravity="center_vertical"
                     android:text=")"
+                    android:textColor="@color/white"
                     android:textSize="16sp" />
             </LinearLayout>
-
-            <TextView
-                android:id="@+id/adas_cali_horizon_text"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="12dp"
-                android:layout_weight="2"
-                android:gravity="center"
-                android:text="200" />
 
             <ImageButton
                 android:id="@+id/adas_cali_horizont_up"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_marginLeft="6dp"
                 android:layout_weight="1"
                 android:background="#00000000"
                 android:src="@drawable/ic_keyboard_arrow_up" />
+
+            <TextView
+                android:id="@+id/adas_cali_horizon_text"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_margin="5dp"
+                android:layout_weight="2"
+                android:background="@drawable/edittext_bk"
+                android:gravity="center"
+                android:text="200"
+                android:textColor="@color/white" />
 
             <ImageButton
                 android:id="@+id/adas_cali_horizont_down"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_marginLeft="6dp"
-                android:layout_marginRight="6dp"
                 android:layout_weight="1"
                 android:background="#00000000"
                 android:src="@drawable/ic_keyboard_arrow_down" />
-
         </LinearLayout>
 
         <!--carMiddle-->
@@ -95,6 +96,7 @@
                     android:layout_height="match_parent"
                     android:gravity="center_vertical"
                     android:text="@string/car_central_line"
+                    android:textColor="@color/white"
                     android:textSize="16sp" />
 
                 <TextView
@@ -110,33 +112,33 @@
                     android:layout_height="match_parent"
                     android:gravity="center_vertical"
                     android:text=")"
+                    android:textColor="@color/white"
                     android:textSize="16sp" />
             </LinearLayout>
-
-            <TextView
-                android:id="@+id/adas_cali_carMiddle_text"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="12dp"
-                android:layout_weight="2"
-                android:gravity="center"
-                android:text="200" />
 
             <ImageButton
                 android:id="@+id/adas_cali_carMiddle_left"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_marginLeft="6dp"
                 android:layout_weight="1"
                 android:background="#00000000"
                 android:src="@drawable/ic_keyboard_arrow_left" />
+
+            <TextView
+                android:id="@+id/adas_cali_carMiddle_text"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_margin="5dp"
+                android:layout_weight="2"
+                android:background="@drawable/edittext_bk"
+                android:gravity="center"
+                android:text="200"
+                android:textColor="@color/white" />
 
             <ImageButton
                 android:id="@+id/adas_cali_carMiddle_right"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_marginLeft="6dp"
-                android:layout_marginRight="6dp"
                 android:layout_weight="1"
                 android:background="#00000000"
                 android:src="@drawable/ic_keyboard_arrow_right" />
@@ -161,33 +163,33 @@
                     android:layout_height="match_parent"
                     android:gravity="center_vertical"
                     android:text="@string/camera_height"
+                    android:textColor="@color/white"
                     android:textSize="16sp" />
             </LinearLayout>
-
-            <TextView
-                android:id="@+id/adas_cali_cameraHeight_text"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="12dp"
-                android:layout_weight="2"
-                android:gravity="center"
-                android:text="200" />
 
             <ImageButton
                 android:id="@+id/adas_cali_cameraHeight_left"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_marginLeft="6dp"
                 android:layout_weight="1"
                 android:background="#00000000"
                 android:src="@drawable/ic_keyboard_arrow_left" />
+
+            <TextView
+                android:id="@+id/adas_cali_cameraHeight_text"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_margin="5dp"
+                android:layout_weight="2"
+                android:background="@drawable/edittext_bk"
+                android:gravity="center"
+                android:text="200"
+                android:textColor="@color/white" />
 
             <ImageButton
                 android:id="@+id/adas_cali_cameraHeight_right"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_marginLeft="6dp"
-                android:layout_marginRight="6dp"
                 android:layout_weight="1"
                 android:background="#00000000"
                 android:src="@drawable/ic_keyboard_arrow_right" />
@@ -212,33 +214,33 @@
                     android:layout_height="match_parent"
                     android:gravity="center_vertical"
                     android:text="@string/camera_to_axle"
+                    android:textColor="@color/white"
                     android:textSize="16sp" />
             </LinearLayout>
-
-            <TextView
-                android:id="@+id/adas_cali_cameraToAxle_text"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="12dp"
-                android:layout_weight="2"
-                android:gravity="center"
-                android:text="200" />
 
             <ImageButton
                 android:id="@+id/adas_cali_cameraToAxle_left"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_marginLeft="6dp"
                 android:layout_weight="1"
                 android:background="#00000000"
                 android:src="@drawable/ic_keyboard_arrow_left" />
+
+            <TextView
+                android:id="@+id/adas_cali_cameraToAxle_text"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_margin="5dp"
+                android:layout_weight="2"
+                android:background="@drawable/edittext_bk"
+                android:gravity="center"
+                android:text="200"
+                android:textColor="@color/white" />
 
             <ImageButton
                 android:id="@+id/adas_cali_cameraToAxle_right"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_marginLeft="6dp"
-                android:layout_marginRight="6dp"
                 android:layout_weight="1"
                 android:background="#00000000"
                 android:src="@drawable/ic_keyboard_arrow_right" />
@@ -263,33 +265,33 @@
                     android:layout_height="match_parent"
                     android:gravity="center_vertical"
                     android:text="@string/car_width"
+                    android:textColor="@color/white"
                     android:textSize="16sp" />
             </LinearLayout>
-
-            <TextView
-                android:id="@+id/adas_cali_carWidth_text"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="12dp"
-                android:layout_weight="2"
-                android:gravity="center"
-                android:text="200" />
 
             <ImageButton
                 android:id="@+id/adas_cali_carWidth_left"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_marginLeft="6dp"
                 android:layout_weight="1"
                 android:background="#00000000"
                 android:src="@drawable/ic_keyboard_arrow_left" />
+
+            <TextView
+                android:id="@+id/adas_cali_carWidth_text"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_margin="5dp"
+                android:layout_weight="2"
+                android:background="@drawable/edittext_bk"
+                android:gravity="center"
+                android:text="200"
+                android:textColor="@color/white" />
 
             <ImageButton
                 android:id="@+id/adas_cali_carWidth_right"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_marginLeft="6dp"
-                android:layout_marginRight="6dp"
                 android:layout_weight="1"
                 android:background="#00000000"
                 android:src="@drawable/ic_keyboard_arrow_right" />
@@ -314,33 +316,33 @@
                     android:layout_height="match_parent"
                     android:gravity="center_vertical"
                     android:text="@string/camera_to_bumper"
+                    android:textColor="@color/white"
                     android:textSize="16sp" />
             </LinearLayout>
-
-            <TextView
-                android:id="@+id/adas_cali_cameraToBumper_text"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="12dp"
-                android:layout_weight="2"
-                android:gravity="center"
-                android:text="200" />
 
             <ImageButton
                 android:id="@+id/adas_cali_cameraToBumper_left"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_marginLeft="6dp"
                 android:layout_weight="1"
                 android:background="#00000000"
                 android:src="@drawable/ic_keyboard_arrow_left" />
+
+            <TextView
+                android:id="@+id/adas_cali_cameraToBumper_text"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_margin="5dp"
+                android:layout_weight="2"
+                android:background="@drawable/edittext_bk"
+                android:gravity="center"
+                android:text="200"
+                android:textColor="@color/white" />
 
             <ImageButton
                 android:id="@+id/adas_cali_cameraToBumper_right"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_marginLeft="6dp"
-                android:layout_marginRight="6dp"
                 android:layout_weight="1"
                 android:background="#00000000"
                 android:src="@drawable/ic_keyboard_arrow_right" />
@@ -365,33 +367,33 @@
                     android:layout_height="match_parent"
                     android:gravity="center_vertical"
                     android:text="@string/camera_to_left_wheel"
+                    android:textColor="@color/white"
                     android:textSize="16sp" />
             </LinearLayout>
-
-            <TextView
-                android:id="@+id/adas_cali_cameraToLeftWheel_text"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="12dp"
-                android:layout_weight="2"
-                android:gravity="center"
-                android:text="200" />
 
             <ImageButton
                 android:id="@+id/adas_cali_cameraToLeftWheel_left"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_marginLeft="6dp"
                 android:layout_weight="1"
                 android:background="#00000000"
                 android:src="@drawable/ic_keyboard_arrow_left" />
+
+            <TextView
+                android:id="@+id/adas_cali_cameraToLeftWheel_text"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_margin="5dp"
+                android:layout_weight="2"
+                android:background="@drawable/edittext_bk"
+                android:gravity="center"
+                android:text="200"
+                android:textColor="@color/white" />
 
             <ImageButton
                 android:id="@+id/adas_cali_cameraToLeftWheel_right"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_marginLeft="6dp"
-                android:layout_marginRight="6dp"
                 android:layout_weight="1"
                 android:background="#00000000"
                 android:src="@drawable/ic_keyboard_arrow_right" />
