@@ -129,15 +129,6 @@ public class ArcSoftDms {
         }
     }
 
-    //int MOD_DMS_CALL 1 打电话
-    //int MOD_DMS_SMOKE 2 抽烟
-    //int MOD_DMS_CLOSE_EYE 4 闭眼
-    //int MOD_DMS_YAWN 8 打哈欠
-    //int MOD_DMS_DISTRACT 16 分心
-    //int MOD_DMS_DRIVER_ABNORMAL 32 驾驶员异常
-    //int MOD_DMS_IR_BLOCKING 64 红外阻断
-    //int MOD_DMS_LENS_COVERED 128 摄像头遮挡
-    //int MOD_DMS_SEATBELT_UNFASTENED 256 未系安全带
     private String getDMSAlarmText(int alarmMask) {
         switch (alarmMask) {
             case ArcDMSDetectMaskType.MOD_DMS_CALL:

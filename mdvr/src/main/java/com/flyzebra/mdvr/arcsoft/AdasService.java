@@ -5,6 +5,7 @@ import android.os.SystemClock;
 
 import com.arcsoft.visdrive.sdk.model.adas.ArcADASCalibInfo;
 import com.arcsoft.visdrive.sdk.model.adas.ArcADASCalibResult;
+import com.arcsoft.visdrive.sdk.model.adas.ArcADASDetectResult;
 import com.flyzebra.arcsoft.ArcSoftActive;
 import com.flyzebra.arcsoft.ArcSoftAdas;
 import com.flyzebra.mdvr.Config;
@@ -105,6 +106,9 @@ public class AdasService {
                 }
             }
 
+            //加载报警声音
+            AlertMusicPlayer.get().loadAdasMusic(mContext);
+
             int width = 1280;
             int height = 720;
             final int size = width * height * 3 / 2;
@@ -129,7 +133,8 @@ public class AdasService {
             while (!is_stop.get()) {
                 QCarCamera.FrameInfo info = qCarCamera.getSubFrameInfo(channel, buffer);
                 if (info != null) {
-                    arcSoftAdas.detectNV12(buffer, width * height * 3 / 2, width, height);
+                    ArcADASDetectResult result = arcSoftAdas.detectNV12(buffer, width * height * 3 / 2, width, height);
+                    if (result != null) AlertMusicPlayer.get().playAdas(result.alarmMask);
                 } else {
                     FlyLog.e("Camera getVideoFrameInfo return null!");
                 }

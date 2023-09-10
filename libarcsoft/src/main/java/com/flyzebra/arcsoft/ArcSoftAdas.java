@@ -128,10 +128,6 @@ public class ArcSoftAdas {
         }
     }
 
-    //int MOD_ADAS_LDW 1 车道偏离
-    //int MOD_ADAS_FCW 2 前向碰撞
-    //int MOD_ADAS_HMW 4 车距过近
-    //int MOD_ADAS_PCW 8 行人碰撞
     private String getADASAlarmText(int alarmMask) {
         switch (alarmMask) {
             case ArcADASDetectMaskType.MOD_ADAS_LDW:

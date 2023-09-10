@@ -3,6 +3,7 @@ package com.flyzebra.mdvr.arcsoft;
 import android.content.Context;
 import android.os.SystemClock;
 
+import com.arcsoft.visdrive.sdk.model.dms.ArcDMSDetectResult;
 import com.flyzebra.arcsoft.ArcSoftActive;
 import com.flyzebra.arcsoft.ArcSoftDms;
 import com.flyzebra.mdvr.Config;
@@ -20,7 +21,7 @@ public class DmsService {
     private ArcSoftDms arcSoftDms = null;
     private AtomicBoolean is_stop = new AtomicBoolean(true);
 
-    private DmsService(){
+    private DmsService() {
     }
 
     private static class DmsServiceHolder {
@@ -83,7 +84,7 @@ public class DmsService {
                     ArcSoftActive.get().active(mContext.getApplicationContext(), Config.appId, Config.appSecret);
                     try {
                         for (int i = 0; i < 15; i++) {
-                            if(is_stop.get()) return;
+                            if (is_stop.get()) return;
                             Thread.sleep(200);
                         }
                     } catch (InterruptedException e) {
@@ -91,6 +92,9 @@ public class DmsService {
                     }
                 }
             }
+
+            //加载报警声音
+            AlertMusicPlayer.get().loadDmsMusic(mContext);
 
             int width = 1280;
             int height = 720;
@@ -116,7 +120,8 @@ public class DmsService {
             while (!is_stop.get()) {
                 QCarCamera.FrameInfo info = qCarCamera.getSubFrameInfo(channel, buffer);
                 if (info != null) {
-                    arcSoftDms.detectNV12(buffer, width * height * 3 / 2, width, height);
+                    ArcDMSDetectResult result = arcSoftDms.detectNV12(buffer, width * height * 3 / 2, width, height);
+                    if (result != null) AlertMusicPlayer.get().playDms(result.alarmMask);
                 } else {
                     FlyLog.e("Camera getVideoFrameInfo return null!");
                 }
