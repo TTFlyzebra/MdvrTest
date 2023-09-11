@@ -120,21 +120,21 @@ public class AdasSetView extends RelativeLayout {
             }
             LayoutParams params1 = (LayoutParams) horizonView.getLayoutParams();
             if (params1 != null) {
-                params1.height = height / 5;
-                params1.topMargin = calibInfo.horizon * height / Config.CAM_HEIGHT - height / 10;
+                params1.height = height / 20;
+                params1.topMargin = calibInfo.horizon * height / Config.CAM_HEIGHT - height / 40;
             }
             LayoutParams params2 = (LayoutParams) horizonView_child.getLayoutParams();
             if (params2 != null) {
-                params2.topMargin = height / 10 - 1;
+                params2.topMargin = height / 40 - 1;
             }
             LayoutParams params3 = (LayoutParams) carMiddleView_child.getLayoutParams();
             if (params3 != null) {
-                params3.leftMargin = height / 10 - 1;
+                params3.leftMargin = height / 40 - 1;
             }
             LayoutParams params4 = (LayoutParams) carMiddleView.getLayoutParams();
             if (params4 != null) {
-                params4.width = height / 5;
-                params4.leftMargin = (calibInfo.carMiddle + Config.CAM_WIDTH / 2) * width / Config.CAM_WIDTH - height / 10;
+                params4.width = height / 20;
+                params4.leftMargin = (calibInfo.carMiddle + Config.CAM_WIDTH / 2) * width / Config.CAM_WIDTH - height / 40;
             }
         } catch (Exception e) {
             FlyLog.e(e.toString());
@@ -149,12 +149,12 @@ public class AdasSetView extends RelativeLayout {
     }
 
     public void updateHorizonView() {
-        int top = calibInfo.horizon * height / Config.CAM_HEIGHT - height / 10;
+        int top = calibInfo.horizon * height / Config.CAM_HEIGHT - height / 40;
         horizonView.layout(0, top, horizonView.getWidth(), top + horizonView.getHeight());
     }
 
     public void updateCarMiddleView() {
-        int left = (calibInfo.carMiddle + Config.CAM_WIDTH / 2) * width / Config.CAM_WIDTH - height / 10;
+        int left = (calibInfo.carMiddle + Config.CAM_WIDTH / 2) * width / Config.CAM_WIDTH - height / 40;
         carMiddleView.layout(left, 0, left + carMiddleView.getWidth(), carMiddleView.getHeight());
     }
 

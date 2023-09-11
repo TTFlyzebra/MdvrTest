@@ -57,9 +57,7 @@ Fzebra::~Fzebra() {
 void Fzebra::notify(const char *data, int32_t size) {
     auto *notifyData = (NotifyData *) data;
     switch (notifyData->type) {
-        case TYPE_T_CONNECTED:
         case TYPE_U_CONNECTED:
-        case TYPE_T_DISCONNECTED:
         case TYPE_U_DISCONNECTED:
         case TYPE_UT_HEARTBEAT:
         case TYPE_MCTL_REBOOT:

@@ -277,7 +277,7 @@ public class ChannelFrame_adas extends Fragment {
         edit.requestFocus();
         Button bt1 = view.findViewById(R.id.lg_dlg_bt1);
         title.setText(textId);
-        final AlertDialog dlg = new AlertDialog.Builder(getActivity(), R.style.Theme_Dvrtest_full).setView(view).show();
+        final AlertDialog dlg = new AlertDialog.Builder(getActivity(), R.style.ThemeFull).setView(view).show();
         bt1.setOnClickListener(v -> {
             textView.setText(edit.getText());
             if (resID == R.id.adas_cali_horizon_text) {

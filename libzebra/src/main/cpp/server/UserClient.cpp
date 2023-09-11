@@ -421,7 +421,6 @@ void UserClient::disconnected() {
         is_stop = true;
     }
     mServer->disconnectClient(this);
-    N->miniNotify((const char *) T_DISCONNECTED, sizeof(T_DISCONNECTED), T->tid);
     N->miniNotify((const char *) U_DISCONNECTED, sizeof(U_DISCONNECTED), T->tid, U.uid);
 }
 

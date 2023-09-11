@@ -36,7 +36,7 @@ public class ScreenService implements INotify {
     private MediaProjectionManager mpManager = null;
     private int width = 1280;
     private int height = 720;
-    private final int mBitRate = 2048 * 1024;
+    private final int mBitRate = 1024 * 1024;
     private static final String MIME_TYPE = "video/avc"; // H.264 Advanced Video Coding
     private static final int FRAME_RATE = 25; // 30 fps
     private static final int IFRAME_INTERVAL = 5; // 2 seconds between I-frames
@@ -178,7 +178,17 @@ public class ScreenService implements INotify {
 
     @Override
     public void notify(byte[] data, int size) {
-        mCmdHandler.post(() -> handleCmd(data, size));
+        short type = ByteUtil.bytes2Short(data, 2, true);
+        switch (type) {
+            case Protocol.TYPE_UT_HEARTBEAT:
+            case Protocol.TYPE_U_DISCONNECTED:
+            case Protocol.TYPE_T_DISCONNECTED:
+            case Protocol.TYPE_SCREEN_U_READY:
+            case Protocol.TYPE_SCREEN_U_START:
+            case Protocol.TYPE_SCREEN_U_STOP:
+                mCmdHandler.post(() -> handleCmd(data, size));
+                break;
+        }
     }
 
     @Override

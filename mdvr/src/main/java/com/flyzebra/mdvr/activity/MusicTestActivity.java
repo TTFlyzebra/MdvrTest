@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.arcsoft.visdrive.sdk.constant.adas.ArcADASDetectMaskType;
 import com.arcsoft.visdrive.sdk.constant.dms.ArcDMSDetectMaskType;
+import com.flyzebra.mdvr.R;
 import com.flyzebra.mdvr.arcsoft.AlertMusicPlayer;
 
 public class MusicTestActivity extends AppCompatActivity {
