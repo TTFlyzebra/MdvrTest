@@ -58,7 +58,7 @@ public class LauncherActivity extends AppCompatActivity {
                 replaceFragment1("ChannelFrame_all");
                 replaceFragment2("ChannelFrame_empty");
             } else if (checkedId == R.id.radio_adas) {
-                replaceFragment1("ChannelFrame_0");
+                replaceFragment1("ChannelFrame_1");
                 replaceFragment2("ChannelFrame_adas");
                 radioGroup.setVisibility(View.INVISIBLE);
             }

@@ -150,7 +150,7 @@ public class ChannelFrame_adas extends Fragment {
                 }
                 LauncherActivity activity = (LauncherActivity) getActivity();
                 if (activity != null) {
-                    activity.radioGroup.check(R.id.radio_bt01);
+                    activity.radioGroup.check(R.id.radio_bt02);
                 }
             } catch (Exception e) {
                 FlyLog.e(e.toString());
