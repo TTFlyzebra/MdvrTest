@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MdvrTest</string>
+    <string name="app_name">MDVR</string>
     <string name="dms_calibration">标定</string>
     <string name="dms_calibration2">视频功能设置</string>
     <string name="start_calibration">开始标定</string>

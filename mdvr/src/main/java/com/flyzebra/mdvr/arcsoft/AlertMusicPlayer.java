@@ -68,9 +68,11 @@ public class AlertMusicPlayer {
             return;
         }
         try {
-            int id = adasMap.get(maskType);
-            if (id >= 0) {
-                splay.play(id, 1, 1, 1, 0, 1.0f);
+            if (adasMap.containsKey(maskType)) {
+                int id = adasMap.get(maskType);
+                if (id >= 0) {
+                    splay.play(id, 1, 1, 1, 0, 1.0f);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -82,9 +84,11 @@ public class AlertMusicPlayer {
             return;
         }
         try {
-            int id = dmsMap.get(maskType);
-            if (id >= 0) {
-                splay.play(id, 1, 1, 1, 0, 1.0f);
+            if (dmsMap.containsKey(maskType)) {
+                int id = dmsMap.get(maskType);
+                if (id >= 0) {
+                    splay.play(id, 1, 1, 1, 0, 1.0f);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();

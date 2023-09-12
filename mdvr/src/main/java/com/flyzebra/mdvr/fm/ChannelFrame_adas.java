@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -28,7 +29,9 @@ public class ChannelFrame_adas extends Fragment {
     private final ArcADASCalibInfo calibInfo = new ArcADASCalibInfo();
 
     private RelativeLayout adas_page1;
-    private RelativeLayout adas_page2;
+    private LinearLayout adas_page2;
+    private TextView bt_next_page;
+    private TextView bt_front_page;
 
     private AdasSetView adasSetView;
 
@@ -106,13 +109,15 @@ public class ChannelFrame_adas extends Fragment {
             @Override
             public void notifyHorizon(int vaule) {
                 adas_cali_horizon_text.setText(String.valueOf(calibInfo.horizon));
-                adas_cali_horizon_text2.setText(String.valueOf(calibInfo.horizon));
+                String horizon_text = getString(R.string.horizontal_line3) + calibInfo.horizon;
+                adas_cali_horizon_text2.setText(horizon_text);
             }
 
             @Override
             public void notiryCarMiddle(int value) {
                 adas_cali_carMiddle_text.setText(String.valueOf(calibInfo.carMiddle));
-                adas_cali_carMiddle_text2.setText(String.valueOf(calibInfo.carMiddle));
+                String carMiddle_text = getString(R.string.car_central_line3) + calibInfo.carMiddle;
+                adas_cali_carMiddle_text2.setText(carMiddle_text);
             }
         });
 
@@ -161,18 +166,26 @@ public class ChannelFrame_adas extends Fragment {
         bt_adas_cancel.setOnClickListener(v -> {
             LauncherActivity activity = (LauncherActivity) getActivity();
             if (activity != null) {
-                activity.radioGroup.check(R.id.radio_bt01);
+                activity.radioGroup.check(R.id.radio_bt02);
             }
         });
-        TextView bt_next_page = view.findViewById(R.id.bt_next_page);
+        bt_next_page = view.findViewById(R.id.bt_next_page);
         bt_next_page.setOnClickListener(v -> {
-            adas_page1.setVisibility(View.INVISIBLE);
+            //adas_page1.setVisibility(View.INVISIBLE);
             adas_page2.setVisibility(View.VISIBLE);
+            bt_next_page.setVisibility(View.GONE);
+            bt_front_page.setVisibility(View.VISIBLE);
+            adas_cali_horizon_text2.setVisibility(View.GONE);
+            adas_cali_carMiddle_text2.setVisibility(View.GONE);
         });
-        TextView bt_front_page = view.findViewById(R.id.bt_front_page);
+        bt_front_page = view.findViewById(R.id.bt_front_page);
         bt_front_page.setOnClickListener(v -> {
-            adas_page1.setVisibility(View.VISIBLE);
+            //adas_page1.setVisibility(View.VISIBLE);
             adas_page2.setVisibility(View.INVISIBLE);
+            bt_next_page.setVisibility(View.VISIBLE);
+            bt_front_page.setVisibility(View.GONE);
+            adas_cali_horizon_text2.setVisibility(View.VISIBLE);
+            adas_cali_carMiddle_text2.setVisibility(View.VISIBLE);
         });
 
         adas_cali_horizon_text.setOnClickListener(v -> showDialog((TextView) v, R.string.horizontal_line2, R.id.adas_cali_horizon_text));
@@ -187,7 +200,8 @@ public class ChannelFrame_adas extends Fragment {
             if (calibInfo.horizon > 0) {
                 calibInfo.horizon--;
                 adas_cali_horizon_text.setText(String.valueOf(calibInfo.horizon));
-                adas_cali_horizon_text2.setText(String.valueOf(calibInfo.horizon));
+                String horizon_text = getString(R.string.horizontal_line3) + calibInfo.horizon;
+                adas_cali_horizon_text2.setText(horizon_text);
                 adasSetView.updateHorizonView();
             }
         });
@@ -195,7 +209,8 @@ public class ChannelFrame_adas extends Fragment {
             if (calibInfo.horizon < (Config.CAM_HEIGHT - 1)) {
                 calibInfo.horizon++;
                 adas_cali_horizon_text.setText(String.valueOf(calibInfo.horizon));
-                adas_cali_horizon_text2.setText(String.valueOf(calibInfo.horizon));
+                String horizon_text = getString(R.string.horizontal_line3) + calibInfo.horizon;
+                adas_cali_horizon_text2.setText(horizon_text);
                 adasSetView.updateHorizonView();
             }
         });
@@ -204,7 +219,8 @@ public class ChannelFrame_adas extends Fragment {
             if (calibInfo.carMiddle > (-Config.CAM_WIDTH / 2) - 1) {
                 calibInfo.carMiddle--;
                 adas_cali_carMiddle_text.setText(String.valueOf(calibInfo.carMiddle));
-                adas_cali_carMiddle_text2.setText(String.valueOf(calibInfo.carMiddle));
+                String carMiddle_text = getString(R.string.car_central_line3) + calibInfo.carMiddle;
+                adas_cali_carMiddle_text2.setText(carMiddle_text);
                 adasSetView.updateCarMiddleView();
             }
         });
@@ -212,7 +228,8 @@ public class ChannelFrame_adas extends Fragment {
             if (calibInfo.carMiddle < (Config.CAM_WIDTH) / 2 - 1) {
                 calibInfo.carMiddle++;
                 adas_cali_carMiddle_text.setText(String.valueOf(calibInfo.carMiddle));
-                adas_cali_carMiddle_text2.setText(String.valueOf(calibInfo.carMiddle));
+                String carMiddle_text = getString(R.string.car_central_line3) + calibInfo.carMiddle;
+                adas_cali_carMiddle_text2.setText(carMiddle_text);
                 adasSetView.updateCarMiddleView();
             }
         });
@@ -304,8 +321,10 @@ public class ChannelFrame_adas extends Fragment {
     private void updateView() {
         adas_cali_horizon_text.setText(String.valueOf(calibInfo.horizon));
         adas_cali_carMiddle_text.setText(String.valueOf(calibInfo.carMiddle));
-        adas_cali_horizon_text2.setText(String.valueOf(calibInfo.horizon));
-        adas_cali_carMiddle_text2.setText(String.valueOf(calibInfo.carMiddle));
+        String horizon_text = getString(R.string.horizontal_line3) + calibInfo.horizon;
+        adas_cali_horizon_text2.setText(horizon_text);
+        String carMiddle_text = getString(R.string.car_central_line3) + calibInfo.carMiddle;
+        adas_cali_carMiddle_text2.setText(carMiddle_text);
         adas_cali_cameraHeight_text.setText(String.valueOf(calibInfo.cameraHeight));
         adas_cali_cameraToAxle_text.setText(String.valueOf(calibInfo.cameraToAxle));
         adas_cali_carWidth_text.setText(String.valueOf(calibInfo.carWidth));

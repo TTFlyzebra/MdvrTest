@@ -8,4 +8,62 @@
 
     <include layout="@layout/fragment_adas_page2" />
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="5dp"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/bt_adas_cancel"
+            android:layout_width="60dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp"
+            android:background="@drawable/text_button"
+            android:gravity="center"
+            android:padding="2dp"
+            android:text="取消"
+            android:textColor="@color/white" />
+
+        <TextView
+            android:id="@+id/bt_front_page"
+            android:layout_width="60dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp"
+            android:background="@drawable/text_button"
+            android:gravity="center"
+            android:padding="2dp"
+            android:text="上一页"
+            android:textColor="@color/white"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/bt_next_page"
+            android:layout_width="60dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp"
+            android:background="@drawable/text_button"
+            android:gravity="center"
+            android:padding="2dp"
+            android:text="下一页"
+            android:textColor="@color/white" />
+
+        <TextView
+            android:id="@+id/bt_adas_save"
+            android:layout_width="60dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp"
+            android:background="@drawable/text_button"
+            android:gravity="center"
+            android:padding="2dp"
+            android:text="保存"
+            android:textColor="@color/white" />
+    </LinearLayout>
+
 </RelativeLayout>
